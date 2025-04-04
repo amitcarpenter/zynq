@@ -1,9 +1,12 @@
 import crypto from 'crypto';
-import base64url from 'base64url';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import base64url from 'base64url';
 import Msg from '../utils/message.js';
 import { handleError, handleSuccess } from '../utils/responseHandler.js';
-import jwt from 'jsonwebtoken';
+
+
+
 
 export const capitalizeFirstLetterOfWords = (str) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -76,4 +79,14 @@ export const generateRandomString = async (length) => {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return result;
+};
+
+export const generateVerificationLink = (token, baseUrl) => {
+    return `${baseUrl}/api/verify-email?token=${token}`;
+};
+
+export const generateAccessToken = (payload) => {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    const JWT_EXPIRY = process.env.JWT_EXPIRY;
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 };

@@ -9,9 +9,9 @@ datasource db {
 
 model User {
   user_id                 Int      @id @default(autoincrement())
-  email                   String   @unique
-  password                String
-  full_name               String
+  email                   String?   @unique
+  password                String?
+  full_name               String?
   age                     Int?
   gender                  String?
   mobile_number           String   @unique
@@ -21,30 +21,9 @@ model User {
   language                String?
   jwt_token               String?
   is_verified             Boolean  @default(false)
+  is_active               Boolean  @default(false)
   is_push_notification_on Boolean  @default(true)
   is_location_on          Boolean  @default(true)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 }
-
-
-model Admin {
-  admin_id                 Int      @id @default(autoincrement())
-  email                   String   @unique
-  password                String
-  full_name               String
-  age                     Int?
-  gender                  String?
-  mobile_number           String   @unique
-  fcm_token               String?
-  otp                     String?
-  profile_image           String?
-  language                String?
-  jwt_token               String?
-  is_verified             Boolean  @default(false)
-  is_push_notification_on Boolean  @default(true)
-  is_location_on          Boolean  @default(true)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-}
-

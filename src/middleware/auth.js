@@ -1,8 +1,10 @@
-import jwt from "jsonwebtoken";
-import { handleError } from "../utils/responseHandler.js";
-import express from "express";
 import dotenv from "dotenv";
-import { get_admin_data_by_id, get_user_data_by_id } from "../models/api/auth.js";
+import express from "express";
+import jwt from "jsonwebtoken";
+import { PrismaClient } from '@prisma/client';
+import { handleError } from "../utils/responseHandler.js";
+
+const prisma = new PrismaClient();
 
 
 dotenv.config();
@@ -27,9 +29,13 @@ export const authenticateUser = async (req, res, next) => {
         } catch (err) {
             return handleError(res, 401, "Unauthorized: Invalid token");
         }
-        console.log(decodedToken.email, "User Connected");
-        console.log(decodedToken, "decocde token");
-        const [user] = await get_user_data_by_id(decodedToken.user_id)
+        console.log(decodedToken.mobile_number, "User Connected");
+
+        const user = await prisma.user.findUnique({
+            where: {
+                user_id: decodedToken.user_id,
+            },
+        });
         if (!user) {
             return handleError(res, 404, "User Not Found")
         }
