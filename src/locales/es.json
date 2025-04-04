@@ -1,0 +1,7 @@
+{
+    "SUCCESS": "Operación completada con éxito",
+    "ERROR": "Algo salió mal",
+    "FUEL_TYPE_EXISTS": "El tipo de combustible ya existe",
+    "DISCOVER_QUESTION_CREATED": "Pregunta descubierta creada con éxito",
+    "DISCOVER_QUESTION_NOT_FOUND": "Pregunta descubierta no encontrada"
+}

@@ -147,7 +147,7 @@ export const updateProfile = async (req, res) => {
 
         await prisma.user.update({
             where: { user_id: user.user_id },
-            data: { profile_image, age, full_name, gender, is_push_notification_on, is_location_on, language, fcm_token }
+            data: { profile_image, age, full_name, gender, language, fcm_token, is_push_notification_on, is_location_on }
         })
 
         return handleSuccess(res, 200, "Profile updated successfully");

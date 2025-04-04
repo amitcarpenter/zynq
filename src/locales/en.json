@@ -1,0 +1,11 @@
+{
+    "USER_REGISTER_SUCCESS": "User Register Successfully",
+    "ADMIN_CREATED": "Admin Created Successfully",
+    "EMAIL_ALREADY": "Email Already Exists",
+    "ADMIN_NOT_FOUND": "Admin Not Found",
+    "INVALID_CREDENTIAL": "Invalid Credential",
+    "VERIFY_EMAIL_FIRST": "Please Verify Your Account First",
+    "DISCOVER_QUESTION_CREATED": "Discover question created successfully",
+    "DISCOVER_QUESTION_NOT_FOUND": "Discover question not found",
+    "DISCOVER_QUESTION_EXISTS": "Discover Question Existing Already"
+}
