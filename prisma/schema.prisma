@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,383 +8,43 @@ datasource db {
 }
 
 model User {
-  id                       Int      @id @default(autoincrement())
-  email                    String   @unique
-  password                 String
-  // role               Role                 @default(USER)
-  first_name               String
-  last_name                String
-  company_name             String   @db.LongText
-  phone_no                 String
-  fcm_token                String?
-  BSB                      String?
-  ACC                      String?
-  act_token                String?
-  token                    String?
-  abn                      String?
-  isVerified               Boolean  @default(false)
-  company_logo             String?
-  trade_license            String?
-  accounting_software_used String?  @db.LongText
-  about_us                 String?  @db.LongText
-  service_region           String?  @db.LongText
-  services_offered         String?  @db.LongText
-  stripeCustomerId         String?
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
-
-  Dock Dock[]
-
-  Staff_Member Staff_Member[]
-
-  Boat Boat[]
-
-  QuickLeads QuickLeads[]
-
-  InsuranceFile InsuranceFile[]
-
-  Task Task[]
-
-  DockBooking DockBooking[]
-
-  UserSupplier UserSupplier[]
-
-  Invoice Invoice[]
-
-  Subscription Subscription[]
-
-  Order Order[]
-}
-
-model InsuranceFile {
-  id       Int     @id @default(autoincrement())
-  filename String?
-  userId   Int
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Dock {
-  id                   Int           @id @default(autoincrement())
-  name                 String
-  email                String
-  phone_no             String
-  userId               Int
-  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  booking_cost         String
-  booking_cost_per_day String
-  address              String
-  DockBooking          DockBooking[]
-}
-
-model Boat {
-  id           Int       @id @default(autoincrement())
-  name         String
-  owners_name  String
-  fileKey      String?
-  avatar_url   String?
-  rego         String
-  vin          String
-  make         String
-  model        String
-  engine_no    String
-  engine_make  String?
-  engine_model String?
-  length       String
-  app_date     DateTime?
-  book_from    DateTime?
-  book_to      DateTime?
-  email        String
-  phone_no     String
-  docking_date DateTime?
-  boat_type    String?
-  userId       Int
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime? @updatedAt
-  Task         Task[]
-
-  DockBooking DockBooking[]
-
-  Invoice Invoice[]
-}
-
-model Staff_Member {
-  id                         Int               @id @default(autoincrement())
-  email                      String            @unique
-  password                   String
-  showPassword               String?
-  token                      String?
-  role                       String
-  full_name                  String
-  home_address               String            @db.LongText
-  userId                     Int
-  user                       User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  status                     Int               @default(1)
-  system_deactivation_status Int               @default(1)
-  phone_no                   String
-  createdAt                  DateTime          @default(now())
-  updatedAt                  DateTime          @updatedAt
-  Task                       Task[]
-  JobServiceSheet            JobServiceSheet[]
-
-  TaskPhoto TaskPhoto[]
-
-  Notification Notification[]
-}
-
-model Supplier {
-  id                       Int      @id @default(autoincrement())
-  email                    String   @unique
-  password                 String?
-  first_name               String?
-  last_name                String?
-  company_name             String?  @db.LongText
-  company_description      String?  @db.LongText
-  status                   Int      @default(1)
-  phone_no                 String?
-  city                     String?
-  company_logo             String?
-  abn                      String?
-  token                    String?
-  trade_license            String?
-  accounting_software_used String?  @db.LongText
-  about_us                 String?  @db.LongText
-  service_region           String?  @db.LongText
-  services_offered         String?  @db.LongText
-  complete_profile_status  Int      @default(0)
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
-  Task                     Task[]
-
-  JobServiceSheet JobServiceSheet[]
-
-  SupplierInsuranceFile SupplierInsuranceFile[]
-
-  TaskPhoto TaskPhoto[]
-
-  UserSupplier UserSupplier[]
-}
-
-model SupplierInsuranceFile {
-  id         Int      @id @default(autoincrement())
-  filename   String?
-  supplierId Int
-  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-enum AssignTo {
-  STAFF
-  OUTSOURCED
-}
-
-model Task {
-  id                  Int               @id @default(autoincrement())
-  description         String?           @db.LongText
-  time_alloted        String
-  quoted_value        String
-  boatId              Int
-  boat                Boat              @relation(fields: [boatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  assignStaffId       Int?
-  status              Int               @default(0)
-  staff               Staff_Member?     @relation(fields: [assignStaffId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  supplierId          Int?
-  supplier            Supplier?         @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId              Int
-  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  assign_to           AssignTo // Enum for assignment type
-  date_scheduled_from DateTime
-  date_scheduled_to   DateTime
-  taskInfo            String?           @db.LongText
-  supplierNotes       String?           @db.LongText
-  futureWatchList     String?           @db.LongText
-  recommendedDueDate  DateTime?
-  avatar_url          String?
-  isRecurring         Int               @default(0)
-  completed_at        DateTime?
-  contacted_status    Int               @default(0)
-  jobNumber           String?
-  JobServiceSheet     JobServiceSheet[]
-
-  TaskPhoto TaskPhoto[]
-
-  Notification Notification[]
-
-  invoiceId Int? // New field
-  invoice   Invoice? @relation("InvoiceTasks", fields: [invoiceId], references: [id], onDelete: SetNull)
-}
-
-model QuickLeads {
-  id                    Int      @id @default(autoincrement())
-  client_name           String
-  client_contact_number String
-  status                Int      @default(0)
-  userId                Int
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @default(now())
-}
-
-model DockBooking {
-  id        Int      @id @default(autoincrement())
-  dockId    Int
-  boatId    Int?
-  book_from DateTime
-  book_to   DateTime
-  createdAt DateTime @default(now())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  dock      Dock     @relation(fields: [dockId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  boat      Boat?    @relation(fields: [boatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model JobServiceSheet {
-  id                 Int           @id @default(autoincrement())
-  date               DateTime
-  jobNumber          String?
-  personAttending    String?
-  customerName       String?
-  mobile             String?
-  workToBeCarriedOut String?       @db.LongText
-  workCarriedOut     String?       @db.LongText
-  cdsSignature       String?       @db.LongText
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  taskId             Int?
-  task               Task?         @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  staffId            Int?
-  staff              Staff_Member? @relation(fields: [staffId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  supplierId         Int?
-  supplier           Supplier?     @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  Material Material[]
-}
-
-model TaskPhoto {
-  id         Int           @id @default(autoincrement())
-  url        String        @db.LongText
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  staffId    Int?
-  staff      Staff_Member? @relation(fields: [staffId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  supplierId Int?
-  supplier   Supplier?     @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  taskId     Int
-  task       Task          @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Notification {
-  id        Int           @id @default(autoincrement())
-  byStaff   Staff_Member? @relation(fields: [byStaffId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  byStaffId Int?
-  toUserId  Int
-  taskId    Int
-  task      Task          @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  isRead    Boolean       @default(false)
-  content   String?
-  type      String?
-  data      Json?         @default("{}")
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt()
-}
-
-model UserSupplier {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  supplierId Int
-  name       String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([userId, supplierId]) // Ensure the same user cannot link to the same supplier multiple times
-}
-
-model Material {
-  id                Int             @id @default(autoincrement())
-  materialName      String?
-  unitsUsed         Float
-  pricePerUnit      Float?
-  totalPrice        Float
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  jobServiceSheetId Int
-  jobServiceSheet   JobServiceSheet @relation(fields: [jobServiceSheetId], references: [id], onDelete: Cascade)
-}
-
-model Invoice {
-  id                  Int      @id @default(autoincrement())
-  invoiceNumber       String?  @unique
-  boatId              Int
-  boat                Boat     @relation(fields: [boatId], references: [id], onDelete: Cascade)
-  userId              Int
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  pleasePayByDate     DateTime
-  status              Int      @default(0) // 0 - Pending, 1 - Paid
-  totalAmount         Float    @default(0.0) // New field for total amount
-  totalAmountAfterTax Float    @default(0.0) // New field for amount after 10% tax
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  tasks               Task[]   @relation("InvoiceTasks")
-}
-
-model Plan {
-  id            Int     @id @default(autoincrement())
-  name          String?
-  price         Float
-  billingCycle  String // 'monthly' or 'yearly'
-  maxStaffUsers Int // Maximum staff users allowed for this plan
-  stripePriceId String? @unique
-
-  Subscription Subscription[]
-
-  Order Order[]
-}
-
-model Subscription {
-  id                   Int       @id @default(autoincrement())
-  planId               Int
-  plan                 Plan      @relation(fields: [planId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId               Int       @unique
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at           DateTime  @default(now())
-  stripeSubscriptionId String?   @unique
-  stripeCustomerId     String?   @unique
-  renewed_at           DateTime?
-  sub_status           Int // 1 = Active, 3 = Canceled, -1 = Trial, 0=payment failed
-  start_date           DateTime
-  canceled_at          DateTime?
-  trial_end_date       DateTime? // New field to track trial period
-  failed_at            DateTime?
-}
-
-model Order {
-  id                   Int       @id @default(autoincrement())
-  planId               Int
-  plan                 Plan      @relation(fields: [planId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId               Int       @unique
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at           DateTime  @default(now())
-  stripeSubscriptionId String?   @unique
-  stripeCustomerId     String?   @unique
-  renewed_at           DateTime?
-  sub_status           Int // 1 = Active, 3 = Canceled, -1 = Trial, 0=payment failed
-  start_date           DateTime
-  canceled_at          DateTime?
-  trial_end_date       DateTime? // New field to track trial period
-  failed_at            DateTime?
+  user_id                 Int      @id @default(autoincrement())
+  email                   String   @unique
+  password                String
+  full_name               String
+  age                     Int?
+  gender                  String?
+  mobile_number           String   @unique
+  fcm_token               String?
+  otp                     String?
+  profile_image           String?
+  language                String?
+  jwt_token               String?
+  is_verified             Boolean  @default(false)
+  is_push_notification_on Boolean  @default(true)
+  is_location_on          Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 }
 
 
-model OrderName {
-  id                   Int       @id @default(autoincrement())
-  created_at           DateTime  @default(now())
-  stripeSubscriptionId String?   @unique
-  stripeCustomerId     String?   @unique
-  renewed_at           DateTime?
-  sub_status           Int // 1 = Active, 3 = Canceled, -1 = Trial, 0=payment failed
-  start_date           DateTime
-  canceled_at          DateTime?
-  trial_end_date       DateTime? // New field to track trial period
-  failed_at            DateTime?
+model Admin {
+  admin_id                 Int      @id @default(autoincrement())
+  email                   String   @unique
+  password                String
+  full_name               String
+  age                     Int?
+  gender                  String?
+  mobile_number           String   @unique
+  fcm_token               String?
+  otp                     String?
+  profile_image           String?
+  language                String?
+  jwt_token               String?
+  is_verified             Boolean  @default(false)
+  is_push_notification_on Boolean  @default(true)
+  is_location_on          Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 }
+

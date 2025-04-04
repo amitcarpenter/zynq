@@ -4,9 +4,9 @@ import path from 'path';
 import https from "https";
 import dotenv from "dotenv";
 import express from "express";
-import db from "./src/config/db.js";
+import { checkDatabaseConnection } from "./src/config/db.js";
 import { fileURLToPath } from 'url';
-import configureApp from "./src/config/routes.js"
+// import configureApp from "./src/config/routes.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,8 +24,8 @@ app.use('/', express.static(path.join(__dirname, 'src/uploads')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 
-
-configureApp(app);
+checkDatabaseConnection()
+// configureApp(app);
 
 app.get("/", (req, res) => {
   return res.send("krakka project here")
