@@ -1,17 +1,19 @@
+import { getMessage } from './getMessage.js';
 
-export const handleError = (res, statusCode, message) => {
+
+export const handleError = (res, statusCode, lang = 'en', messageKey) => {
   return res.status(200).send({
     success: false,
     status: statusCode,
-    message: message
+    message: getMessage(messageKey, lang)
   });
 };
 
-export const handleSuccess = (res, statusCode, message, ...data) => {
+export const handleSuccess = (res, statusCode, lang = 'en', messageKey, ...data) => {  
   return res.status(200).json({
     success: true,
     status: statusCode,
-    message: message,
+    message: getMessage(messageKey, lang),
     data: data.length > 0 ? data[0] : undefined,
   });
 };

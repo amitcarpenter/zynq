@@ -23,12 +23,13 @@ export const login_with_mobile = async (req, res) => {
     try {
         const sendOtpSchema = Joi.object({
             mobile_number: Joi.string().required(),
+            language: Joi.string().valid('sv', 'en').optional().allow("", null),
         });
 
         const { error, value } = sendOtpSchema.validate(req.body);
         if (error) return joiErrorHandle(res, error);
 
-        const { mobile_number } = value;
+        const { mobile_number, language } = value;
 
         let user = await prisma.user.findUnique({
             where: { mobile_number },
@@ -40,6 +41,7 @@ export const login_with_mobile = async (req, res) => {
                 data: {
                     mobile_number,
                     otp: "",
+                    language: language,
                     is_verified: false,
                     is_active: true,
                 },
@@ -47,17 +49,16 @@ export const login_with_mobile = async (req, res) => {
         }
 
         if (!user.is_active) {
-            return handleError(res, 400, "Your account has been deactivated by the admin.");
+            return handleError(res, 400, language, 'ADMIN_DEACTIVATION');
         }
 
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
         await prisma.user.update({
             where: { user_id: user.user_id },
-            data: { otp },
+            data: { otp, language },
         });
-
-        return handleSuccess(res, 200, "OTP sent successfully to your mobile number.", otp);
+        return handleSuccess(res, 200, language, "VERIFICATION_OTP", otp);
     } catch (error) {
         return handleError(res, 500, error.message);
     }
@@ -68,41 +69,33 @@ export const login_with_otp = async (req, res) => {
         const loginOtpSchema = Joi.object({
             mobile_number: Joi.string().required(),
             otp: Joi.string().length(4).required(),
+            language: Joi.string().valid("en", "sv").optional().allow("", null),
         });
 
         const { error, value } = loginOtpSchema.validate(req.body);
-        if (error) {
-            return joiErrorHandle(res, error);
-        }
+        if (error) return joiErrorHandle(res, error);
 
-        const { mobile_number, otp } = value;
+        const { mobile_number, otp, language } = value;
 
         let user = await prisma.user.findUnique({
             where: { mobile_number },
         });
 
         if (!user) {
-            return handleError(res, 404, "User Not Found.");
-        }
-
-        if (!user.is_active) {
-            return handleError(res, 400, "Your account has been deactivated by the admin.");
+            return handleError(res, 404, language, "USER_NOT_FOUND");
         }
 
         if (user.otp !== otp) {
-            return handleError(res, 400, "Invalid OTP.");
+            return handleError(res, 400, language, "INVALID_OTP");
         }
 
         const payload = { user_id: user.user_id, mobile_number: user.mobile_number };
         const token = generateAccessToken(payload);
-
-
         await prisma.user.update({
             where: { user_id: user.user_id },
             data: { otp, jwt_token: token, otp: "", is_verified: true },
         });
-
-        return handleSuccess(res, 200, "Login Successful.", token);
+        return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
     } catch (error) {
         return handleError(res, 500, error.message);
     }
@@ -111,12 +104,13 @@ export const login_with_otp = async (req, res) => {
 export const getProfile = async (req, res) => {
     try {
         const user = req.user;
+        const language = req.user?.language;
         if (user.profile_image && !user.profile_image.startsWith("http")) {
             user.profile_image = `${APP_URL}${user.profile_image}`;
         }
-        return handleSuccess(res, 200, "User profile fetched successfully", user);
+        return handleSuccess(res, 200, language, "USER_PROFILE", user);
     } catch (error) {
-        return handleError(res, 500, error.message)
+        return handleError(res, 500, 'en', error.message)
     }
 };
 
@@ -128,7 +122,7 @@ export const updateProfile = async (req, res) => {
             age: Joi.number().optional().allow("", null),
             is_push_notification_on: Joi.boolean().optional().allow("", null),
             is_location_on: Joi.boolean().optional().allow("", null),
-            language: Joi.string().optional().allow("", null),
+            // language: Joi.string().optional().allow("", null),
             fcm_token: Joi.string().optional().allow("", null),
         });
 
@@ -136,7 +130,9 @@ export const updateProfile = async (req, res) => {
         if (error) return joiErrorHandle(res, error);
 
         const user = req.user;
-        const { full_name, gender, age, is_push_notification_on, is_location_on, language, fcm_token } = value;
+        const language = req.user?.language;
+
+        const { full_name, gender, age, is_push_notification_on, is_location_on, fcm_token } = value;
 
 
         let profile_image = user.profile_image;
@@ -147,13 +143,13 @@ export const updateProfile = async (req, res) => {
 
         await prisma.user.update({
             where: { user_id: user.user_id },
-            data: { profile_image, age, full_name, gender, language, fcm_token, is_push_notification_on, is_location_on }
+            data: { profile_image, age, full_name, gender, fcm_token, is_push_notification_on, is_location_on }
         })
 
-        return handleSuccess(res, 200, "Profile updated successfully");
+        return handleSuccess(res, 200, language, "PROFILE_UPDATED");
 
     } catch (error) {
-        return handleError(res, 500, error.message);
+        return handleError(res, 'en', 500, error.message);
     }
 };
 
@@ -164,8 +160,6 @@ export const deleteAccount = async (req, res) => {
         if (!user_id) {
             return handleError(res, 400, "User ID is required.");
         }
-
-        const userRepository = getRepository(User);
 
         const user = await userRepository.findOne({ where: { user_id } });
 
@@ -183,7 +177,19 @@ export const deleteAccount = async (req, res) => {
 
 export const render_terms_and_condition = (req, res) => {
     try {
-        return res.render("terms_and_condition.ejs");
+        const schema = Joi.object({
+            language: Joi.string().valid('en', 'sv').required()
+        })
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+        const { language = 'en' } = value
+        if (language == 'en') {
+            return res.render("terms_and_condition_en.ejs");
+
+        }
+        if (language == 'sv') {
+            return res.render("terms_and_condition_sv.ejs");
+        }
     } catch (error) {
         console.error("Error rendering forgot password page:", error);
         return handleError(res, 500, "An error occurred while rendering the page")

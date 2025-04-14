@@ -1,0 +1,10 @@
+{
+    "USER_REGISTER_SUCCESS": "Användare registrerad framgångsrikt",
+    "ADMIN_CREATED": "Admin skapades framgångsrikt",
+    "EMAIL_ALREADY": "E-postadressen finns redan",
+    "ADMIN_NOT_FOUND": "Admin hittades inte",
+    "ADMIN_DEACTIVATION": "Ditt konto har inaktiverats av administratören.",
+    "VERIFICATION_OTP": "OTP skickades framgångsrikt till ditt mobilnummer.",
+    "VERIFY_EMAIL_FIRST": "Vänligen verifiera ditt konto först"
+  }
+  

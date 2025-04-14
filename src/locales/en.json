@@ -3,9 +3,12 @@
     "ADMIN_CREATED": "Admin Created Successfully",
     "EMAIL_ALREADY": "Email Already Exists",
     "ADMIN_NOT_FOUND": "Admin Not Found",
-    "INVALID_CREDENTIAL": "Invalid Credential",
-    "VERIFY_EMAIL_FIRST": "Please Verify Your Account First",
-    "DISCOVER_QUESTION_CREATED": "Discover question created successfully",
-    "DISCOVER_QUESTION_NOT_FOUND": "Discover question not found",
-    "DISCOVER_QUESTION_EXISTS": "Discover Question Existing Already"
+    "USER_NOT_FOUND": "User Not Found",
+    "INVALID_OTP": "Invalid OTP",
+    "LOGIN_SUCCESSFUL": "Login Successful",
+    "USER_PROFILE": "User profile fetched successfully",
+    "PROFILE_UPDATED": "Profile updated successfully",
+    "ADMIN_DEACTIVATION": "Your account has been deactivated by the admin.",
+    "VERIFICATION_OTP": "OTP sent successfully to your mobile number.",
+    "VERIFY_EMAIL_FIRST": "Please Verify Your Account First"
 }

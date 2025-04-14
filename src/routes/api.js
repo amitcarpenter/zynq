@@ -17,7 +17,7 @@ router.get("/profile", authenticateUser, authControllers.getProfile);
 router.post("/profile/update", authenticateUser, uploadFile, authControllers.updateProfile);
 router.delete("/delete-account", authenticateUser, authControllers.deleteAccount);
 router.get("/privacy-policy", authControllers.render_privacy_policy);
-router.get("/terms-and-conditions", authControllers.render_terms_and_condition);
+router.post("/terms-and-conditions", authControllers.render_terms_and_condition);
 
 
 
