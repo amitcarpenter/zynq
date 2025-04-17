@@ -16,6 +16,7 @@ const app = express();
 
 const PORT = process.env.PORT;
 const APP_URL = process.env.APP_URL;
+const IS_LIVE = process.env.IS_LIVE === "true";
 
 app.use('/', express.static(path.join(__dirname, 'src/uploads')));
 app.set('view engine', 'ejs');
@@ -29,21 +30,20 @@ app.get("/", (req, res) => {
 });
 
 
-// const sslOptions = {
-//   ca: fs.readFileSync("/var/www/html/ssl/ca_bundle.crt"),
-//   key: fs.readFileSync("/var/www/html/ssl/private.key"),
-//   cert: fs.readFileSync("/var/www/html/ssl/certificate.crt"),
-// };
-// // Create HTTPS server
-// const httpsServer = https.createServer(sslOptions, app);
+if (IS_LIVE) {
+  const sslOptions = {
+    ca: fs.readFileSync("/var/www/html/ssl/ca_bundle.crt"),
+    key: fs.readFileSync("/var/www/html/ssl/private.key"),
+    cert: fs.readFileSync("/var/www/html/ssl/certificate.crt"),
+  };
 
-// httpsServer.listen(PORT, () => {
-//   console.log(`Server is working on ${APP_URL}`);
-// })
-
-app.listen(PORT, () => {
-  console.log(`Server is working on ${APP_URL}`);
-});
-
+  https.createServer(sslOptions, app).listen(PORT, () => {
+    console.log(`Server is working on ${APP_URL}`);
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`Server is working on ${APP_URL}`);
+  });
+}
 
 
