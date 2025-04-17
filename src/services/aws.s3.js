@@ -1,8 +1,8 @@
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-const AWS = require('aws-sdk');
-const dotenv = require('dotenv');
-const s3Client = require('../utils/aws_s3_client');
+import multer from 'multer';
+import multerS3 from 'multer-s3';
+import AWS from 'aws-sdk';
+import dotenv from 'dotenv';
+import s3Client from '../utils/aws_s3_client.js';
 
 dotenv.config();
 
@@ -12,14 +12,14 @@ const s3 = new AWS.S3({
     region: process.env.AWS_REGION,
 });
 
-const upload = multer({
+export const upload = multer({
     storage: multerS3({
         s3: s3Client,
         bucket: process.env.S3_BUCKET_NAME,
-        metadata: function (req, file, cb) {
+        metadata: (req, file, cb) => {
             cb(null, { fieldName: file.fieldname });
         },
-        key: function (req, file, cb) {
+        key: (req, file, cb) => {
             const fileName = `${Date.now()}_${file.originalname}`;
             cb(null, fileName);
         },
@@ -29,9 +29,7 @@ const upload = multer({
     }),
 });
 
-module.exports = upload;
-
-module.exports.deleteFileFromS3 = async function (fileUrl) {
+export const deleteFileFromS3 = async (fileUrl) => {
     try {
         const bucketName = process.env.S3_BUCKET_NAME;
         const urlParts = fileUrl.split('/');

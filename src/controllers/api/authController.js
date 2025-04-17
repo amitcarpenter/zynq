@@ -6,9 +6,10 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from '@prisma/client';
+import * as apiModels from "../../models/api.js";
 import { sendEmail } from "../../services/send_email.js";
-import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 import { generateAccessToken } from "../../utils/user_helper.js";
+import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 
 const prisma = new PrismaClient();
 
@@ -29,37 +30,28 @@ export const login_with_mobile = async (req, res) => {
         if (error) return joiErrorHandle(res, error);
 
         const { mobile_number, language } = value;
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-        let user = await prisma.user.findUnique({
-            where: { mobile_number },
-        });
-
+        let [user] = await apiModels.get_user_by_mobile_number(mobile_number);
 
         if (!user) {
-            user = await prisma.user.create({
-                data: {
-                    mobile_number,
-                    otp: "",
-                    language: language,
-                    is_verified: false,
-                    is_active: true,
-                },
-            });
+            await apiModels.create_user(mobile_number, otp, language);
+            [user] = await apiModels.get_user_by_mobile_number(mobile_number);
         }
 
-        if (!user.is_active) {
+        if (user && !user.is_active) {
             return handleError(res, 400, language, 'ADMIN_DEACTIVATION');
         }
 
-        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        let user_data = {
+            otp, language
+        }
 
-        await prisma.user.update({
-            where: { user_id: user.user_id },
-            data: { otp, language },
-        });
+        await apiModels.update_user(user_data);
         return handleSuccess(res, 200, language, "VERIFICATION_OTP", otp);
     } catch (error) {
-        return handleError(res, 500, error.message);
+        console.error("Login error:", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
 
@@ -76,9 +68,7 @@ export const login_with_otp = async (req, res) => {
 
         const { mobile_number, otp, language } = value;
 
-        let user = await prisma.user.findUnique({
-            where: { mobile_number },
-        });
+        let [user] = await apiModels.get_user_by_mobile_number(mobile_number);
 
         if (!user) {
             return handleError(res, 404, language, "USER_NOT_FOUND");
@@ -90,13 +80,14 @@ export const login_with_otp = async (req, res) => {
 
         const payload = { user_id: user.user_id, mobile_number: user.mobile_number };
         const token = generateAccessToken(payload);
-        await prisma.user.update({
-            where: { user_id: user.user_id },
-            data: { otp, jwt_token: token, otp: "", is_verified: true },
-        });
+
+        let user_data = {
+            otp, jwt_token: token, otp: "", is_verified: true
+        }
+        await apiModels.update_user(user_data)
         return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
     } catch (error) {
-        return handleError(res, 500, error.message);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
 
@@ -169,7 +160,7 @@ export const deleteAccount = async (req, res) => {
 
         return handleSuccess(res, 200, "Account deleted successfully.");
     } catch (error) {
-        return handleError(res, 500, error.message);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
 
@@ -262,6 +253,6 @@ export const register_with_email = async (req, res) => {
         return handleSuccess(res, 201, `Verification link sent successfully to your email (${lower_email}). Please verify your account.`);
     } catch (error) {
         console.error('Error in register:', error);
-        return handleError(res, 500, error.message);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };

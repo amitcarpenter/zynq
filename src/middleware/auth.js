@@ -2,7 +2,9 @@ import dotenv from "dotenv";
 import express from "express";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from '@prisma/client';
+import * as apiModels from "../models/api.js";
 import { handleError } from "../utils/responseHandler.js";
+
 
 const prisma = new PrismaClient();
 
@@ -31,11 +33,8 @@ export const authenticateUser = async (req, res, next) => {
         }
         console.log(decodedToken.mobile_number, "User Connected");
 
-        const user = await prisma.user.findUnique({
-            where: {
-                user_id: decodedToken.user_id,
-            },
-        });
+        let [user] = await apiModels.get_user_by_user_id(decodedToken.user_id)
+
         if (!user) {
             return handleError(res, 404, "User Not Found")
         }

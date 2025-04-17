@@ -10,5 +10,6 @@
     "PROFILE_UPDATED": "Profile updated successfully",
     "ADMIN_DEACTIVATION": "Your account has been deactivated by the admin.",
     "VERIFICATION_OTP": "OTP sent successfully to your mobile number.",
-    "VERIFY_EMAIL_FIRST": "Please Verify Your Account First"
+    "VERIFY_EMAIL_FIRST": "Please Verify Your Account First",
+    "INTERNAL_SERVER_ERROR": "internal server error"
 }
