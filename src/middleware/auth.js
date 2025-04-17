@@ -1,12 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from '@prisma/client';
 import * as apiModels from "../models/api.js";
 import { handleError } from "../utils/responseHandler.js";
-
-
-const prisma = new PrismaClient();
 
 
 dotenv.config();
