@@ -1,5 +1,5 @@
 import express from 'express';
-import { uploadFile, uploadMultipleFiles } from '../services/uploadImage.js';
+import { uploadFile, uploadMultipleFiles } from '../services/multer.js';
 import { authenticateUser } from '../middleware/auth.js';
 
 

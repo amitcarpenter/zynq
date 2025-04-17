@@ -10,7 +10,6 @@ import { sendEmail } from "../../services/send_email.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 import { generateAccessToken } from "../../utils/user_helper.js";
 
-
 const prisma = new PrismaClient();
 
 dotenv.config();
@@ -205,7 +204,6 @@ export const render_privacy_policy = (req, res) => {
 };
 
 //==================================================================================================
-
 
 export const register_with_email = async (req, res) => {
     try {

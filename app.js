@@ -4,7 +4,7 @@ import path from 'path';
 import https from "https";
 import dotenv from "dotenv";
 import express from "express";
-import { checkDatabaseConnection } from "./src/config/db.js";
+import db from "./src/config/db.js";
 import { fileURLToPath } from 'url';
 import configureApp from "./src/config/routes.js"
 
@@ -14,7 +14,6 @@ const __dirname = path.dirname(__filename);
 dotenv.config()
 const app = express();
 
-
 const PORT = process.env.PORT;
 const APP_URL = process.env.APP_URL;
 
@@ -23,9 +22,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 
 
-checkDatabaseConnection()
 configureApp(app);
-
 
 app.get("/", (req, res) => {
   return res.send("Zynq App Working")
