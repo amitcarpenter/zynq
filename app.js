@@ -29,6 +29,7 @@ app.get("/", (req, res) => {
   return res.send("Zynq App Working")
 });
 
+console.log(IS_LIVE, "islive");
 
 if (IS_LIVE) {
   const sslOptions = {
