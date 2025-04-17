@@ -15,7 +15,6 @@ const configureApp = (app) => {
   app.use(cookieParser());
   app.use(cors());
   app.use("/api", api_routes);
-  // app.use("/admin", admin_routes);
 
 };
 

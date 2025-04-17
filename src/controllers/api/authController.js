@@ -122,7 +122,6 @@ export const updateProfile = async (req, res) => {
             age: Joi.number().optional().allow("", null),
             is_push_notification_on: Joi.boolean().optional().allow("", null),
             is_location_on: Joi.boolean().optional().allow("", null),
-            // language: Joi.string().optional().allow("", null),
             fcm_token: Joi.string().optional().allow("", null),
         });
 
