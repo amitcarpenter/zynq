@@ -28,7 +28,7 @@ checkDatabaseConnection()
 configureApp(app);
 
 app.get("/", (req, res) => {
-  return res.send("krakka project here")
+  return res.send("Zynq App Working")
 });
 
 const sslOptions = {
