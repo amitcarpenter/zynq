@@ -31,21 +31,21 @@ app.get("/", (req, res) => {
   return res.send("krakka project here")
 });
 
-// const sslOptions = {
-//   ca: fs.readFileSync("/var/www/html/ssl/ca_bundle.crt"),
-//   key: fs.readFileSync("/var/www/html/ssl/private.key"),
-//   cert: fs.readFileSync("/var/www/html/ssl/certificate.crt"),
-// };
-// // Create HTTPS server
-// const httpsServer = https.createServer(sslOptions, app);
+const sslOptions = {
+  ca: fs.readFileSync("/var/www/html/ssl/ca_bundle.crt"),
+  key: fs.readFileSync("/var/www/html/ssl/private.key"),
+  cert: fs.readFileSync("/var/www/html/ssl/certificate.crt"),
+};
+// Create HTTPS server
+const httpsServer = https.createServer(sslOptions, app);
 
-// httpsServer.listen(PORT, () => {
-//   console.log(`Server is working on ${APP_URL}`);
-// })
-
-app.listen(PORT, () => {
+httpsServer.listen(PORT, () => {
   console.log(`Server is working on ${APP_URL}`);
-});
+})
+
+// app.listen(PORT, () => {
+//   console.log(`Server is working on ${APP_URL}`);
+// });
 
 
 
