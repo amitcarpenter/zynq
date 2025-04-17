@@ -1,10 +1,15 @@
 {
-    "USER_REGISTER_SUCCESS": "Användare registrerad framgångsrikt",
-    "ADMIN_CREATED": "Admin skapades framgångsrikt",
-    "EMAIL_ALREADY": "E-postadressen finns redan",
-    "ADMIN_NOT_FOUND": "Admin hittades inte",
-    "ADMIN_DEACTIVATION": "Ditt konto har inaktiverats av administratören.",
-    "VERIFICATION_OTP": "OTP skickades framgångsrikt till ditt mobilnummer.",
-    "VERIFY_EMAIL_FIRST": "Vänligen verifiera ditt konto först"
-  }
-  
+  "USER_REGISTER_SUCCESS": "Användare registrerad framgångsrikt",
+  "ADMIN_CREATED": "Admin skapad framgångsrikt",
+  "EMAIL_ALREADY": "E-postadressen finns redan",
+  "ADMIN_NOT_FOUND": "Admin hittades inte",
+  "USER_NOT_FOUND": "Användare hittades inte",
+  "INVALID_OTP": "Ogiltig engångskod (OTP)",
+  "LOGIN_SUCCESSFUL": "Inloggning lyckades",
+  "USER_PROFILE": "Användarprofil hämtades framgångsrikt",
+  "PROFILE_UPDATED": "Profil uppdaterad framgångsrikt",
+  "ADMIN_DEACTIVATION": "Ditt konto har inaktiverats av administratören.",
+  "VERIFICATION_OTP": "Engångskod (OTP) skickades framgångsrikt till ditt mobilnummer.",
+  "VERIFY_EMAIL_FIRST": "Vänligen verifiera ditt konto först",
+  "INTERNAL_SERVER_ERROR": "internt serverfel"
+}

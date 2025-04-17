@@ -4,14 +4,12 @@ import path from "path";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
-import { PrismaClient } from '@prisma/client';
+import jwt from "jsonwebtoken"
 import * as apiModels from "../../models/api.js";
 import { sendEmail } from "../../services/send_email.js";
 import { generateAccessToken } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 
-const prisma = new PrismaClient();
 
 dotenv.config();
 
@@ -47,7 +45,7 @@ export const login_with_mobile = async (req, res) => {
             otp, language
         }
 
-        await apiModels.update_user(user_data);
+        await apiModels.update_user(user_data, user.user_id);
         return handleSuccess(res, 200, language, "VERIFICATION_OTP", otp);
     } catch (error) {
         console.error("Login error:", error);
@@ -84,7 +82,7 @@ export const login_with_otp = async (req, res) => {
         let user_data = {
             otp, jwt_token: token, otp: "", is_verified: true
         }
-        await apiModels.update_user(user_data)
+        await apiModels.update_user(user_data, user.user_id)
         return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
     } catch (error) {
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
@@ -119,47 +117,61 @@ export const updateProfile = async (req, res) => {
         if (error) return joiErrorHandle(res, error);
 
         const user = req.user;
-        const language = req.user?.language;
+        const language = user?.language;
 
-        const { full_name, gender, age, is_push_notification_on, is_location_on, fcm_token } = value;
+        const full_name = value.full_name ?? user.full_name;
+        const gender = value.gender ?? user.gender;
+        const age = value.age ?? user.age;
+        const is_push_notification_on = (value.is_push_notification_on !== undefined && value.is_push_notification_on !== null)
+            ? value.is_push_notification_on
+            : user.is_push_notification_on;
+
+        const is_location_on = (value.is_location_on !== undefined && value.is_location_on !== null)
+            ? value.is_location_on
+            : user.is_location_on;
+
+        const fcm_token = value.fcm_token ?? user.fcm_token;
 
 
         let profile_image = user.profile_image;
         if (req.file) {
-            profile_image = req.file.filename;
-            user.profile_image = profile_image;
+            profile_image = (req.file).location;
         }
 
-        await prisma.user.update({
-            where: { user_id: user.user_id },
-            data: { profile_image, age, full_name, gender, fcm_token, is_push_notification_on, is_location_on }
-        })
+        const user_data = {
+            profile_image,
+            age,
+            full_name,
+            gender,
+            fcm_token,
+            is_push_notification_on,
+            is_location_on
+        };
+
+        console.log(user_data, "user_data");
+
+        await apiModels.update_user(user_data, user.user_id);
 
         return handleSuccess(res, 200, language, "PROFILE_UPDATED");
 
     } catch (error) {
-        return handleError(res, 'en', 500, error.message);
+        console.log(error.message);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
 
 export const deleteAccount = async (req, res) => {
     try {
-        const user_id = req.user?.user_id;
+        const { user_id, language } = req.user;
+        const [user] = await apiModels.get_user_by_user_id(user_id)
 
-        if (!user_id) {
-            return handleError(res, 400, "User ID is required.");
-        }
+        if (!user) return handleError(res, 404, language, "USER_NOT_FOUND");
+        await apiModels.delete_user(user_id)
 
-        const user = await userRepository.findOne({ where: { user_id } });
-
-        if (!user) {
-            return handleError(res, 404, "User Account not found.");
-        }
-
-        await userRepository.delete(user_id);
-
-        return handleSuccess(res, 200, "Account deleted successfully.");
+        return handleSuccess(res, 200, language, "ACOUNT_DELETED");
     } catch (error) {
+        console.log(error.message);
+
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
@@ -187,13 +199,25 @@ export const render_terms_and_condition = (req, res) => {
 
 export const render_privacy_policy = (req, res) => {
     try {
-        return res.render("privacy_policy.ejs");
+        const schema = Joi.object({
+            language: Joi.string().valid('en', 'sv').required()
+        })
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+        const { language = 'en' } = value
+
+        if (language == 'en') {
+            return res.render("privacy_and_policy_en.ejs");
+
+        }
+        if (language == 'sv') {
+            return res.render("privacy_and_policy_sv.ejs");
+        }
     } catch (error) {
         console.error("Error rendering forgot password page:", error);
         return handleError(res, 500, "An error occurred while rendering the page")
     }
 };
-
 //==================================================================================================
 
 export const register_with_email = async (req, res) => {

@@ -11,5 +11,11 @@
     "ADMIN_DEACTIVATION": "Your account has been deactivated by the admin.",
     "VERIFICATION_OTP": "OTP sent successfully to your mobile number.",
     "VERIFY_EMAIL_FIRST": "Please Verify Your Account First",
+    "ACOUNT_DELETED": "Account deleted successfully.",
+    "UNAUTH": "Unauthorized: No token provided.",
+    "UNAUTHMISSINGTOKEN": "Unauthorized: Invalid or missing token",
+    "PROMPT_DATA_UPDATE": "Prompt Data Updated Successfully",
+    "PROMPT_DATA_GET": "Prompt Data Retrived Successfully",
+    "PROMPT_NOT_FOUND": "Prompt Not Found",
     "INTERNAL_SERVER_ERROR": "internal server error"
 }
