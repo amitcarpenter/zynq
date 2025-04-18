@@ -38,7 +38,7 @@ export const add_and_update_prompt = async (req, res) => {
 
         return handleSuccess(res, 200, 'en', "PROMPT_DATA_UPDATE");
     } catch (error) {
-        console.error("Login error:", error);
+        console.error("internal E", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
@@ -62,7 +62,7 @@ export const get_prompt_data_by_prompt_type = async (req, res) => {
 
         return handleSuccess(res, 200, 'en', "PROMPT_DATA_GET", prompt_data);
     } catch (error) {
-        console.error("Login error:", error);
+        console.error("internal E", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };

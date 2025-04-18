@@ -48,7 +48,7 @@ export const login_with_mobile = async (req, res) => {
         await apiModels.update_user(user_data, user.user_id);
         return handleSuccess(res, 200, language, "VERIFICATION_OTP", otp);
     } catch (error) {
-        console.error("Login error:", error);
+        console.error("internal E", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };

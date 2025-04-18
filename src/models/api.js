@@ -91,3 +91,24 @@ export const update_prompt = async (prompt_data, prompt_type) => {
         throw new Error("Failed to update prompt.");
     }
 };
+
+
+//======================================= Face Scan =========================================
+export const add_face_scan_data = async (face_data) => {
+    try {
+        return await db.query(`INSERT INTO tbl_face_scan_results SET ?`, face_data);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to add face scan data.");
+    }
+};
+
+export const get_face_scan_history = async (user_id) => {
+    try {
+        return await db.query(
+            `SELECT * FROM tbl_face_scan_results WHERE user_id = ? ORDER BY created_at DESC`, [user_id]);
+    } catch (error) {
+        console.error("DB Error in get_prompt_data:", error);
+        throw new Error("Failed to face scan historydata");
+    }
+};
