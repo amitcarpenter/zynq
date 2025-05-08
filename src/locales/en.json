@@ -9,7 +9,7 @@
     "USER_PROFILE": "User profile fetched successfully",
     "PROFILE_UPDATED": "Profile updated successfully",
     "ADMIN_DEACTIVATION": "Your account has been deactivated by the admin.",
-    "VERIFICATION_OTP": "OTP sent successfully to your mobile number.",
+    "VERIFICATION_OTP": "OTP sent successfully.",
     "VERIFY_EMAIL_FIRST": "Please Verify Your Account First",
     "ACOUNT_DELETED": "Account deleted successfully.",
     "UNAUTH": "Unauthorized: No token provided.",

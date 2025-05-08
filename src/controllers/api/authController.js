@@ -9,6 +9,7 @@ import * as apiModels from "../../models/api.js";
 import { sendEmail } from "../../services/send_email.js";
 import { generateAccessToken } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
+import twilio from 'twilio';
 
 
 dotenv.config();
@@ -16,6 +17,86 @@ dotenv.config();
 const APP_URL = process.env.APP_URL;
 const image_logo = process.env.LOGO_URL;
 
+
+// export const login_with_mobile = async (req, res) => {
+//     try {
+//         const sendOtpSchema = Joi.object({
+//             mobile_number: Joi.string().required(),
+//             language: Joi.string().valid('sv', 'en').optional().allow("", null),
+//         });
+
+//         const { error, value } = sendOtpSchema.validate(req.body);
+//         if (error) return joiErrorHandle(res, error);
+
+//         const { mobile_number, language } = value;
+//         const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+//         let [user] = await apiModels.get_user_by_mobile_number(mobile_number);
+
+//         if (!user) {
+//             await apiModels.create_user(mobile_number, otp, language);
+//             [user] = await apiModels.get_user_by_mobile_number(mobile_number);
+//         }
+
+//         if (user && !user.is_active) {
+//             return handleError(res, 400, language, 'ADMIN_DEACTIVATION');
+//         }
+
+//         let user_data = {
+//             otp, language
+//         }
+
+//         await apiModels.update_user(user_data, user.user_id);
+//         return handleSuccess(res, 200, language, "VERIFICATION_OTP", otp);
+//     } catch (error) {
+//         console.error("internal E", error);
+//         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+//     }
+// };
+
+// export const login_with_otp = async (req, res) => {
+//     try {
+//         const loginOtpSchema = Joi.object({
+//             mobile_number: Joi.string().required(),
+//             otp: Joi.string().length(4).required(),
+//             language: Joi.string().valid("en", "sv").optional().allow("", null),
+//         });
+
+//         const { error, value } = loginOtpSchema.validate(req.body);
+//         if (error) return joiErrorHandle(res, error);
+
+//         const { mobile_number, otp, language } = value;
+
+//         let [user] = await apiModels.get_user_by_mobile_number(mobile_number);
+
+//         if (!user) {
+//             return handleError(res, 404, language, "USER_NOT_FOUND");
+//         }
+
+//         if (user.otp !== otp) {
+//             return handleError(res, 400, language, "INVALID_OTP");
+//         }
+
+//         const payload = { user_id: user.user_id, mobile_number: user.mobile_number };
+//         const token = generateAccessToken(payload);
+
+//         let user_data = {
+//             otp, jwt_token: token, otp: "", is_verified: true
+//         }
+//         await apiModels.update_user(user_data, user.user_id)
+//         return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
+//     } catch (error) {
+//         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+//     }
+// };
+
+// -----------------------------------------------TWILIO ACCOUNT SETUP--------------------------------------------//
+
+const accountSid = "ACa812e516a641084b3eabc6ed93fca3be";
+const authToken = "a2bd43722da1ce673298c4088668c6c3";
+const verifyServiceSid = "VA940ee29c629330e7c773c63a7d15185d";
+
+const client = twilio(accountSid, authToken);
 
 export const login_with_mobile = async (req, res) => {
     try {
@@ -38,20 +119,27 @@ export const login_with_mobile = async (req, res) => {
         }
 
         if (user && !user.is_active) {
-            return handleError(res, 400, language, 'ADMIN_DEACTIVATION');
+            return handleError(res, 400, language || 'en', 'ADMIN_DEACTIVATION');
         }
 
-        let user_data = {
-            otp, language
-        }
-
+        const user_data = { otp, language };
         await apiModels.update_user(user_data, user.user_id);
-        return handleSuccess(res, 200, language, "VERIFICATION_OTP", otp);
+
+        const verification = await client.verify.v2.services(verifyServiceSid)
+            .verifications
+            .create({
+                to: mobile_number,
+                channel: 'sms',
+            });
+
+        return handleSuccess(res, 200, language || 'en', "VERIFICATION_OTP", { otp, sid: verification.sid });
+
     } catch (error) {
-        console.error("internal E", error);
+        console.error("Internal error:", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
+
 
 export const login_with_otp = async (req, res) => {
     try {
@@ -65,29 +153,42 @@ export const login_with_otp = async (req, res) => {
         if (error) return joiErrorHandle(res, error);
 
         const { mobile_number, otp, language } = value;
+        console.log('value>>>>>>>>>>>>>.', value);
 
-        let [user] = await apiModels.get_user_by_mobile_number(mobile_number);
-
+        const [user] = await apiModels.get_user_by_mobile_number(mobile_number);
         if (!user) {
-            return handleError(res, 404, language, "USER_NOT_FOUND");
+            return handleError(res, 404, language || 'en', "USER_NOT_FOUND");
         }
 
-        if (user.otp !== otp) {
-            return handleError(res, 400, language, "INVALID_OTP");
+        // ✅ Verify OTP with Twilio
+        const verificationCheck = await client.verify.v2.services(verifyServiceSid)
+            .verificationChecks
+            .create({ to: mobile_number, code: otp });
+
+        if (verificationCheck.status !== "approved") {
+            return handleError(res, 400, language || 'en', "INVALID_OTP");
         }
 
         const payload = { user_id: user.user_id, mobile_number: user.mobile_number };
         const token = generateAccessToken(payload);
 
-        let user_data = {
-            otp, jwt_token: token, otp: "", is_verified: true
-        }
-        await apiModels.update_user(user_data, user.user_id)
-        return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
+        const user_data = {
+            jwt_token: token,
+            otp: "",
+            is_verified: true,
+        };
+
+        await apiModels.update_user(user_data, user.user_id);
+
+        return handleSuccess(res, 200, language || 'en', "LOGIN_SUCCESSFUL", token);
+
     } catch (error) {
+        console.error("Login OTP verification error:", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
+
+// -------------------------------------------------------END--------------------------------------------------------//
 
 export const getProfile = async (req, res) => {
     try {

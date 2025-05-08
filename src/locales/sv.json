@@ -9,7 +9,7 @@
   "USER_PROFILE": "Användarprofil hämtades framgångsrikt",
   "PROFILE_UPDATED": "Profil uppdaterad framgångsrikt",
   "ADMIN_DEACTIVATION": "Ditt konto har inaktiverats av administratören.",
-  "VERIFICATION_OTP": "OTP skickades framgångsrikt till ditt mobilnummer.",
+  "VERIFICATION_OTP": "OTP skickades framgångsrikt.",
   "VERIFY_EMAIL_FIRST": "Vänligen verifiera ditt konto först",
   "ACOUNT_DELETED": "Konto raderat framgångsrikt.",
   "UNAUTH": "Obehörig: Ingen token tillhandahållen.",
