@@ -24,3 +24,7 @@ export const generateAccessToken = (payload) => {
     const JWT_EXPIRY = process.env.JWT_EXPIRY;
     return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 };
+
+export const generateToken = () => {
+    return Math.random().toString(36).substr(2, 12);
+}

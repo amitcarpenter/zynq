@@ -1,15 +1,14 @@
-// import express from 'express';
+import express from 'express';
 
 
-// //==================================== Import Controllers ==============================
-// import * as storageControllers from "../controllers/admin/formController.js";
+//==================================== Import Controllers ==============================
+import * as clinicControllers from "../controllers/admin/clinicController.js";
+import { upload } from '../services/multer.js';
 
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.post('/add-update-form-data', storageControllers.add_update_form_data);
-// router.get('/get-form-data', storageControllers.get_form_data_api);
-
+router.post('/import-clinics-from-CSV', upload.single("file"), clinicControllers.import_clinics_from_CSV);
 
 
-// export default router;
+export default router;

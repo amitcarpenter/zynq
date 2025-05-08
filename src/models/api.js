@@ -112,3 +112,5 @@ export const get_face_scan_history = async (user_id) => {
         throw new Error("Failed to face scan historydata");
     }
 };
+
+

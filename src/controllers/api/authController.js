@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken"
 import * as apiModels from "../../models/api.js";
 import { sendEmail } from "../../services/send_email.js";
-import { generateAccessToken } from "../../utils/user_helper.js";
+import { generateAccessToken, generateVerificationLink } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 import twilio from 'twilio';
 
@@ -90,11 +90,11 @@ const image_logo = process.env.LOGO_URL;
 //     }
 // };
 
-// -----------------------------------------------TWILIO ACCOUNT SETUP--------------------------------------------//
 
-const accountSid = "ACa812e516a641084b3eabc6ed93fca3be";
-const authToken = "a2bd43722da1ce673298c4088668c6c3";
-const verifyServiceSid = "VA940ee29c629330e7c773c63a7d15185d";
+const accountSid = process.env.ACCOUNT_SID;
+const authToken = process.env.AUTHTOKEN;
+const verifyServiceSid = process.env.VERIFY_SERVICE_SID;
+
 
 const client = twilio(accountSid, authToken);
 
@@ -187,8 +187,6 @@ export const login_with_otp = async (req, res) => {
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
-
-// -------------------------------------------------------END--------------------------------------------------------//
 
 export const getProfile = async (req, res) => {
     try {
