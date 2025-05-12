@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import base64url from 'base64url';
+
 import { handleError, handleSuccess } from '../utils/responseHandler.js';
 
 
@@ -28,3 +29,31 @@ export const generateAccessToken = (payload) => {
 export const generateToken = () => {
     return Math.random().toString(36).substr(2, 12);
 }
+
+export const generatePassword = (email) => {
+  
+    const username = email.split('@')[0];
+    const firstName = username.split('.')[0]; 
+
+    const upperCaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowerCaseChars = 'abcdefghijklmnopqrstuvwxyz';
+    const numberChars = '0123456789';
+    const specialChars = '@#$%&';
+
+    const randomUpperCase = upperCaseChars.charAt(Math.floor(Math.random() * upperCaseChars.length));
+    const randomLowerCase = lowerCaseChars.charAt(Math.floor(Math.random() * lowerCaseChars.length));
+    const randomNumber = numberChars.charAt(Math.floor(Math.random() * numberChars.length));
+    const randomSpecial = specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+
+    let basePassword = firstName.slice(0, 4); 
+
+    const combined = basePassword + randomUpperCase + randomLowerCase + randomNumber + randomSpecial;
+
+    const shuffledPassword = combined
+        .split('')
+        .sort(() => Math.random() - 0.5)  
+        .join('');
+
+    return shuffledPassword.slice(0, 8);  
+};
+
