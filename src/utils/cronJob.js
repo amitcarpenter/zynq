@@ -1,10 +1,12 @@
-const ejs = require("ejs");
-const path = require("path");
-const moment = require("moment");
-const cron = require("node-cron");
-const { default: db } = require("../config/db");
-const { sendEmail } = require("../services/send_email");
-const { generatePassword } = require("./user_helper");
+import ejs from "ejs";
+import bcrypt from "bcrypt";
+import path from "path";
+import moment from "moment";
+import cron from "node-cron";
+import db from "../config/db.js";
+import { fileURLToPath } from 'url';
+import { sendEmail } from "../services/send_email.js";
+import { generatePassword } from "./user_helper.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,9 +20,10 @@ let isRunning = false;
 
 const send_clinic_email = async (clinic, isFirstEmail) => {
     try {
-        const emailTemplatePath = path.resolve(__dirname, '../../views/invite_email/en.ejs');
-        const password = generatePassword(email);
+        const emailTemplatePath = path.resolve(__dirname, '../views/invite_email/en.ejs');
         let email = clinic.email;
+        const password = generatePassword(email);
+        const hashedPassword = await bcrypt.hash(password, 10);
         const emailHtml = await ejs.renderFile(emailTemplatePath, { image_logo, email, password });
 
         const emailOptions = {
@@ -30,11 +33,16 @@ const send_clinic_email = async (clinic, isFirstEmail) => {
         };
 
         await sendEmail(emailOptions);
+        await db.query(
+            "UPDATE tbl_clinics SET password = ?, show_password = ? , is_invited = 1 WHERE clinic_id = ?",
+            [hashedPassword, password, clinic.clinic_id]
+        );
+
         console.log(`Email sent to: ${clinic.email}`);
 
         if (isFirstEmail) {
             await db.query(
-                "UPDATE tbl_clinics SET email_sent_at = ?, is_invited = 1 WHERE id = ?",
+                "UPDATE tbl_clinics SET email_sent_at = ?, is_invited = 1 WHERE clinic_id = ?",
                 [moment().format('YYYY-MM-DD HH:mm:ss'), clinic.clinic_id]
             );
         }
@@ -44,10 +52,9 @@ const send_clinic_email = async (clinic, isFirstEmail) => {
     }
 };
 
-
-const send_clinic_email_cron = async () => {
+export const send_clinic_email_cron = async () => {
     try {
-        cron.schedule("0 0 * * *", async () => {
+        cron.schedule("*/10 * * * * *", async () => {
             if (isRunning) {
                 console.log("Previous clinic email cron is still running.");
                 return;
@@ -57,18 +64,39 @@ const send_clinic_email_cron = async () => {
             console.log("Running clinic email cron...");
 
             try {
-                const clinics = await db.query("SELECT * FROM tbl_clinics WHERE is_invited = 1 AND is_active = 0");
+                const clinics = await db.query("SELECT * FROM tbl_clinics WHERE is_invited = 0 AND is_active = 0");
+
 
                 for (let clinic of clinics) {
+                    if (!clinic.email_sent_at) {
+                        // First time email, send it
+                        console.log("First time email");
+                        await send_clinic_email(clinic, true);
+                        continue;
+                    }
+
                     const lastSentDate = moment(clinic.email_sent_at);
+
+                    // Check if date is valid just in case
+                    if (!lastSentDate.isValid()) {
+                        console.log("Invalid lastSentDate, skipping...");
+                        continue;
+                    }
+
+                console.log('after continuew');
+                
                     const daysSinceLastEmail = moment().diff(lastSentDate, "days");
 
                     if (daysSinceLastEmail === 0) {
-                        await send_clinic_email(clinic, true);
+                        console.log("Email sent today already.");
                     } else if (daysSinceLastEmail === 7 || daysSinceLastEmail === 14) {
+                        console.log("7th or 14th day reminder");
                         await send_clinic_email(clinic, false);
+                    } else {
+                        console.log(`No email condition met for clinic: ${clinic.id} | Days since last: ${daysSinceLastEmail}`);
                     }
                 }
+
 
             } catch (err) {
                 console.error("Error in clinic email cron:", err.message);
@@ -80,6 +108,3 @@ const send_clinic_email_cron = async () => {
         console.error("Error setting up clinic email cron:", err.message);
     }
 };
-
-
-module.exports = { send_clinic_email_cron };

@@ -21,9 +21,9 @@ export const generateVerificationLink = (token, baseUrl) => {
 };
 
 export const generateAccessToken = (payload) => {
-    const JWT_SECRET = process.env.JWT_SECRET;
+    const USER_JWT_SECRET = process.env.USER_JWT_SECRET;
     const JWT_EXPIRY = process.env.JWT_EXPIRY;
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+    return jwt.sign(payload, USER_JWT_SECRET, { expiresIn: JWT_EXPIRY });
 };
 
 export const generateToken = () => {

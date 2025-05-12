@@ -6,6 +6,7 @@ import cors from "cors";
 
 import api_routes from "../routes/api.js"
 import admin_routes from "../routes/admin.js";
+import clinic_routes from "../routes/clinic.js";
 
 
 //==================================== configureApp ==============================
@@ -17,6 +18,8 @@ const configureApp = (app) => {
   app.use(cors());
   app.use("/api", api_routes);
   app.use("/admin", admin_routes);
+  app.use("/clinic", clinic_routes);
+  
 };
 
 export default configureApp;

@@ -21,5 +21,6 @@
     "SCAN_HISTORY_DATA": "Face Scan Data Retrived Successfully",
     "INTERNAL_SERVER_ERROR": "internal server error",
     "CLINIC_IMPORT": "Clinics imported successfully",
-    "CSV_REQUIRED": "CSV file is required"
+    "CSV_REQUIRED": "CSV file is required", 
+    "CLINIC_NOT_FOUND": "Clinic Not Found"
 }

@@ -7,7 +7,7 @@ import { handleError } from "../utils/responseHandler.js";
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const USER_JWT_SECRET = process.env.USER_JWT_SECRET;
 
 
 export const authenticateUser = async (req, res, next) => {
@@ -23,7 +23,7 @@ export const authenticateUser = async (req, res, next) => {
         const token = tokenParts[1];
         let decodedToken;
         try {
-            decodedToken = jwt.verify(token, JWT_SECRET);
+            decodedToken = jwt.verify(token, USER_JWT_SECRET);
         } catch (err) {
             return handleError(res, 401, 'en', "UNAUTH")
         }
