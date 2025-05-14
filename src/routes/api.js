@@ -32,8 +32,4 @@ router.post("/get-prompt", aiPromptControllers.get_prompt_data_by_prompt_type);
 router.post("/add-face-scan-result", authenticateUser, upload.single("file"), faceScanControllers.add_face_scan_result);
 router.get("/get-face-scan-history", authenticateUser, faceScanControllers.get_face_scan_history);
 
-
-
-
-
 export default router;

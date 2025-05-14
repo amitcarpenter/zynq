@@ -49,5 +49,3 @@ if (IS_LIVE) {
     console.log(`Server is working on ${APP_URL}`);
   });
 }
-
-

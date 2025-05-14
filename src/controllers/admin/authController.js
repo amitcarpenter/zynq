@@ -11,7 +11,6 @@ import { generateAccessToken, generateVerificationLink } from "../../utils/user_
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 import twilio from 'twilio';
 
-
 dotenv.config();
 
 const APP_URL = process.env.APP_URL;
