@@ -22,5 +22,8 @@
     "INTERNAL_SERVER_ERROR": "internal server error",
     "CLINIC_IMPORT": "Clinics imported successfully",
     "CSV_REQUIRED": "CSV file is required", 
-    "CLINIC_NOT_FOUND": "Clinic Not Found"
+    "CLINIC_NOT_FOUND": "Clinic Not Found",
+    "SCAN_HISTORY_NOT_FOUND": "Scan History Not Found"
+
+    
 }
