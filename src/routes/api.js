@@ -29,7 +29,8 @@ router.post("/add-update-prompt", aiPromptControllers.add_and_update_prompt);
 router.post("/get-prompt", aiPromptControllers.get_prompt_data_by_prompt_type);
 
 //==================================== Face Scan ==============================
-router.post("/add-face-scan-result", authenticateUser, upload.single("file"), faceScanControllers.add_face_scan_result);
+// router.post("/add-face-scan-result", authenticateUser, upload.single("file"), faceScanControllers.add_face_scan_result);
+router.post("/add-face-scan-result", authenticateUser, uploadFile, faceScanControllers.add_face_scan_result);
 router.get("/get-face-scan-history", authenticateUser, faceScanControllers.get_face_scan_history);
 
 export default router;

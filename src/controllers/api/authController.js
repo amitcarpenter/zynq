@@ -210,6 +210,9 @@ export const updateProfile = async (req, res) => {
             is_push_notification_on: Joi.boolean().optional().allow("", null),
             is_location_on: Joi.boolean().optional().allow("", null),
             fcm_token: Joi.string().optional().allow("", null),
+            latitude: Joi.string().optional().allow("", null),
+            longitude: Joi.string().optional().allow("", null),
+
         });
 
         const { error, value } = updateProfileSchema.validate(req.body);
@@ -230,6 +233,8 @@ export const updateProfile = async (req, res) => {
             : user.is_location_on;
 
         const fcm_token = value.fcm_token ?? user.fcm_token;
+        const latitude = value.latitude ?? user.latitude;
+        const longitude = value.longitude ?? user.longitude;
 
 
         let profile_image = user.profile_image;
@@ -244,7 +249,9 @@ export const updateProfile = async (req, res) => {
             gender,
             fcm_token,
             is_push_notification_on,
-            is_location_on
+            is_location_on,
+            latitude,
+            longitude
         };
 
         console.log(user_data, "user_data");

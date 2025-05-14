@@ -39,13 +39,16 @@ export const login_clinic = async (req, res) => {
         if (!existingclinic) {
             return handleError(res, 400, language, "CLINIC_NOT_FOUND");
         }
+
         const isPasswordValid = await bcrypt.compare(password, existingclinic.password);
         if (!isPasswordValid) {
             return handleError(res, 400, Msg.INVALID_EMAIL_PASSWORD);
         }
+
         const token = jwt.sign({ clinic_id: existingclinic.clinic_id, email: existingclinic.email }, CLINIC_JWT_SECRET, {
             expiresIn: JWT_EXPIRY
         });
+        
         let adminId = existingclinic.id
         await updateAdminFcmToken(fcmToken, adminId)
         return res.status(200).json({
