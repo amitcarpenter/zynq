@@ -86,6 +86,8 @@ export const login_with_otp = async (req, res) => {
         await apiModels.update_user(user_data, user.user_id)
         return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
     } catch (error) {
+        console.log(error.message);
+        
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
