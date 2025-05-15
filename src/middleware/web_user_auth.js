@@ -14,7 +14,6 @@ export const authenticate = (allowedRoles = []) => {
         try {
             const authorizationHeader = req.headers['authorization'];
             if (!authorizationHeader) {
-                console.log("code>>>>>")
                 return handleError(res, 401, 'en', "UNAUTH");
             }
 
@@ -36,16 +35,12 @@ export const authenticate = (allowedRoles = []) => {
             let [user] = await webModels.get_web_user_by_id(decodedToken.web_user_id)
 
             if (!user) {
-
                 return handleError(res, 404, 'en', "USER_NOT_FOUND");
             }
 
-
             const userRole = user.role_name;
 
-
             if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-
                 return handleError(res, 403, 'en', "ACCESS_DENIED");
             }
             req.user = user;
