@@ -36,12 +36,38 @@ export const get_web_user_by_email = async (email) => {
     }
 };
 
-
 export const update_reset_token = async (reset_token, reset_token_expiry, email) => {
     try {
         return await db.query(`UPDATE tbl_zqnq_users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?`, [reset_token, reset_token_expiry, email]);
     } catch (error) {
         console.error("Database Error:", error.message);
 
+    }
+}
+
+export const get_web_user_by_reset_token = async (reset_token) => {
+    try {
+        return await db.query(`SELECT * FROM tbl_zqnq_users WHERE reset_token = ?`, [reset_token]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch web user data.");
+    }
+}
+
+export const update_jwt_token = async (token, id) => {
+    try {
+        return await db.query(`UPDATE tbl_zqnq_users SET jwt_token = ? WHERE id = ?`, [token, id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update jwt token.");
+    }
+}
+
+export const update_web_user_password = async (password, show_password, reset_token, reset_token_expiry, id) => {
+    try {
+        return await db.query(`UPDATE tbl_zqnq_users SET password = ?, show_password = ?, reset_token = ?, reset_token_expiry = ? WHERE id = ?`, [password, show_password, reset_token, reset_token_expiry, id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update web user password.");
     }
 }

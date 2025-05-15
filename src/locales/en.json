@@ -26,7 +26,14 @@
     "SCAN_HISTORY_NOT_FOUND": "Scan History Not Found",
     "INVALID_EMAIL_PASSWORD": "Invalid email or password",
     "ACCESS_DENIED": "Access Denied",
-    "RESET_PASSWORD_EMAIL_SENT": "Reset Password Email Sent Successfully"
-
-    
+    "RESET_PASSWORD_EMAIL_SENT": "Reset Password Email Sent Successfully",
+    "PASSWORD_RESET_SUCCESS": "Password Reset Successfully",
+    "PASSWORD_RESET_FAILED": "Password Reset Failed",
+    "INVALID_EXPIRED_TOKEN": "Invalid or Expired Token",
+    "PASSWORD_CAN_NOT_SAME": "New password can not be same as current password",
+    "PASSWORD_MUST_BE_8_CHARACTERS": "Password must be at least 8 characters long",
+    "NEW_PASSWORD_REQUIRED": "New password is required",
+    "PASSWORD_UPDATE_SUCCESS": "Password updated successfully",
+    "PASSWORD_UPDATE_FAILED": "Password update failed",
+    "CLINIC_PROFILE_FETCHED": "Clinic profile fetched successfully"
 }

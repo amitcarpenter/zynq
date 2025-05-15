@@ -48,17 +48,19 @@ export const login_web_user = async (req, res) => {
             return handleError(res, 400, language, "INVALID_EMAIL_PASSWORD");
         }
 
-        const token = jwt.sign({ web_user_id: existingWebUser.id }, WEB_JWT_SECRET, {
+        const token = jwt.sign({ web_user_id: existingWebUser.id, email: existingWebUser.email, role: existingWebUser.role_name }, WEB_JWT_SECRET, {
             expiresIn: JWT_EXPIRY
         });
 
-        return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
+        await webModels.update_jwt_token(token, existingWebUser.id);
+        const [user_data] = await webModels.get_web_user_by_id(existingWebUser.id);
+
+        return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", user_data);
     } catch (error) {
         console.error(error);
         return handleError(res, 500, error.message);
     }
 };
-
 
 export const forgot_password = async (req, res) => {
     try {
@@ -70,7 +72,7 @@ export const forgot_password = async (req, res) => {
 
         const { error, value } = schema.validate(req.body);
         if (error) {
-            return joiErrorHandle(res, error); 
+            return joiErrorHandle(res, error);
         }
 
         const { email } = value;
@@ -89,13 +91,13 @@ export const forgot_password = async (req, res) => {
 
         const resetLink = `${APP_URL}webuser/reset-password?token=${resetToken}`;
         let emailTemplatePath;
-        if(language === "sv"){
+        if (language === "sv") {
             emailTemplatePath = path.resolve(__dirname, "../../views/forgot_password/sv.ejs");
-        }else{
+        } else {
             emailTemplatePath = path.resolve(__dirname, "../../views/forgot_password/en.ejs");
         }
-        
-        const emailHtml = await ejs.renderFile(emailTemplatePath, { 
+
+        const emailHtml = await ejs.renderFile(emailTemplatePath, {
             resetLink,
             image_logo
         });
@@ -132,37 +134,91 @@ export const reset_password = async (req, res) => {
                 "any.required": "New password is required",
             }),
         });
+
         const { error, value } = resetPasswordSchema.validate(req.body);
         if (error) {
             return handleError(res, 400, error.details[0].message);
         }
+
         const { token, newPassword } = value;
 
-        const [admin] = await get_admin_data_by(token)
-        if (!admin) {
-            return handleError(res, 400, Msg.INVALID_EXPIRED_TOKEN);
-        }
-        if (admin.show_password === newPassword) {
-            return handleError(res, 400, Msg.PASSWORD_CAN_NOT_SAME);
+        // Get user by reset token
+        const [webUser] = await webModels.get_web_user_by_reset_token(token);
+        if (!webUser) {
+            return handleError(res, 400, webUser.language, "INVALID_EXPIRED_TOKEN");
         }
 
+        // Check if new password matches current password
+        if (webUser.show_password === newPassword) {
+            return handleError(res, 400, webUser.language, "PASSWORD_CAN_NOT_SAME");
+        }
+
+        // Hash the new password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        const update_result = await update_admin_data_by(hashedPassword, newPassword, admin.id)
+        // Update password and clear reset token
+        const updateResult = await webModels.update_web_user_password(
+            hashedPassword,
+            newPassword,
+            null, // reset token
+            null, // reset token expiry
+            webUser.id
+        );
 
-        if (update_result.affectedRows > 0) {
-            return handleSuccess(res, 200, Msg.PASSWORD_RESET_SUCCESS);
+        if (updateResult.affectedRows > 0) {
+            return handleSuccess(res, 200, webUser.language, "PASSWORD_RESET_SUCCESS");
         } else {
-            return handleError(res, 500, Msg.PASSWORD_RESET_FAILED);
+            return handleError(res, 500, webUser.language, "PASSWORD_RESET_FAILED");
         }
+
     } catch (error) {
         console.error("Error in reset password controller:", error);
-        return handleError(res, 500, error.message);
+        return handleError(res, 500, "en", error.message);
     }
 };
+
+// export const reset_password = async (req, res) => {
+//     try {
+//         const resetPasswordSchema = Joi.object({
+//             token: Joi.string().required(),
+//             newPassword: Joi.string().min(8).required().messages({
+//                 "string.min": "Password must be at least 8 characters long",
+//                 "any.required": "New password is required",
+//             }),
+//         });
+//         const { error, value } = resetPasswordSchema.validate(req.body);
+//         if (error) {
+//             return handleError(res, 400, error.details[0].message);
+//         }
+//         const { token, newPassword } = value;
+
+//         const [admin] = await get_admin_data_by(token)
+//         if (!admin) {
+//             return handleError(res, 400, Msg.INVALID_EXPIRED_TOKEN);
+//         }
+//         if (admin.show_password === newPassword) {
+//             return handleError(res, 400, Msg.PASSWORD_CAN_NOT_SAME);
+//         }
+
+//         const salt = await bcrypt.genSalt(10);
+//         const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+//         const update_result = await update_admin_data_by(hashedPassword, newPassword, admin.id)
+
+//         if (update_result.affectedRows > 0) {
+//             return handleSuccess(res, 200, Msg.PASSWORD_RESET_SUCCESS);
+//         } else {
+//             return handleError(res, 500, Msg.PASSWORD_RESET_FAILED);
+//         }
+//     } catch (error) {
+//         console.error("Error in reset password controller:", error);
+//         return handleError(res, 500, error.message);
+//     }
+// };
 
 export const render_success_reset = (req, res) => {
     return res.render("reset_password/en.ejs")
 }
+
 

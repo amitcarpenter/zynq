@@ -26,17 +26,17 @@ export const getProfile = async (req, res) => {
         console.log("req.user", req.user);
         
         const clinicReq = req.user;
-        const [clinic] = await clinicModels.get_clinic_by_clinic_id(clinicReq.id)
+        const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(clinicReq.id)
         if (!clinic) {
-            return handleError(res, 404, Msg.ADMIN_NOT_FOUND);
+            return handleError(res, 404, "en", "CLINIC_NOT_FOUND");
         }
-        if (admin.profile_image && !admin.profile_image.startsWith("http")) {
-            admin.profile_image = `${APP_URL}${admin.profile_image}`;
+        if (clinic.profile_image && !clinic.profile_image.startsWith("http")) {
+            clinic.profile_image = `${APP_URL}${clinic.profile_image}`;
         }
-        return handleSuccess(res, 200, Msg.ADMIN_PROFILE_FETCHED, admin);
+        return handleSuccess(res, 200, "en", "CLINIC_PROFILE_FETCHED", clinic);
     } catch (error) {
         console.error("Error in getProfile:", error);
-        return handleError(res, 500, error.message);
+        return handleError(res, 500, "en", error.message);
     }
 };
 
