@@ -5,10 +5,10 @@ import https from "https";
 import dotenv from "dotenv";
 import express from "express";
 import db from "./src/config/db.js";
-import { fileURLToPath } from 'url';
 import configureApp from "./src/config/routes.js"
 import { send_clinic_email_cron } from "./src/utils/cronJob.js";
 
+import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
