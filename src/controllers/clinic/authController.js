@@ -118,7 +118,7 @@ export const forgot_password = async (req, res) => {
         return handleError(res, 500, error.message);
     }
 };
- am
+
 
 export const reset_password = async (req, res) => {
     try {
