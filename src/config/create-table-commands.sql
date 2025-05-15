@@ -1,5 +1,5 @@
 CREATE TABLE tbl_admin (
-  admin_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  admin_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   full_name varchar(191) NULL,
   email varchar(191) NULL,
   password varchar(191) NULL,
@@ -17,7 +17,7 @@ CREATE TABLE tbl_admin (
 );
 
 CREATE TABLE tbl_appointments (
-  appointment_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  appointment_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   doctor_id varchar(36) NULL,
   patient_id varchar(36) NOT NULL,
   clinic_id varchar(36) NULL,
@@ -32,14 +32,14 @@ CREATE TABLE tbl_appointments (
 );
 
 CREATE TABLE tbl_certification_type (
-  certification_type_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  certification_type_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   name varchar(255) NOT NULL UNIQUE,
   created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE tbl_clinic_documents (
-  clinic_document_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_document_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   document_type enum('legal','certification') NOT NULL,
   file_url varchar(500) NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE tbl_clinic_documents (
 );
 
 CREATE TABLE tbl_clinic_equipments (
-  clinic_equipment_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_equipment_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   equipment_id varchar(36) NOT NULL,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -56,7 +56,7 @@ CREATE TABLE tbl_clinic_equipments (
 );
 
 CREATE TABLE tbl_clinic_locations (
-  clinic_location_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_location_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   street_address varchar(255) NOT NULL,
   city varchar(100) NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE tbl_clinic_locations (
 );
 
 CREATE TABLE tbl_clinic_operation_hours (
-  clinic_operation_hours_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_operation_hours_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   day_of_week enum('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') NOT NULL,
   open_time time NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE tbl_clinic_operation_hours (
 );
 
 CREATE TABLE tbl_clinic_services (
-  clinic_service_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_service_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   service_name varchar(255) NULL,
   service_type varchar(255) NULL,
@@ -91,7 +91,7 @@ CREATE TABLE tbl_clinic_services (
 );
 
 CREATE TABLE tbl_clinic_severity_levels (
-  clinic_severity_level_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_severity_level_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   severity_id varchar(36) NOT NULL,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -99,7 +99,7 @@ CREATE TABLE tbl_clinic_severity_levels (
 );
 
 CREATE TABLE tbl_clinic_skin_types (
-  clinic_skin_type_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_skin_type_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   skin_type_id varchar(36) NOT NULL,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -107,7 +107,7 @@ CREATE TABLE tbl_clinic_skin_types (
 );
 
 CREATE TABLE tbl_clinic_treatments (
-  clinic_treatment_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_treatment_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   treatment_id varchar(36) NOT NULL,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -115,7 +115,7 @@ CREATE TABLE tbl_clinic_treatments (
 );
 
 CREATE TABLE tbl_clinics (
-  clinic_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  clinic_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   zynq_user_id varchar(255) NULL,
   clinic_name varchar(255) NOT NULL,
   org_number varchar(50) NULL,
@@ -133,7 +133,7 @@ CREATE TABLE tbl_clinics (
 );
 
 CREATE TABLE tbl_doctor_certification (
-  doctor_certification_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  doctor_certification_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   doctor_id varchar(36) NOT NULL,
   certification_type_id varchar(36) NOT NULL,
   upload_path varchar(255) NULL,
@@ -145,14 +145,14 @@ CREATE TABLE tbl_doctor_certification (
 );
 
 CREATE TABLE tbl_doctor_clinic_map (
-  map_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  map_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   doctor_id varchar(36) NOT NULL,
   clinic_id varchar(36) NOT NULL,
   assigned_at timestamp NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE tbl_doctor_educations (
-  education_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  education_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   doctor_id varchar(36) NULL,
   degree varchar(100) NULL,
   institution varchar(150) NULL,
@@ -164,7 +164,7 @@ CREATE TABLE tbl_doctor_educations (
 );
 
 CREATE TABLE tbl_doctor_experiences (
-  experience_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  experience_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   doctor_id varchar(36) NULL,
   title varchar(100) NULL,
   start_date date NULL,
@@ -174,7 +174,7 @@ CREATE TABLE tbl_doctor_experiences (
 );
 
 CREATE TABLE tbl_doctor_reviews (
-  doctor_review_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  doctor_review_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   appointment_id varchar(36) NULL,
   doctor_id varchar(36) NULL,
   clinic_id varchar(36) NULL,
@@ -186,7 +186,7 @@ CREATE TABLE tbl_doctor_reviews (
 );
 
 CREATE TABLE tbl_doctors (
-  doctor_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  doctor_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   zynq_user_id varchar(255) NOT NULL,
   name varchar(100) NULL,
   specialization varchar(100) NULL,
@@ -206,12 +206,12 @@ CREATE TABLE tbl_doctors (
 );
 
 CREATE TABLE tbl_equipments (
-  equipment_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  equipment_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   name varchar(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE tbl_face_scan_results (
-  face_scan_result_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  face_scan_result_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   skin_type varchar(255) NULL,
   skin_concerns varchar(255) NULL,
   face varchar(255) NULL,
@@ -224,7 +224,7 @@ CREATE TABLE tbl_face_scan_results (
 );
 
 CREATE TABLE tbl_product_reviews (
-  review_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  review_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   product_id varchar(36) NOT NULL,
   user_id varchar(36) NOT NULL,
   rating float NOT NULL,
@@ -234,7 +234,7 @@ CREATE TABLE tbl_product_reviews (
 );
 
 CREATE TABLE tbl_product_usage_instructions (
-  instruction_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  instruction_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   product_id varchar(36) NOT NULL,
   step_number int NOT NULL,
   instruction_text text NOT NULL,
@@ -243,7 +243,7 @@ CREATE TABLE tbl_product_usage_instructions (
 );
 
 CREATE TABLE tbl_products (
-  product_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  product_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
   name varchar(100) NOT NULL,
   price decimal(10,2) NOT NULL,
@@ -259,22 +259,22 @@ CREATE TABLE tbl_products (
 );
 
 CREATE TABLE tbl_roles (
-  id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   role varchar(255) NOT NULL DEFAULT 'CLINIC' UNIQUE
 );
 
 CREATE TABLE tbl_severity_levels (
-  severity_level_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  severity_level_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   level varchar(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE tbl_skin_types (
-  skin_type_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  skin_type_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   name varchar(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE tbl_support_tickets (
-  ticket_id varchar(36) NOT NULL PRIMARY KEY,
+  ticket_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   title varchar(255) NOT NULL,
   date_raised date NOT NULL,
   issue_category varchar(100) NOT NULL,
@@ -285,12 +285,12 @@ CREATE TABLE tbl_support_tickets (
 );
 
 CREATE TABLE tbl_treatments (
-  treatment_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  treatment_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   name varchar(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE tbl_users (
-  user_id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  user_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   email varchar(191) NULL,
   password varchar(191) NULL,
   full_name varchar(191) NULL,
@@ -313,7 +313,7 @@ CREATE TABLE tbl_users (
 );
 
 CREATE TABLE tbl_zqnq_users (
-  id varchar(36) NOT NULL DEFAULT uuid() PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   email varchar(255) NULL UNIQUE,
   password varchar(255) NULL,
   show_password varchar(255) NULL,
