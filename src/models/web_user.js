@@ -35,3 +35,13 @@ export const get_web_user_by_email = async (email) => {
         throw new Error("Failed to fetch clinic data.");
     }
 };
+
+
+export const update_reset_token = async (reset_token, reset_token_expiry, email) => {
+    try {
+        return await db.query(`UPDATE tbl_zqnq_users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?`, [reset_token, reset_token_expiry, email]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+
+    }
+}

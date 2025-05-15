@@ -173,7 +173,7 @@
                 loaderOverlay.style.display = "flex";
 
                 try {
-                    const response = await fetch("/api/reset-password", {
+                    const response = await fetch("/webuser/reset-password", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -192,7 +192,7 @@
                         ).style.display = "disable");
                         toastr.success("Password reset successfully");
                         setTimeout(() => {
-                            window.location.href = "/api/success-reset";
+                            window.location.href = "/webuser/success-reset";
                         }, 500);
                     } else {
                         toastr.error(result.message);

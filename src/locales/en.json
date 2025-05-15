@@ -23,7 +23,10 @@
     "CLINIC_IMPORT": "Clinics imported successfully",
     "CSV_REQUIRED": "CSV file is required", 
     "CLINIC_NOT_FOUND": "Clinic Not Found",
-    "SCAN_HISTORY_NOT_FOUND": "Scan History Not Found"
+    "SCAN_HISTORY_NOT_FOUND": "Scan History Not Found",
+    "INVALID_EMAIL_PASSWORD": "Invalid email or password",
+    "ACCESS_DENIED": "Access Denied",
+    "RESET_PASSWORD_EMAIL_SENT": "Reset Password Email Sent Successfully"
 
     
 }
