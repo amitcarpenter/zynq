@@ -13,7 +13,6 @@ const router = express.Router();
 
 
 //==================================== AUTH ==============================
-router.post("/login-clinic", authControllers.login_clinic);
 
 
 
