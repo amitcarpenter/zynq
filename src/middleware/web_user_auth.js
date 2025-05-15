@@ -1,0 +1,61 @@
+
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import * as webModels from "../models/web_user.js";
+import { handleError } from "../utils/responseHandler.js";
+
+dotenv.config();
+
+const WEB_JWT_SECRET = process.env.WEB_JWT_SECRET;
+
+
+export const authenticate = (allowedRoles = []) => {
+    return async (req, res, next) => {
+        try {
+            const authorizationHeader = req.headers['authorization'];
+            if (!authorizationHeader) {
+                console.log("code>>>>>")
+                return handleError(res, 401, 'en', "UNAUTH");
+            }
+
+            const tokenParts = authorizationHeader.split(' ');
+            if (tokenParts[0] !== 'Bearer' || tokenParts[1] === 'null' || !tokenParts[1]) {
+                return handleError(res, 401, 'en', "UNAUTHMISSINGTOKEN");
+            }
+
+            const token = tokenParts[1];
+            let decodedToken;
+
+            try {
+                decodedToken = jwt.verify(token, WEB_JWT_SECRET);
+            } catch (err) {
+                return handleError(res, 401, 'en', "UNAUTH");
+            }
+
+
+            let [user] = await webModels.get_web_user_by_id(decodedToken.web_user_id)
+
+            if (!user) {
+
+                return handleError(res, 404, 'en', "USER_NOT_FOUND");
+            }
+
+
+            const userRole = user.role_name;
+
+
+            if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+
+                return handleError(res, 403, 'en', "ACCESS_DENIED");
+            }
+            req.user = user;
+
+
+            next();
+
+        } catch (error) {
+            console.error("Authentication error:", error);
+            return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+        }
+    };
+};
