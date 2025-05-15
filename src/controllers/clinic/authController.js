@@ -12,6 +12,7 @@ import { handleError, handleSuccess, joiErrorHandle } from "../../utils/response
 import twilio from 'twilio';
 
 
+
 dotenv.config();
 
 const APP_URL = process.env.APP_URL;
@@ -19,49 +20,55 @@ const image_logo = process.env.LOGO_URL;
 const CLINIC_JWT_SECRET = process.env.CLINIC_JWT_SECRET;
 
 
-export const login_clinic = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const schema = Joi.object({
-            email: Joi.string().min(5).max(255).email({ tlds: { allow: false } }).lowercase().required(),
-            password: Joi.string().min(8).max(15).required(),
-            fcmToken: Joi.string().optional().allow("", null)
+            email: Joi.string().email().required(),
+            password: Joi.string().required()
         });
-
-        let language = 'en';
 
         const { error, value } = schema.validate(req.body);
-
-        if (error) return joiErrorHandle(res, result.error);
-
-        const { email, password, fcmToken } = value;
-
-        const [existingclinic] = await clinicModels.get_clinic_by_email(email);
-        if (!existingclinic) {
-            return handleError(res, 400, language, "CLINIC_NOT_FOUND");
+        if (error) {
+            return handleError(res, 400, error.details[0].message);
         }
 
-        const isPasswordValid = await bcrypt.compare(password, existingclinic.password);
-        if (!isPasswordValid) {
-            return handleError(res, 400, Msg.INVALID_EMAIL_PASSWORD);
-        }
+        const { email, password } = value;
 
-        const token = jwt.sign({ clinic_id: existingclinic.clinic_id, email: existingclinic.email }, CLINIC_JWT_SECRET, {
-            expiresIn: JWT_EXPIRY
-        });
+        const [user] = await clinicModels.get_zqnq_user_by_email(email);
         
-        let adminId = existingclinic.id
-        await updateAdminFcmToken(fcmToken, adminId)
-        return res.status(200).json({
-            success: true,
-            status: 200,
-            message: Msg.LOGIN_SUCCESSFUL,
-            token: token
-        })
+        if (!user) {
+            return handleError(res, 401, 'Invalid email or password');
+        }
+
+        // Verify password
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return handleError(res, 401, 'Invalid email or password');
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role_id: user.role_id },
+            CLINIC_JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        return handleSuccess(res, 200, 'Login successful', {
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                role_id: user.role_id
+            }
+        });
+
     } catch (error) {
-        console.error(error);
+        console.error('Error in login:', error);
         return handleError(res, 500, error.message);
     }
 };
+
+
 
 export const render_forgot_password_page = (req, res) => {
     try {
@@ -111,6 +118,7 @@ export const forgot_password = async (req, res) => {
         return handleError(res, 500, error.message);
     }
 };
+
 
 export const reset_password = async (req, res) => {
     try {

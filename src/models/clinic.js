@@ -11,6 +11,16 @@ export const get_clinic_by_clinic_id = async (clinic_id) => {
     }
 };
 
+export const get_zqnq_user_by_email = async (email) => {
+    try {
+        return await db.query(`SELECT * FROM tbl_zqnq_users WHERE email = ?`, [email]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch user data.");
+    }
+};
+
+
 export const get_clinic_by_email = async (email) => {
     try {
         return await db.query(`SELECT * FROM tbl_clinics WHERE email = ?`, [email]);
