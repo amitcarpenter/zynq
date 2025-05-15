@@ -47,9 +47,7 @@ import * as adminModels from "../../models/admin.js";
 export const import_clinics_from_CSV = async (req, res) => {
     const filePath = req.file?.path;
 
-    if (!filePath) {
-        return handleError(res, 400, 'en', "CSV_REQUIRED");
-    }
+    if (!filePath) return handleError(res, 400, 'en', "CSV_REQUIRED");
 
     try {
         const workbook = xlsx.readFile(filePath);
@@ -66,7 +64,7 @@ export const import_clinics_from_CSV = async (req, res) => {
             address: row.address || '',
             token: generateToken()
         }));
-        
+
         for (const clinic of clinics) {
             await insert_clinic(clinic);
         }
@@ -76,7 +74,7 @@ export const import_clinics_from_CSV = async (req, res) => {
 
     } catch (error) {
         console.error("Import failed:", error);
-        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
     }
 };
 
@@ -93,14 +91,14 @@ export const get_clinic_managment = async (req, res) => {
         const data = {
             users: users,
             pagination: {
-                totalUsers: users.length,
-                totalPages: Math.ceil(users.length / limit),
+                totalUsers: total,
+                totalPages: Math.ceil(total / limit),
                 currentPage: page,
-                subadminPerPage: limit,
+                clinicsPerPage: limit,
             }
         }
 
-        return handleSuccess(res, 200, 'en', "Fetch user management successfully", data);
+        return handleSuccess(res, 200, 'en', "Fetch clinic management successfully", data);
     } catch (error) {
         console.error("internal E", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
