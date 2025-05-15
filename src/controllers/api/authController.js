@@ -240,8 +240,11 @@ export const updateProfile = async (req, res) => {
 
 
         let profile_image = user.profile_image;
+        // if (req.file) {
+        //     profile_image = (req.file).location;
+        // }
         if (req.file) {
-            profile_image = (req.file).location;
+            profile_image = req.file.filename;
         }
 
         const user_data = {
