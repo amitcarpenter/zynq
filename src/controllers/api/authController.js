@@ -87,7 +87,7 @@ export const login_with_otp = async (req, res) => {
         return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
     } catch (error) {
         console.log(error.message);
-        
+
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
@@ -212,8 +212,9 @@ export const updateProfile = async (req, res) => {
             is_push_notification_on: Joi.boolean().optional().allow("", null),
             is_location_on: Joi.boolean().optional().allow("", null),
             fcm_token: Joi.string().optional().allow("", null),
-            latitude: Joi.string().optional().allow("", null),
-            longitude: Joi.string().optional().allow("", null),
+            latitude: Joi.number().optional().allow(null),
+            longitude: Joi.number().optional().allow(null),
+            language: Joi.string().optional().allow("", null),
 
         });
 
@@ -221,7 +222,7 @@ export const updateProfile = async (req, res) => {
         if (error) return joiErrorHandle(res, error);
 
         const user = req.user;
-        const language = user?.language;
+        const language = value.language ?? user?.language;
 
         const full_name = value.full_name ?? user.full_name;
         const gender = value.gender ?? user.gender;
@@ -240,9 +241,13 @@ export const updateProfile = async (req, res) => {
 
 
         let profile_image = user.profile_image;
-        if (req.file) {
-            profile_image = (req.file).location;
+        // if (req.file) {
+        //     profile_image = (req.file).location;
+        // }
+        if (req.file && req.file.filename) {
+            profile_image = req.file.filename;
         }
+
 
         const user_data = {
             profile_image,
@@ -253,7 +258,8 @@ export const updateProfile = async (req, res) => {
             is_push_notification_on,
             is_location_on,
             latitude,
-            longitude
+            longitude,
+            language
         };
 
         console.log(user_data, "user_data");
