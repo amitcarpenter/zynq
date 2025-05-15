@@ -20,7 +20,7 @@ const configureApp = (app) => {
   app.use("/api", api_routes);
   app.use("/admin", admin_routes);
   app.use("/clinic", clinic_routes);
-  app.use("/web_user", web_user_routes);
+  app.use("/webuser", web_user_routes);
   
 };
 

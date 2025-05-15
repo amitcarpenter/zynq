@@ -4,11 +4,9 @@ import jwt from "jsonwebtoken";
 import * as apiModels from "../models/api.js";
 import { handleError } from "../utils/responseHandler.js";
 
-
 dotenv.config();
 
 const USER_JWT_SECRET = process.env.USER_JWT_SECRET;
-
 
 export const authenticateUser = async (req, res, next) => {
     try {

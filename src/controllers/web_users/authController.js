@@ -7,7 +7,11 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken"
 import * as webModels from "../../models/web_user.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
+import { fileURLToPath } from "url";
+import { sendEmail } from "../../services/send_email.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -22,7 +26,7 @@ export const login_web_user = async (req, res) => {
         const schema = Joi.object({
             email: Joi.string().min(5).max(255).email({ tlds: { allow: false } }).lowercase().required(),
             password: Joi.string().min(8).max(15).required(),
-            fcmToken: Joi.string().optional().allow("", null)
+            fcm_token: Joi.string().optional().allow("", null)
         });
 
         let language = 'en';
@@ -31,31 +35,80 @@ export const login_web_user = async (req, res) => {
 
         if (error) return joiErrorHandle(res, error);
 
-        const { email, password, fcmToken } = value;
+        const { email, password, fcm_token } = value;
 
         const [existingWebUser] = await webModels.get_web_user_by_email(email);
         if (!existingWebUser) {
             return handleError(res, 400, language, "CLINIC_NOT_FOUND");
         }
+        language = existingWebUser.language;
 
         const isPasswordValid = await bcrypt.compare(password, existingWebUser.password);
         if (!isPasswordValid) {
-            return handleError(res, 400, language,"INVALID_EMAIL_PASSWORD");
+            return handleError(res, 400, language, "INVALID_EMAIL_PASSWORD");
         }
 
         const token = jwt.sign({ web_user_id: existingWebUser.id }, WEB_JWT_SECRET, {
             expiresIn: JWT_EXPIRY
         });
+
+        return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", token);
+    } catch (error) {
+        console.error(error);
+        return handleError(res, 500, error.message);
+    }
+};
+
+
+export const forgot_password = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            email: Joi.string().email().required()
+        });
+
+        let language = 'en';
+
+        const { error, value } = schema.validate(req.body);
+        if (error) {
+            return joiErrorHandle(res, error); 
+        }
+
+        const { email } = value;
+
+        const [webUser] = await webModels.get_web_user_by_email(email);
+        if (!webUser) {
+            return handleError(res, 404, language, "USER_NOT_FOUND");
+        }
+
+        language = webUser.language;
+
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+        await webModels.update_reset_token(resetToken, resetTokenExpiry, email);
+
+        const resetLink = `${APP_URL}webuser/reset-password?token=${resetToken}`;
+        let emailTemplatePath;
+        if(language === "sv"){
+            emailTemplatePath = path.resolve(__dirname, "../../views/forgot_password/sv.ejs");
+        }else{
+            emailTemplatePath = path.resolve(__dirname, "../../views/forgot_password/en.ejs");
+        }
         
-        let adminId = existingWebUser.id
-        // await updateAdminFcmToken(fcmToken, adminId)
-        return res.status(200).json({
-            success: true,
-            status: 200,
-            existingWebUser,
-            message: "Msg.LOGIN_SUCCESSFUL",
-            token: token
-        })
+        const emailHtml = await ejs.renderFile(emailTemplatePath, { 
+            resetLink,
+            image_logo
+        });
+
+        const emailOptions = {
+            to: email,
+            subject: "Password Reset Request",
+            html: emailHtml
+        };
+
+        await sendEmail(emailOptions);
+        return handleSuccess(res, 200, language, "RESET_PASSWORD_EMAIL_SENT");
+
     } catch (error) {
         console.error(error);
         return handleError(res, 500, error.message);
@@ -64,50 +117,9 @@ export const login_web_user = async (req, res) => {
 
 export const render_forgot_password_page = (req, res) => {
     try {
-        return res.render("resetPasswordAdmin.ejs");
+        return res.render("reset_password/en.ejs");
     } catch (error) {
         return handleError(res, 500, error.message)
-    }
-};
-
-export const forgot_password = async (req, res) => {
-    try {
-        const forgotPasswordSchema = Joi.object({
-            email: Joi.string().email().required(),
-        });
-        const { error, value } = forgotPasswordSchema.validate(req.body);
-        if (error) {
-            return handleError(res, 400, error.details[0].message);
-        }
-        const { email } = value;
-        const [admin] = await get_admin_data_by_email(email);
-        if (!admin) {
-            return handleError(res, 404, Msg.ADMIN_NOT_FOUND);
-        }
-
-        if (admin.is_verified === false) {
-            return handleError(res, 400, Msg.VERIFY_EMAIL_FIRST);
-        }
-        const resetToken = crypto.randomBytes(32).toString("hex");
-        console.log(email);
-
-        const resetTokenExpiry = new Date(Date.now() + 3600000);
-
-        const update_admin_datad = await update_admin_data(resetToken, resetTokenExpiry, email)
-        console.log(update_admin_datad, "update_admin_datad");
-
-        const resetLink = `${req.protocol}://${req.get("host")}/api/admin/reset-password?token=${resetToken}`;
-        const emailTemplatePath = path.resolve(__dirname, "../views/forgotPasswordAdmin.ejs");
-        const emailHtml = await ejs.renderFile(emailTemplatePath, { resetLink, image_logo });
-        const emailOptions = {
-            to: email,
-            subject: "Password Reset Request",
-            html: emailHtml,
-        };
-        await sendEmail(emailOptions);
-        return handleSuccess(res, 200, Msg.PASSWORD_RESET_LINK_SENT(email));
-    } catch (error) {
-        return handleError(res, 500, error.message);
     }
 };
 
@@ -151,85 +163,6 @@ export const reset_password = async (req, res) => {
 };
 
 export const render_success_reset = (req, res) => {
-    return res.render("successReset.ejs")
+    return res.render("reset_password/en.ejs")
 }
 
-export const getProfile = async (req, res) => {
-    try {
-        const userReq = req.user;
-        const [user] = await webModels.get_web_user_by_id(userReq.id)
-        if (!user) {
-            return handleError(res, 404, "NOT_FOUND");
-        }
-        return handleSuccess(res, 200,'en', "USER_REGISTER_SUCCESS", user);
-
-    } catch (error) {
-        console.error("Error in getProfile:", error);
-        return handleError(res, 500,"en", error.message);
-    }
-};
-
-export const updateProfile = async (req, res) => {
-    try {
-        const updateProfileSchema = Joi.object({
-            full_name: Joi.string().required(),
-            mobile_number: Joi.string().required(),
-        });
-
-        const { error, value } = updateProfileSchema.validate(req.body);
-        if (error) {
-            return handleError(res, 400, error.details[0].message);
-        }
-
-        const { full_name, mobile_number } = value;
-        const adminReq = req.admin;
-        const [admin] = await get_admin_data_by_id(adminReq.id)
-        if (!admin) {
-            return handleError(res, 404, Msg.ADMIN_NOT_FOUND);
-        }
-        let profile_image = admin.profile_image;
-        if (req.file) {
-            profile_image = req.file.filename;
-        }
-        console.log(profile_image);
-
-
-        const update_profile = await update_admin_profile(full_name, profile_image, mobile_number, adminReq.id)
-
-        return handleSuccess(res, 200, "Profile updated successfully");
-    } catch (error) {
-        return handleError(res, 500, error.message);
-    }
-};
-
-export const changePassword = async (req, res) => {
-    try {
-        const { currentPassword, newPassword } = req.body;
-
-        if (!currentPassword || !newPassword || newPassword.length < 8) {
-            return handleError(res, 400, Msg.CUREENT_NEW_REQUIERED);
-        }
-        const admin = req.admin;
-        if (!admin) {
-            return handleError(res, 404, Msg.ADMIN_NOT_FOUND);
-        }
-
-        const isMatch = await bcrypt.compare(currentPassword, admin.password);
-        if (!isMatch) {
-            return handleError(res, 400, Msg.CURRENT_PASSWORD_INCORRECT);
-        }
-
-        if (admin.show_password === newPassword) {
-            return handleError(res, 400, Msg.PASSWORD_CAN_NOT_BE_SAME);
-        }
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-
-        const update_admin = await update_admin_password(hashedPassword, newPassword, admin.id)
-
-        return handleSuccess(res, 200, Msg.PASSWORD_CHANGED_SUCCESSFULLY);
-    } catch (error) {
-        return handleError(res, 500, error.message);
-    }
-};
