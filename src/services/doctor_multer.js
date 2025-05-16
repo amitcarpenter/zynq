@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
 
@@ -9,7 +10,6 @@ const createStorageWithSubfolder = (subfolder) => {
     return multer.diskStorage({
         destination: function (req, file, cb) {
             const uploadDir = path.join(__dirname, '../uploads/doctor', subfolder);
-            const fs = require('fs');
             if (!fs.existsSync(uploadDir)) {
                 fs.mkdirSync(uploadDir, { recursive: true });
             }
@@ -33,11 +33,11 @@ export const uploadFilesTo = (subfolder = 'general', fieldName = 'file', maxCoun
     return upload.array(fieldName, maxCount);
 };
 
-export const uploadFieldsTo = (fields) => {
+export const uploadCertificationFieldsTo = (fields) => {
     const multerFieldsConfig = fields.map(field => ({
         name: field.name,
         maxCount: field.maxCount || 1,
     }));
-    const upload = multer({ storage: createStorageWithSubfolder('general') }); // Default storage
+    const upload = multer({ storage: createStorageWithSubfolder('certifications') }); // Default storage
     return upload.fields(multerFieldsConfig);
 };
