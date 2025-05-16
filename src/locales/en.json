@@ -35,5 +35,6 @@
     "NEW_PASSWORD_REQUIRED": "New password is required",
     "PASSWORD_UPDATE_SUCCESS": "Password updated successfully",
     "PASSWORD_UPDATE_FAILED": "Password update failed",
-    "CLINIC_PROFILE_FETCHED": "Clinic profile fetched successfully"
+    "CLINIC_PROFILE_FETCHED": "Clinic profile fetched successfully",
+    "DOCTOR_PERSONAL_DETAILS_ADDED":"Personal Details Added Successfully"
 }
