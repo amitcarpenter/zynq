@@ -2,6 +2,8 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import * as webModels from "../models/web_user.js";
+import * as doctorModels from "../models/doctor.js";
+import * as clinicModels from "../models/clinic.js";
 import { handleError } from "../utils/responseHandler.js";
 
 dotenv.config();
@@ -40,12 +42,28 @@ export const authenticate = (allowedRoles = []) => {
 
             const userRole = user.role_name;
 
+            console.log("user",user)
+
             if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
                 return handleError(res, 403, 'en', "ACCESS_DENIED");
             }
+            if (userRole === 'DOCTOR') {
+                const [doctorData] = await doctorModels.get_doctor_by_zynquser_id(user.id);
+                if (doctorData) {
+                    user.doctorData = doctorData
+                    user.clinicData = {}
+                }
+            }
+
+            if (userRole === 'CLINIC') {
+                const [clinicData] = await clinicModels.get_clinic_by_zynq_user_id(user.id);
+                if (clinicData) {
+                    user.clinicData = clinicData
+                    user.doctorData = {}
+                }
+            }
+
             req.user = user;
-
-
             next();
 
         } catch (error) {

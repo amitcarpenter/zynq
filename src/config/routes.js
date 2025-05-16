@@ -8,6 +8,7 @@ import api_routes from "../routes/api.js"
 import admin_routes from "../routes/admin.js";
 import clinic_routes from "../routes/clinic.js";
 import web_user_routes from "../routes/web_user.js";
+import doctor_routes from "../routes/doctor.js";
 
 
 //==================================== configureApp ==============================
@@ -21,6 +22,7 @@ const configureApp = (app) => {
   app.use("/admin", admin_routes);
   app.use("/clinic", clinic_routes);
   app.use("/webuser", web_user_routes);
+  app.use("/doctor", doctor_routes);
   
 };
 

@@ -38,6 +38,7 @@ export const login_web_user = async (req, res) => {
         const { email, password, fcm_token } = value;
 
         const [existingWebUser] = await webModels.get_web_user_by_email(email);
+        console.log("existingWebUser",existingWebUser)
         if (!existingWebUser) {
             return handleError(res, 400, language, "CLINIC_NOT_FOUND");
         }
