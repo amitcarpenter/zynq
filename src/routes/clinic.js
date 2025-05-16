@@ -14,9 +14,9 @@ const router = express.Router();
 
 
 //==================================== AUTH ==============================
-router.get("/get-profile",authenticate(['CLINIC','DOCTOR']), authControllers.getProfile);
-router.post("/update-profile", authControllers.updateProfile);
-router.post("/change-password", authControllers.changePassword);
+router.get("/get-profile", authenticate(['CLINIC', 'DOCTOR']), authControllers.getProfile);
+router.post("/onboard-clinic", authenticate(['CLINIC']), uploadMultipleFiles, authControllers.onboardClinic);
+
 
 
 export default router;
