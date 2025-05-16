@@ -42,8 +42,6 @@ export const authenticate = (allowedRoles = []) => {
 
             const userRole = user.role_name;
 
-            console.log("user",user)
-
             if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
                 return handleError(res, 403, 'en', "ACCESS_DENIED");
             }
@@ -51,7 +49,8 @@ export const authenticate = (allowedRoles = []) => {
                 const [doctorData] = await doctorModels.get_doctor_by_zynquser_id(user.id);
                 if (doctorData) {
                     user.doctorData = doctorData
-                    user.clinicData = {}
+                }else{
+                    return handleError(res, 404, 'en', "DOCTOR_NOT_FOUND");
                 }
             }
 
@@ -59,7 +58,8 @@ export const authenticate = (allowedRoles = []) => {
                 const [clinicData] = await clinicModels.get_clinic_by_zynq_user_id(user.id);
                 if (clinicData) {
                     user.clinicData = clinicData
-                    user.doctorData = {}
+                }else{
+                    return handleError(res, 404, 'en', "CLINIC_NOT_FOUND");
                 }
             }
 
