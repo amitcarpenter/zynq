@@ -21,7 +21,7 @@
     "SCAN_HISTORY_DATA": "Face Scan Data Retrived Successfully",
     "INTERNAL_SERVER_ERROR": "internal server error",
     "CLINIC_IMPORT": "Clinics imported successfully",
-    "CSV_REQUIRED": "CSV file is required", 
+    "CSV_REQUIRED": "CSV file is required",
     "CLINIC_NOT_FOUND": "Clinic Not Found",
     "SCAN_HISTORY_NOT_FOUND": "Scan History Not Found",
     "INVALID_EMAIL_PASSWORD": "Invalid email or password",
@@ -36,5 +36,10 @@
     "PASSWORD_UPDATE_SUCCESS": "Password updated successfully",
     "PASSWORD_UPDATE_FAILED": "Password update failed",
     "CLINIC_PROFILE_FETCHED": "Clinic profile fetched successfully",
-    "DOCTOR_PERSONAL_DETAILS_ADDED":"Personal Details Added Successfully"
+    "DOCTOR_PERSONAL_DETAILS_ADDED": "Personal Details Added Successfully",
+    "FAILED_TO_ADD_PERSONAL_DETAILS": "Failed to add Personal Details",
+    "DOCTOR_PROFILE_INFO_ADDED": "DOCTOR_PROFILE_INFO_ADDED",
+    "EXPERTISE_UPDATED": "Expertise Updated Successfully",
+    "FEE_AVAILABILITY_UPDATED": "Fee and Availability Updated",
+    "DOCTOR_PROFILE_RETRIEVED":"Doctor Profile Data"
 }
