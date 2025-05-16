@@ -41,8 +41,9 @@ CREATE TABLE tbl_certification_type (
 CREATE TABLE tbl_clinic_documents (
   clinic_document_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
-  document_type enum('legal','certification') NOT NULL,
+  document_type varchar(255) NOT NULL,
   file_url varchar(500) NOT NULL,
+  certification_type_id varchar(36) NULL,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
