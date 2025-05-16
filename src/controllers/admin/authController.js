@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import * as apiModels from "../../models/api.js";
 import * as adminModels from "../../models/admin.js";
 import { sendEmail } from "../../services/send_email.js";
-import { generateAccessToken } from "../../utils/user_helper.js";
+import { generateAccessToken, generateAccessTokenVerify } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 
 dotenv.config();
@@ -15,12 +15,14 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const image_logo = process.env.LOGO_URL
+
 export const login = async (req, res) => {
     try {
         const loginSchema = Joi.object({
             email: Joi.string().email().required(),
             password: Joi.string().required(),
-            fcm_token: Joi.string().required()
+            fcm_token: Joi.string().required().allow(null, '')
         });
 
         const { error, value } = loginSchema.validate(req.body);
@@ -29,28 +31,30 @@ export const login = async (req, res) => {
         const { email, password, fcm_token } = value;
 
         const findEmail = await adminModels.findEmail(email);
-        if (!findEmail) return handleError(res, 404, "en", "USER_NOT_FOUND_OR_INVALID_EMAIL");
+        if (!findEmail.length) return handleError(res, 404, "en", "User not found or invalid email.");
 
         const user = findEmail[0];
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return handleError(res, 401, "en", "INVALID_CREDENTIALS");
+        if (!isMatch) return handleError(res, 401, "en", "Incorrect password.");
 
         const token = generateAccessToken({ id: user.admin_id });
 
         await adminModels.updateData(user.admin_id, token, fcm_token);
 
-        return handleSuccess(res, 200, "en", "LOGIN_SUCCESS", {
+        return handleSuccess(res, 200, "en", "Login successful.", {
             token,
             user: {
                 id: user.admin_id,
                 name: user.full_name,
-                email: user.email
+                email: user.email,
+                phone: user.mobile_number,
+                profile_image: process.env.APP_URL + user.profile_image
             },
         });
     } catch (error) {
-        console.error("internal E", error);
-        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+        console.error("Login error:", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
     }
 };
 
@@ -66,7 +70,7 @@ export const forgotPassword = async (req, res) => {
         const { email } = value;
 
         const userResult = await adminModels.findEmail(email);
-        if (!userResult || userResult.length === 0) return handleError(res, 404, 'en', 'USER_NOT_FOUND_OR_INVALID_EMAIL');
+        if (!userResult || userResult.length === 0) return handleError(res, 404, 'en', 'No account found with this email address.');
 
         const user = userResult[0];
 
@@ -74,17 +78,17 @@ export const forgotPassword = async (req, res) => {
 
         await adminModels.updateData(user.admin_id, token, user.fcm_token);
 
-        const resetLink = process.env.LOCAL_APP_URL + `admin/reset-password/${token}`;
+        const resetLink = `${process.env.LOCAL_APP_URL}admin/reset-password/${token}`;
 
-        const html = await ejs.renderFile(path.join(__dirname, "../../views/resetPasswordAdmin.ejs"), { resetLink });
+        const html = await ejs.renderFile(path.join(__dirname, "../../views/ZYNQ_all_mail-template/forgot-password.ejs"), { image_logo, resetLink });
 
         await sendEmail({
             to: email,
-            subject: "Reset Your Password",
+            subject: "Password Reset Request",
             html,
         });
 
-        return handleSuccess(res, 200, "en", "RESET_LINK_SENT_IN_EMAIL");
+        return handleSuccess(res, 200, "en", "A password reset link has been sent to your email.");
     } catch (error) {
         console.error(error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
@@ -101,7 +105,13 @@ export const renderResetPasswordPage = async (req, res) => {
 
     const { token } = value;
 
-    res.render("forgetPasswordAdmin.ejs", { token });
+    const decoded = generateAccessTokenVerify(token);
+    if (!decoded || !decoded.id) return res.status(400).render("errorPage.ejs", { message: "Invalid or expired reset token." });
+
+    const user = await adminModels.findById(decoded.admin_id);
+    if (!user) return res.status(404).render("errorPage.ejs", { message: "User not found or token is invalid." });
+
+    res.render("Zynq-forgot-password/forgot-password-zynq.ejs");
 };
 
 export const resetPassword = async (req, res) => {
@@ -110,24 +120,21 @@ export const resetPassword = async (req, res) => {
     if (new_password !== confirm_password) {
         return res.send("Passwords do not match.");
     }
-
-    const result = await db.query(
-        "SELECT * FROM tbl_admin WHERE reset_token = ? AND reset_token_expiry > NOW()",
-        [token]
-    );
-
-    if (!result || result[0].length === 0) {
-        return res.send("Invalid or expired token.");
-    }
+    const decoded = generateAccessTokenVerify(token);
+    if (!decoded || !decoded.id) return res.status(400).render("errorPage.ejs", { message: "Invalid or expired reset token." });
 
     const hashedPassword = await bcrypt.hash(new_password, 10);
 
-    await db.query(
-        "UPDATE tbl_admin SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?",
-        [hashedPassword, token]
-    );
+    await adminModels.updatePassword(decoded.admin_id, hashedPassword)
 
-    res.send("Password reset successful. You can now login.");
+    res.json({
+        message: "Password reset successful. You can now login.",
+        redirectUrl: "/admin/success-change"
+    });
+};
+
+export const successChange = async (req, res) => {
+    res.render("success_reset/en.ejs");
 };
 
 export const login_with_mobile = async (req, res) => {
