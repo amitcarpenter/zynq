@@ -8,12 +8,15 @@ import * as userControllers from "../controllers/admin/userController.js";
 import * as clinicControllers from "../controllers/admin/clinicController.js";
 import * as doctorControllers from "../controllers/admin/doctorController.js";
 import { upload } from '../services/multer.js';
+import { authenticate } from '../middleware/web_user_auth.js';
 
 //==================================== Authentication ==============================
 router.post('/login', authControllers.login);
 router.post('/forgot-password', authControllers.forgotPassword);
 router.get('/reset-password/:token', authControllers.renderResetPasswordPage);
 router.post('/reset-password', authControllers.resetPassword);
+router.get('/success-change', authControllers.successChange);
+router.get('/get-profile', authenticate, authControllers.successChange);
 
 //==================================== Dashboard ==============================
 router.get('/get-dashboard', dashboardControllers.get_dashboard);

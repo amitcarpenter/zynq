@@ -13,15 +13,30 @@ export const findEmail = async (email) => {
 
 export const updateData = async (admin_id, token, fcm_token) => {
     try {
-        return await db.query(
-            'UPDATE `tbl_admin` SET jwt_token = ?, fcm_token = ? WHERE admin_id = ?',
-            [token, fcm_token, admin_id]
-        );
+        return await db.query('UPDATE `tbl_admin` SET jwt_token = ?, fcm_token = ? WHERE admin_id = ?', [token, fcm_token, admin_id]);
     } catch (error) {
         console.error("Update Error:", error.message);
         throw new Error("Failed to update admin token.");
     }
 };
+
+export const findById = async (admin_id) => {
+    try {
+        return await db.query('SELECT * FROM `tbl_admin` WHERE admin_id = ?', [admin_id])
+    } catch (error) {
+        console.error("Update Error:", error.message);
+        throw new Error("Failed to update admin token.");
+    }
+};
+
+export const updatePassword = async (admin_id, password) => {
+    try {
+        return await db.query('UPDATE `tbl_admin` SET password = ? WHERE admin_id = ?', [password, admin_id]);
+    } catch (error) {
+        console.error("Update Error:", error.message);
+        throw new Error("Failed to update password.");
+    }
+}
 
 //======================================= Dashboard =========================================
 

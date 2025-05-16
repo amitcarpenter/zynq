@@ -26,14 +26,19 @@ export const generateAccessToken = (payload) => {
     return jwt.sign(payload, USER_JWT_SECRET, { expiresIn: JWT_EXPIRY });
 };
 
+export const generateAccessTokenVerify = (payload) => {
+    const USER_JWT_SECRET = process.env.USER_JWT_SECRET;
+    return jwt.verify(payload, USER_JWT_SECRET);
+};
+
 export const generateToken = () => {
     return Math.random().toString(36).substr(2, 12);
 }
 
 export const generatePassword = (email) => {
-  
+
     const username = email.split('@')[0];
-    const firstName = username.split('.')[0]; 
+    const firstName = username.split('.')[0];
 
     const upperCaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const lowerCaseChars = 'abcdefghijklmnopqrstuvwxyz';
@@ -45,15 +50,15 @@ export const generatePassword = (email) => {
     const randomNumber = numberChars.charAt(Math.floor(Math.random() * numberChars.length));
     const randomSpecial = specialChars.charAt(Math.floor(Math.random() * specialChars.length));
 
-    let basePassword = firstName.slice(0, 4); 
+    let basePassword = firstName.slice(0, 4);
 
     const combined = basePassword + randomUpperCase + randomLowerCase + randomNumber + randomSpecial;
 
     const shuffledPassword = combined
         .split('')
-        .sort(() => Math.random() - 0.5)  
+        .sort(() => Math.random() - 0.5)
         .join('');
 
-    return shuffledPassword.slice(0, 8);  
+    return shuffledPassword.slice(0, 8);
 };
 
