@@ -14,12 +14,12 @@ const image_logo = process.env.LOGO_URL;
 export const addPersonalInformation = async (req, res) => {
     try {
         const schema = Joi.object({
-            name: Joi.string().min(3).max(255).required(),
-            phone: Joi.string().min(3).max(255).required(),
-            age: Joi.string().min(3).max(255).required(),
-            address: Joi.string().min(3).max(255).required(),
-            gender: Joi.string().min(3).max(255).required(),
-            biography: Joi.string().optional()
+            name: Joi.string().max(255).required(),
+            phone: Joi.string().max(255).required(),
+            age: Joi.string().max(255).required(),
+            address: Joi.string().max(255).required(),
+            gender: Joi.string().max(255).required(),
+            biography: Joi.string().optional().allow('')
         });
         let language = 'en';
 
@@ -248,13 +248,12 @@ export const getDoctorProfile = async (req, res) => {
 export const editPersonalInformation = async (req, res) => {
     try {
         const schema = Joi.object({
-            name: Joi.string().min(3).max(255).optional(),
-            phone: Joi.string().min(3).max(255).optional(),
-            age: Joi.string().min(3).max(255).optional(),
-            address: Joi.string().min(3).max(255).optional(),
-            gender: Joi.string().min(3).max(255).optional(),
-            biography: Joi.string().optional()
-
+            name: Joi.string().max(255).optional(),
+            phone: Joi.string().max(255).optional(),
+            age: Joi.string().max(255).optional(),
+            address: Joi.string().max(255).optional(),
+            gender: Joi.string().max(255).optional(),
+            biography: Joi.string().optional().allow('')
         });
         let language = 'en';
 
