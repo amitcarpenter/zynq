@@ -159,7 +159,8 @@ export const onboardClinic = async (req, res) => {
             zynq_user_id, clinic_name, org_number, email, mobile_number,
             address, street_address, city, state, zip_code, latitude, longitude,
             treatments, clinic_timing, website_url, clinic_description,
-            equipments, skin_types, severity_levels, fee_range, language, form_stage
+            equipments, skin_types, severity_levels, fee_range, language, form_stage,
+            ivo_registration_number, hsa_id
         } = value;
 
         language = language || "en";
@@ -174,22 +175,22 @@ export const onboardClinic = async (req, res) => {
 
 
         const clinicData = buildClinicData({
-            zynq_user_id : zynq_user_id || clinic_data.zynq_user_id,
-            clinic_name : clinic_name || clinic_data.clinic_name,   
-            org_number : org_number || clinic_data.org_number,
-            email : email || clinic_data.email,
-            mobile_number : mobile_number || clinic_data.mobile_number,
-            address : address || clinic_data.address,
-            fee_range : fee_range || clinic_data.fee_range,
-            website_url : website_url || clinic_data.website_url,
-            clinic_description : clinic_description || clinic_data.clinic_description,
-            language : language || clinic_data.language,
-            clinic_logo : clinic_logo ? clinic_logo : clinic_data.clinic_logo,
-            form_stage : form_stage || clinic_data.form_stage,
-            ivo_registration_number : ivo_registration_number || clinic_data.ivo_registration_number,
-            hsa_id : hsa_id || clinic_data.hsa_id           
+            zynq_user_id: zynq_user_id || clinic_data.zynq_user_id,
+            clinic_name: clinic_name || clinic_data.clinic_name,
+            org_number: org_number || clinic_data.org_number,
+            email: email || clinic_data.email,
+            mobile_number: mobile_number || clinic_data.mobile_number,
+            address: address || clinic_data.address,
+            fee_range: fee_range || clinic_data.fee_range,
+            website_url: website_url || clinic_data.website_url,
+            clinic_description: clinic_description || clinic_data.clinic_description,
+            language: language || clinic_data.language,
+            clinic_logo: clinic_logo ? clinic_logo : clinic_data.clinic_logo,
+            form_stage: form_stage || clinic_data.form_stage,
+            ivo_registration_number: ivo_registration_number || clinic_data.ivo_registration_number,
+            hsa_id: hsa_id || clinic_data.hsa_id
         });
-  
+
 
         if (clinic_data) {
             await clinicModels.updateClinicData(clinicData, clinic_data.clinic_id);
@@ -211,11 +212,12 @@ export const onboardClinic = async (req, res) => {
                 }
             });
         }
-
-        await clinicModels.insertClinicLocation({
-            clinic_id, street_address, city, state,
-            zip_code, latitude, longitude
-        });
+        if (street_address && city && state && zip_code && latitude && longitude) {
+            await clinicModels.insertClinicLocation({
+                clinic_id, street_address, city, state,
+                zip_code, latitude, longitude
+            });
+        }
 
         await Promise.all([
             treatments && clinicModels.insertClinicTreatments(treatments, clinic_id),

@@ -34,7 +34,7 @@ export const get_all_doctors = async (req, res) => {
             const certifications = await userModels.getDoctorCertifications(doctor.doctor_id);
             certifications.forEach(certification => {
                 if (certification.upload_path && !certification.upload_path.startsWith('http')) {
-                    certification.upload_path = `${APP_URL}/doctors/certifications/${certification.upload_path}`;
+                    certification.upload_path = `${APP_URL}doctors/certifications/${certification.upload_path}`;
                 }
             });
             doctor.certifications = certifications || [];
