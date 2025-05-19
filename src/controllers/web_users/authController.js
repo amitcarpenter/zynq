@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken"
 import * as webModels from "../../models/web_user.js";
+import * as clinicModels from "../../models/clinic.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 import { fileURLToPath } from "url";
 import { sendEmail } from "../../services/send_email.js";
@@ -38,7 +39,6 @@ export const login_web_user = async (req, res) => {
         const { email, password, fcm_token } = value;
 
         const [existingWebUser] = await webModels.get_web_user_by_email(email);
-        console.log("existingWebUser",existingWebUser)
         if (!existingWebUser) {
             return handleError(res, 400, language, "CLINIC_NOT_FOUND");
         }
@@ -55,6 +55,11 @@ export const login_web_user = async (req, res) => {
 
         await webModels.update_jwt_token(token, existingWebUser.id);
         const [user_data] = await webModels.get_web_user_by_id(existingWebUser.id);
+        const [get_clinic] = await clinicModels.get_clinic_by_zynq_user_id(existingWebUser.id);
+        if (get_clinic) {
+            const form_stage = get_clinic.form_stage;
+            user_data.form_stage = form_stage;
+        }
 
         return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", user_data);
     } catch (error) {
