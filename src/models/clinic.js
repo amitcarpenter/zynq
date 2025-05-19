@@ -540,7 +540,11 @@ export const getDoctorAvailability = async (doctor_id) => {
 
 export const getDoctorCertifications = async (doctor_id) => {
     try {
-        const certifications = await db.query('SELECT * FROM tbl_doctor_certification WHERE doctor_id = ?', [doctor_id]);
+        const certifications = await db.query(`
+            SELECT c.*, ct.* 
+            FROM tbl_doctor_certification c
+            LEFT JOIN tbl_certification_type ct ON c.certification_type_id = ct.certification_type_id 
+            WHERE c.doctor_id = ?`, [doctor_id]);
         return certifications;
     }
     catch (error) {
