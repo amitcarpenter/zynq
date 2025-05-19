@@ -179,47 +179,66 @@ export const reset_password = async (req, res) => {
     }
 };
 
-// export const reset_password = async (req, res) => {
-//     try {
-//         const resetPasswordSchema = Joi.object({
-//             token: Joi.string().required(),
-//             newPassword: Joi.string().min(8).required().messages({
-//                 "string.min": "Password must be at least 8 characters long",
-//                 "any.required": "New password is required",
-//             }),
-//         });
-//         const { error, value } = resetPasswordSchema.validate(req.body);
-//         if (error) {
-//             return handleError(res, 400, error.details[0].message);
-//         }
-//         const { token, newPassword } = value;
-
-//         const [admin] = await get_admin_data_by(token)
-//         if (!admin) {
-//             return handleError(res, 400, Msg.INVALID_EXPIRED_TOKEN);
-//         }
-//         if (admin.show_password === newPassword) {
-//             return handleError(res, 400, Msg.PASSWORD_CAN_NOT_SAME);
-//         }
-
-//         const salt = await bcrypt.genSalt(10);
-//         const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-//         const update_result = await update_admin_data_by(hashedPassword, newPassword, admin.id)
-
-//         if (update_result.affectedRows > 0) {
-//             return handleSuccess(res, 200, Msg.PASSWORD_RESET_SUCCESS);
-//         } else {
-//             return handleError(res, 500, Msg.PASSWORD_RESET_FAILED);
-//         }
-//     } catch (error) {
-//         console.error("Error in reset password controller:", error);
-//         return handleError(res, 500, error.message);
-//     }
-// };
-
 export const render_success_reset = (req, res) => {
     return res.render("reset_password/en.ejs")
 }
+    
+export const set_password = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            new_password: Joi.string().required(),
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+
+        const { new_password } = value;
+
+        const [user] = await webModels.get_web_user_by_id(req.user.id);
+        if (!user) return handleError(res, 404, 'en', "USER_NOT_FOUND");
+
+
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        await webModels.update_web_user_password_set(hashedPassword, new_password, user.id);
+
+        return handleSuccess(res, 200, 'en', "PASSWORD_SET_SUCCESSFULLY");
+
+    } catch (error) {
+        console.error("Error setting password:", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+    }
+};
+
+export const change_password = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            current_password: Joi.string().required(),
+            new_password: Joi.string().required()
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        const { current_password, new_password } = value;
+
+        const [user] = await webModels.get_web_user_by_id(req.user.id);
+        if (!user) return handleError(res, 404, 'en', "USER_NOT_FOUND");
+
+        const isPasswordValid = await bcrypt.compare(current_password, user.password);
+        if (!isPasswordValid) return handleError(res, 400, 'en', "PASSWORD_INCORRECT");
+
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        await webModels.update_web_user_password_set(hashedPassword, new_password, user.id);
+
+        return handleSuccess(res, 200, 'en', "PASSWORD_CHANGED_SUCCESSFULLY");
+
+    } catch (error) {
+        console.error("Error changing password:", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+    }
+};
 
 

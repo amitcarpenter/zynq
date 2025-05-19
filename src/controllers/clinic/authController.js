@@ -10,7 +10,7 @@ import * as webModels from "../../models/web_user.js";
 import { sendEmail } from "../../services/send_email.js";
 import { generateAccessToken, generateVerificationLink } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
-import twilio from 'twilio';
+import axios from 'axios';
 
 
 dotenv.config();
@@ -21,9 +21,10 @@ const WEB_JWT_SECRET = process.env.WEB_JWT_SECRET;
 
 
 const daySchema = Joi.object({
-    open: Joi.string().allow('').required(),
-    close: Joi.string().allow('').required()
+    open: Joi.string().allow('').optional().allow('', null),
+    close: Joi.string().allow('').optional().allow('', null)
 });
+
 
 
 export const getProfile = async (req, res) => {
@@ -75,14 +76,14 @@ const calculateProfileCompletion = (data) => {
     const fields = [
         'zynq_user_id', 'clinic_name', 'org_number', 'email',
         'mobile_number', 'address', 'fee_range', 'website_url',
-        'clinic_description'
+        'clinic_description', 'clinic_logo', 'form_stage'
     ];
     const percentPerField = 100 / fields.length;
     return fields.reduce((total, field) =>
         total + (data[field] ? percentPerField : 0), 0);
 };
 
-const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_number, address, fee_range, website_url, clinic_description, clinic_logo }) => {
+const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_number, address, fee_range, website_url, clinic_description, clinic_logo, form_stage }) => {
     const data = {
         zynq_user_id,
         clinic_name,
@@ -97,7 +98,8 @@ const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_
         fee_range,
         website_url,
         clinic_description,
-        clinic_logo
+        clinic_logo,
+        form_stage
     };
     data.profile_completion_percentage = Math.round(calculateProfileCompletion(data));
     return data;
@@ -107,34 +109,35 @@ export const onboardClinic = async (req, res) => {
     try {
         const clinicSchema = Joi.object({
             zynq_user_id: Joi.string().required(),
-            clinic_name: Joi.string().required(),
-            clinic_description: Joi.string().required(),
-            org_number: Joi.string().required(),
-            email: Joi.string().email().required(),
-            language: Joi.string().valid('en', 'sv').required(),
-            mobile_number: Joi.string().required(),
-            address: Joi.string().required(),
-            street_address: Joi.string().required(),
-            city: Joi.string().required(),
-            state: Joi.string().required(),
-            zip_code: Joi.string().required(),
-            latitude: Joi.number().required(),
-            longitude: Joi.number().required(),
-            website_url: Joi.string().uri(),
-            fee_range: Joi.string().required(),
-            treatments: Joi.array().items(Joi.string()).required(),
+            clinic_name: Joi.string().optional().allow('', null),
+            clinic_description: Joi.string().optional().allow('', null),
+            org_number: Joi.string().optional().allow('', null),
+            email: Joi.string().email().optional().allow('', null),
+            language: Joi.string().valid('en', 'sv').optional().allow('', null),
+            mobile_number: Joi.string().optional().allow('', null),
+            address: Joi.string().optional().allow('', null),
+            street_address: Joi.string().optional().allow('', null),
+            city: Joi.string().optional().allow('', null),
+            state: Joi.string().optional().allow('', null),
+            zip_code: Joi.string().optional().allow('', null),
+            latitude: Joi.number().optional().allow('', null),
+            longitude: Joi.number().optional().allow('', null),
+            website_url: Joi.string().uri().optional().allow('', null),
+            fee_range: Joi.string().optional().allow('', null),
+            treatments: Joi.array().items(Joi.string()).optional().allow('', null),
             clinic_timing: Joi.object({
-                monday: daySchema.required(),
-                tuesday: daySchema.required(),
-                wednesday: daySchema.required(),
-                thursday: daySchema.required(),
-                friday: daySchema.required(),
-                saturday: daySchema.required(),
-                sunday: daySchema.required(),
+                monday: daySchema.optional().allow('', null),
+                tuesday: daySchema.optional().allow('', null),
+                wednesday: daySchema.optional().allow('', null),
+                thursday: daySchema.optional().allow('', null),
+                friday: daySchema.optional().allow('', null),
+                saturday: daySchema.optional().allow('', null),
+                sunday: daySchema.optional().allow('', null),
             }).optional(),
-            equipments: Joi.array().items(Joi.string()).required(),
-            skin_types: Joi.array().items(Joi.string()).required(),
-            severity_levels: Joi.array().items(Joi.string()).required(),
+            equipments: Joi.array().items(Joi.string()).optional().allow('', null),
+            skin_types: Joi.array().items(Joi.string()).optional().allow('', null),
+            severity_levels: Joi.array().items(Joi.string()).optional().allow('', null),
+            form_stage: Joi.number().optional().allow('', null)
         });
 
         if (typeof req.body.clinic_timing === 'string') {
@@ -152,26 +155,42 @@ export const onboardClinic = async (req, res) => {
             zynq_user_id, clinic_name, org_number, email, mobile_number,
             address, street_address, city, state, zip_code, latitude, longitude,
             treatments, clinic_timing, website_url, clinic_description,
-            equipments, skin_types, severity_levels, fee_range, language
+            equipments, skin_types, severity_levels, fee_range, language, form_stage
         } = value;
 
         language = language || "en";
 
-        await clinicModels.validateClinicDoesNotExist(zynq_user_id);
 
         const uploadedFiles = req.files;
-        const clinic_logo = uploadedFiles.logo?.[0]?.filename;
+        console.log(uploadedFiles, "uploadedFiles");
+        const clinic_logo = uploadedFiles.find(file => file.fieldname === 'logo')?.filename;
 
-        await clinicModels.validateClinicDoesNotExist(zynq_user_id);
+        console.log(clinic_logo, "clinic_logo");
+        const [clinic_data] = await clinicModels.get_clinic_by_zynq_user_id(zynq_user_id);
+
 
         const clinicData = buildClinicData({
-            zynq_user_id, clinic_name, org_number, email, mobile_number,
-            address, fee_range, website_url, clinic_description, language,
-            clinic_logo
+            zynq_user_id : zynq_user_id || clinic_data.zynq_user_id,
+            clinic_name : clinic_name || clinic_data.clinic_name,   
+            org_number : org_number || clinic_data.org_number,
+            email : email || clinic_data.email,
+            mobile_number : mobile_number || clinic_data.mobile_number,
+            address : address || clinic_data.address,
+            fee_range : fee_range || clinic_data.fee_range,
+            website_url : website_url || clinic_data.website_url,
+            clinic_description : clinic_description || clinic_data.clinic_description,
+            language : language || clinic_data.language,
+            clinic_logo : clinic_logo ? clinic_logo : clinic_data.clinic_logo,
+            form_stage : form_stage || clinic_data.form_stage
         });
+  
 
+        if (clinic_data) {
+            await clinicModels.updateClinicData(clinicData, clinic_data.clinic_id);
+        } else {
+            await clinicModels.insertClinicData(clinicData);
+        }
 
-        await clinicModels.insertClinicData(clinicData);
         const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(zynq_user_id);
         const clinic_id = clinic.clinic_id;
 
@@ -193,11 +212,11 @@ export const onboardClinic = async (req, res) => {
         });
 
         await Promise.all([
-            clinicModels.insertClinicTreatments(treatments, clinic_id),
-            clinicModels.insertClinicOperationHours(clinic_timing, clinic_id),
-            clinicModels.insertClinicEquipments(equipments, clinic_id),
-            clinicModels.insertClinicSkinTypes(skin_types, clinic_id),
-            clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id)
+            treatments && clinicModels.insertClinicTreatments(treatments, clinic_id),
+            clinic_timing && clinicModels.insertClinicOperationHours(clinic_timing, clinic_id),
+            equipments && clinicModels.insertClinicEquipments(equipments, clinic_id),
+            skin_types && clinicModels.insertClinicSkinTypes(skin_types, clinic_id),
+            severity_levels && clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id)
         ]);
 
         return handleSuccess(res, 201, language, "CLINIC_ONBOARDED_SUCCESSFULLY");
@@ -405,3 +424,27 @@ export const getCertificateType = async (req, res) => {
         return handleError(res, 500, "en", 'INTERNAL_SERVER_ERROR');
     }
 }
+
+
+export const searchLocation = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            input: Joi.string().required()
+        });
+
+        const { error, value } = schema.validate(req.query);
+        if (error) {
+            return joiErrorHandle(error, res);
+        }
+        const { input } = value;
+        const googleApiKey = process.env.GOOGLE_API_KEY;
+        const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${googleApiKey}&input=${input}`;
+
+        const response = await axios.get(apiUrl);
+        return handleSuccess(res, 200, "en", "LOCATION_SEARCH_SUCCESS", response.data.predictions);
+
+    } catch (error) {
+        console.error("Error in searchLocationRequest:", error);
+        return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
+    }
+};
