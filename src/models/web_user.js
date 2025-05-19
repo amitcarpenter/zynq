@@ -71,3 +71,12 @@ export const update_web_user_password = async (password, show_password, reset_to
         throw new Error("Failed to update web user password.");
     }
 }
+
+export const update_onboarding_status = async (status, id) => {
+    try {
+        return await db.query(`UPDATE tbl_zqnq_users SET on_boarding_status = ? WHERE id = ?`, [status, id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+
+    }
+}
