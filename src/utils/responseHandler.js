@@ -2,7 +2,7 @@ import { getMessage } from './getMessage.js';
 
 
 export const handleError = (res, statusCode, lang = 'en', messageKey) => {
-  return res.status(200).send({
+  return res.status(statusCode).send({
     success: false,
     status: statusCode,
     message: getMessage(messageKey, lang)

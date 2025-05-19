@@ -37,20 +37,20 @@ export const authenticate = (allowedRoles = []) => {
             let [user] = await webModels.get_web_user_by_id(decodedToken.web_user_id)
 
             if (!user) {
-                return handleError(res, 404, 'en', "USER_NOT_FOUND");
+                return handleError(res, 401, 'en', "USER_NOT_FOUND");
             }
 
             const userRole = user.role_name;
 
             if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-                return handleError(res, 403, 'en', "ACCESS_DENIED");
+                return handleError(res, 401, 'en', "ACCESS_DENIED");
             }
             if (userRole === 'DOCTOR') {
                 const [doctorData] = await doctorModels.get_doctor_by_zynquser_id(user.id);
                 if (doctorData) {
                     user.doctorData = doctorData
                 }else{
-                    return handleError(res, 404, 'en', "DOCTOR_NOT_FOUND");
+                    return handleError(res, 401, 'en', "DOCTOR_NOT_FOUND");
                 }
             }
 
@@ -59,7 +59,7 @@ export const authenticate = (allowedRoles = []) => {
                 if (clinicData) {
                     user.clinicData = clinicData
                 }else{
-                    return handleError(res, 404, 'en', "CLINIC_NOT_FOUND");
+                    return handleError(res, 401, 'en', "CLINIC_NOT_FOUND");
                 }
             }
 
@@ -68,7 +68,7 @@ export const authenticate = (allowedRoles = []) => {
 
         } catch (error) {
             console.error("Authentication error:", error);
-            return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+            return handleError(res, 401, 'en', "INTERNAL_SERVER_ERROR");
         }
     };
 };

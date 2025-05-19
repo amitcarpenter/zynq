@@ -34,6 +34,7 @@ export const addProduct = async (req, res) => {
             benefit_text: Joi.string().optional().allow('', null),
             how_to_use: Joi.string().optional().allow('', null),
             ingredients: Joi.string().optional().allow('', null),
+            stock: Joi.number().optional().allow('', null),
         });
 
         const { error, value } = schema.validate(req.body);
@@ -66,13 +67,12 @@ export const addProduct = async (req, res) => {
     }
 };
 
-
 export const getAllProducts = async (req, res) => {
     try {
         const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(req.user.id);
         if (!clinic) {
             return handleError(res, 404, "en", "CLINIC_NOT_FOUND");
-            }   
+        }
 
         const products = await clinicModels.get_all_products(clinic.clinic_id);
 
@@ -80,7 +80,7 @@ export const getAllProducts = async (req, res) => {
             return handleError(res, 404, "en", "NO_PRODUCTS_FOUND");
         }
         products.forEach(product => {
-            if(product.image_url && !product.image_url.startsWith('http')) {
+            if (product.image_url && !product.image_url.startsWith('http')) {
                 product.image_url = APP_URL + '/clinic/product_image/' + product.image_url;
             }
         });
@@ -105,36 +105,36 @@ export const updateProduct = async (req, res) => {
             benefit_text: Joi.string().optional().allow('', null),
             how_to_use: Joi.string().optional().allow('', null),
             ingredients: Joi.string().optional().allow('', null),
+            stock: Joi.number().optional().allow('', null),
         });
 
         const { error, value } = schema.validate(req.body);
         if (error) return joiErrorHandle(res, error);
-   
+
 
         const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(req.user.id);
         if (!clinic) {
-            return handleError(res, 404, "en", "CLINIC_NOT_FOUND"); 
+            return handleError(res, 404, "en", "CLINIC_NOT_FOUND");
         }
 
         const [product] = await clinicModels.get_product_by_id(value.product_id);
         if (!product) {
             return handleError(res, 404, "en", "PRODUCT_NOT_FOUND");
-        }       
+        }
 
-        if(req.files.length > 0) {
+        if (req.files.length > 0) {
             const image_url = req.files[0].filename;
             value.image_url = image_url;
         }
 
         await clinicModels.updateProduct(value, product.product_id);
 
-        return handleSuccess(res, 200, "en", "PRODUCT_UPDATED_SUCCESSFULLY");       
+        return handleSuccess(res, 200, "en", "PRODUCT_UPDATED_SUCCESSFULLY");
     } catch (error) {
         console.error("Error in updateProduct:", error);
         return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
     }
 };
-
 
 export const deleteProduct = async (req, res) => {
     try {
@@ -148,7 +148,7 @@ export const deleteProduct = async (req, res) => {
         const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(req.user.id);
         if (!clinic) {
             return handleError(res, 404, "en", "CLINIC_NOT_FOUND");
-        }       
+        }
 
         const [product] = await clinicModels.get_product_by_id(value.product_id);
         if (!product) {
@@ -158,8 +158,8 @@ export const deleteProduct = async (req, res) => {
         await clinicModels.deleteProduct(value.product_id);
 
         return handleSuccess(res, 200, "en", "PRODUCT_DELETED_SUCCESSFULLY");
-        
+
     } catch (error) {
-        
+
     }
 }
