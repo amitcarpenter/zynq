@@ -6,9 +6,12 @@ import { authenticate } from '../middleware/web_user_auth.js';
 import { uploadCertificationFieldsTo, uploadFileTo } from '../services/doctor_multer.js';
 ;
 
-router.get("/get_profile", authenticate(['CLINIC','DOCTOR']), doctorController.getDoctorProfile);
 
-router.post("/add_personal_info",authenticate(['DOCTOR']), uploadFileTo('profile_images'),doctorController.addPersonalInformation);
+router.get("/get_profile", authenticate(['DOCTOR']), doctorController.getDoctorProfile);
+
+//======================================= Onboarding apis =========================================
+
+router.post("/add_personal_info", authenticate(['DOCTOR']), uploadFileTo('profile_images'), doctorController.addPersonalInformation);
 
 const uploadVariousFields = uploadCertificationFieldsTo([
     { name: 'medical_council', maxCount: 1, subfolder: 'certifications' },
@@ -16,11 +19,39 @@ const uploadVariousFields = uploadCertificationFieldsTo([
     { name: 'laser_safety', maxCount: 1, subfolder: 'certifications' },
 ]);
 
-router.post('/add_education_experience',authenticate(['DOCTOR']), uploadVariousFields, doctorController.addEducationAndExperienceInformation);
+router.post('/add_education_experience', authenticate(['DOCTOR']), uploadVariousFields, doctorController.addEducationAndExperienceInformation);
 
-router.post('/add_expertise',authenticate(['DOCTOR']), doctorController.addExpertise);
+router.post('/add_expertise', authenticate(['DOCTOR']), doctorController.addExpertise);
 
-router.post('/update_fee_availability',authenticate(['DOCTOR']), doctorController.updateConsultationFeeAndAvailability);
+router.post('/add_fee_availability', authenticate(['DOCTOR']), doctorController.addConsultationFeeAndAvailability);
+
+//======================================= Edit apis =========================================
+router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('profile_images'), doctorController.editPersonalInformation);
 
 
+router.post("/add_education", authenticate(['DOCTOR']), doctorController.addEducation);
+
+router.put("/edit_education", authenticate(['DOCTOR']), doctorController.editEducation);
+
+router.delete("/delete_education/:education_id", authenticate(['DOCTOR']), doctorController.deleteEducation);
+
+
+router.post("/add_experience", authenticate(['DOCTOR']), doctorController.addExperince);
+
+router.put("/edit_experience", authenticate(['DOCTOR']), doctorController.editExperience);
+
+router.delete("/delete_experience/:experience_id", authenticate(['DOCTOR']), doctorController.deleteExperience);
+
+
+router.post('/add_certification', authenticate(['DOCTOR']), uploadVariousFields, doctorController.addCertifications);
+router.put('/edit_certification', authenticate(['DOCTOR']), uploadFileTo('certifications'), doctorController.editCertification);
+router.delete('/delete_certification/:doctor_certification_id', authenticate(['DOCTOR']), doctorController.deleteCertification);
+
+
+// Expertise
+router.put("/edit_expertise", authenticate(['DOCTOR']), doctorController.editExpertise);
+
+router.post('/edit_fee_availability', authenticate(['DOCTOR']), doctorController.editConsultationFeeAndAvailability);
+
+router.get("/get_linked_clinics", authenticate(['DOCTOR']), doctorController.getLinkedClinics);
 export default router;

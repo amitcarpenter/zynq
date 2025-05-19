@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import { get_web_user_by_id } from "./web_user.js";
 
 
 export const get_doctor_by_zynquser_id = async (zynqUserId) => {
@@ -10,9 +11,9 @@ export const get_doctor_by_zynquser_id = async (zynqUserId) => {
     }
 };
 
-export const add_personal_details = async (zynqUserId, name, phone, age, address, gender, profile_image) => {
+export const add_personal_details = async (zynqUserId, name, phone, age, address, gender, profile_image, biography) => {
     try {
-        return await db.query(`INSERT INTO tbl_doctors (zynq_user_id, name, phone,age,address,gender, profile_image) VALUES (?, ?, ?, ?, ?, ?, ?)`, [zynqUserId, name, phone, age, address, gender, profile_image]);
+        return await db.query(`UPDATE  tbl_doctors SET name = ?, phone=? , age=?, address=?, gender=?, profile_image=?,biography=? where zynq_user_id = ? `, [name, phone, age, address, gender, profile_image, biography, zynqUserId]);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to add doctor personal details.");
@@ -37,18 +38,17 @@ export const add_education = async (doctorId, institute, degree, start_year, end
     }
 };
 
-export const update_education = async (educationId, institute, degree, startDate, endDate) => {
+export const update_education = async (educationId, institute, degree, start_year, end_year) => {
     try {
-        return await db.query(`UPDATE tbl_education SET institute = ?, degree = ?, start_date = ?, end_date = ? WHERE education_id = ?`, [institute, degree, startDate, endDate, educationId]);
+        return await db.query(`UPDATE tbl_doctor_educations SET institution = ?, degree = ?, start_year = ?, end_year = ? WHERE education_id = ?`, [institute, degree, start_year, end_year, educationId]);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to update education.");
     }
 };
-
 export const delete_education = async (educationId) => {
     try {
-        return await db.query(`DELETE FROM tbl_education WHERE education_id = ?`, [educationId]);
+        return await db.query(`DELETE FROM tbl_doctor_educations WHERE education_id = ?`, [educationId]);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to delete education.");
@@ -57,7 +57,7 @@ export const delete_education = async (educationId) => {
 
 export const get_doctor_education = async (doctorId) => {
     try {
-        return await db.query(`SELECT * FROM tbl_doctor_educations WHERE doctor_id = ?`, [doctorId]);
+        return await db.query(`SELECT * FROM tbl_doctor_educations WHERE doctor_id = ? ORDER BY end_year DESC, start_year DESC`, [doctorId]);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get doctor's education.");
@@ -75,7 +75,7 @@ export const add_experience = async (doctorId, organization, designation, startD
 
 export const update_experience = async (experienceId, organization, designation, startDate, endDate) => {
     try {
-        return await db.query(`UPDATE tbl_experience SET organization = ?, designation = ?, start_date = ?, end_date = ? WHERE experience_id = ?`, [organization, designation, startDate, endDate, experienceId]);
+        return await db.query(`UPDATE tbl_doctor_experiences SET organization = ?, designation = ?, start_date = ?, end_date = ? WHERE experience_id = ?`, [organization, designation, startDate, endDate, experienceId]);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to update experience.");
@@ -84,7 +84,7 @@ export const update_experience = async (experienceId, organization, designation,
 
 export const delete_experience = async (experienceId) => {
     try {
-        return await db.query(`DELETE FROM tbl_experience WHERE experience_id = ?`, [experienceId]);
+        return await db.query(`DELETE FROM tbl_doctor_experiences WHERE experience_id = ?`, [experienceId]);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to delete experience.");
@@ -93,7 +93,7 @@ export const delete_experience = async (experienceId) => {
 
 export const get_doctor_experience = async (doctorId) => {
     try {
-        return await db.query(`SELECT * FROM tbl_doctor_experiences WHERE doctor_id = ?`, [doctorId]);
+        return await db.query(`SELECT * FROM tbl_doctor_experiences WHERE doctor_id = ? ORDER BY end_date DESC, start_date DESC`, [doctorId]);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get doctor's experience.");
@@ -331,24 +331,17 @@ export const get_all_certification_types = async () => {
 export const get_doctor_profile = async (doctorId) => {
     try {
         const [doctor] = await db.query(`SELECT * FROM tbl_doctors WHERE doctor_id = ?`, [doctorId]);
+        const [mainUser] = await get_web_user_by_id(doctor.zynq_user_id);
         const education = await get_doctor_education(doctorId);
         const experience = await get_doctor_experience(doctorId);
         const treatments = await get_doctor_treatments(doctorId)
-        const skinTypes = await get_doctor_skin_types(doctorId)
-        const severityLevels = await get_doctor_severity_levels(doctorId)
-
+        const skinTypes = await get_doctor_skin_types(doctorId);
+        const severityLevels = await get_doctor_severity_levels(doctorId);
         const availability = await get_doctor_availability(doctorId);
         const certifications = await get_doctor_certifications(doctorId);
 
         return {
-            // doctor: {...doctor},
-            // education: education || [],
-            // experience: experience || [],
-            // treatments: treatments || [],
-            // skinTypes: skinTypes || [],
-            // severityLevels: severityLevels || [],
-            // availability: availability || [],
-            // certifications: certifications || [],
+            ...mainUser,
             ...doctor, education, experience, treatments, skinTypes, severityLevels, availability, certifications,
         };
     } catch (error) {
@@ -363,5 +356,46 @@ export const get_certification_type_by_filename = async (filename) => {
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to fetch doctor by zynq user ID.");
+    }
+};
+
+export const update_certification = async (upload_path, doctor_certification_id) => {
+    try {
+        return await db.query(`UPDATE tbl_doctor_certification SET upload_path = ? WHERE doctor_certification_id  = ?`, [upload_path, doctor_certification_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update experience.");
+    }
+};
+
+export const delete_certification = async (certificationId) => {
+    try {
+        return await db.query(`DELETE FROM tbl_doctor_certification WHERE doctor_certification_id = ?`, [certificationId]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete certification.");
+    }
+};
+
+export const get_clinics_data_by_doctor_id = async (doctorId) => {
+    try {
+        return await db.query(`
+            SELECT
+                c.*,
+                u.email
+            FROM
+                tbl_doctor_clinic_map dcm
+            JOIN
+                tbl_clinics c ON dcm.clinic_id = c.clinic_id
+            LEFT JOIN
+                tbl_zqnq_users u ON c.zynq_user_id = u.id
+            WHERE
+                dcm.doctor_id = ?
+            ORDER BY
+                dcm.assigned_at DESC
+        `, [doctorId]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch clinic data by doctor ID.");
     }
 };
