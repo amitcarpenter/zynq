@@ -114,12 +114,7 @@ export const update_clinic_timing = async (timing, clinic_id) => {
     }
 };
 
-export const validateClinicDoesNotExist = async (zynq_user_id) => {
-    const [existingClinic] = await get_clinic_by_zynq_user_id(zynq_user_id);
-    if (existingClinic) {
-        throw new Error("Clinic already exists.");
-    }
-};
+
 
 export const insertClinicData = async (clinicData) => {
     try {
@@ -520,3 +515,253 @@ export const getCertificateTypeByFileName = async (file_name) => {
     }
 };
 
+export const get_all_doctors = async () => {
+    try {
+        const doctors = await db.query('SELECT * FROM tbl_doctors ORDER BY created_at DESC');
+        return doctors;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctors.");
+    }
+};
+
+
+export const getDoctorAvailability = async (doctor_id) => {
+    try {
+        const availability = await db.query('SELECT * FROM tbl_doctor_availability WHERE doctor_id = ?', [doctor_id]);
+        return availability;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor availability.");
+    }
+};
+
+export const getDoctorCertifications = async (doctor_id) => {
+    try {
+        const certifications = await db.query('SELECT * FROM tbl_doctor_certification WHERE doctor_id = ?', [doctor_id]);
+        return certifications;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor certifications.");
+    }
+};
+
+export const getDoctorEducation = async (doctor_id) => {
+    try {
+        const education = await db.query('SELECT * FROM tbl_doctor_educations WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
+        return education;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor education.");
+    }
+};
+
+export const getDoctorExperience = async (doctor_id) => {
+    try {
+        const experience = await db.query('SELECT * FROM tbl_doctor_experiences WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
+        return experience;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor experience.");
+    }
+};
+
+export const getDoctorReviews = async (doctor_id) => {
+    try {
+        const reviews = await db.query('SELECT * FROM tbl_doctor_reviews WHERE doctor_id = ?', [doctor_id]);
+        return reviews;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor reviews.");
+    }
+};
+
+export const getDoctorSeverityLevels = async (doctor_id) => {
+    try {
+        const severityLevels = await db.query('SELECT * FROM tbl_doctor_severity_levels WHERE doctor_id = ?', [doctor_id]);
+        return severityLevels;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor severity levels.");
+    }
+};
+
+export const getDoctorSkinTypes = async (doctor_id) => {
+    try {
+        const skinTypes = await db.query('SELECT * FROM tbl_doctor_skin_types WHERE doctor_id = ?', [doctor_id]);
+        return skinTypes;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor skin types.");
+    }
+};
+
+export const getDoctorTreatments = async (doctor_id) => {
+    try {
+        const treatments = await db.query('SELECT * FROM tbl_doctor_treatments WHERE doctor_id = ?', [doctor_id]);
+        return treatments;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor treatments.");
+    }
+};
+
+
+export const create_doctor = async (doctorData) => {
+    try {
+        const result = await db.query('INSERT INTO tbl_doctors SET ?', [doctorData]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to create doctor.");
+    }
+};
+
+export const create_doctor_clinic_map = async (clinicMapData) => {
+    try {
+        const result = await db.query('INSERT INTO tbl_doctor_clinic_map SET ?', [clinicMapData]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to create doctor clinic map.");
+    }
+};
+
+export const get_doctor_by_zynq_user_id = async (zynq_user_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_doctors WHERE zynq_user_id = ?', [zynq_user_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor by zynq user id.");
+    }
+};
+
+export const get_all_doctors_by_clinic_id = async (clinic_id) => {
+    try {
+        const query = `
+            SELECT dcm.*, d.*
+            FROM tbl_doctor_clinic_map dcm
+            JOIN tbl_doctors d ON dcm.doctor_id = d.doctor_id
+            WHERE dcm.clinic_id = ?`;
+        const result = await db.query(query, [clinic_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch all doctors by clinic id.");
+    }
+};
+
+export const get_doctor_by_id = async (doctor_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_doctors WHERE doctor_id = ?', [doctor_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor by id.");
+    }
+};
+
+export const delete_doctor_clinic_map = async (doctor_id) => {
+    try {
+        const result = await db.query('DELETE FROM tbl_doctor_clinic_map WHERE doctor_id = ?', [doctor_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete doctor clinic map.");
+    }
+};
+
+export const get_mapping_data_by_doctor_id = async (doctor_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_doctor_clinic_map WHERE doctor_id = ?', [doctor_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch mapping data by doctor id.");
+    }
+};
+
+
+export const update_doctor_password = async (clinic_id, password) => {
+    try {
+        const result = await db.query('UPDATE tbl_zqnq_users SET password = ? WHERE id = ?', [password, clinic_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update doctor password.");
+    }
+};
+
+export const insertProduct = async (productData) => {
+    try {
+        const result = await db.query('INSERT INTO tbl_products SET ?', [productData]);
+        return result;
+    }
+    catch (error) { 
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to add product.");
+    }
+};
+
+export const get_all_products = async (clinic_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_products WHERE clinic_id = ?', [clinic_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch all products.");
+    }
+};
+
+export const get_product_by_id = async (product_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_products WHERE product_id = ?', [product_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch product by id.");
+    }
+};
+
+export const updateProduct = async (productData, product_id) => {
+    try {
+        const result = await db.query('UPDATE tbl_products SET ? WHERE product_id = ?', [productData, product_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update product.");
+    }
+};
+
+
+export const deleteProduct = async (product_id) => {
+    try {
+        const result = await db.query('DELETE FROM tbl_products WHERE product_id = ?', [product_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete product.");
+    }
+};
