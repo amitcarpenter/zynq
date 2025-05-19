@@ -15,7 +15,7 @@ export const get_web_user_by_id = async (id) => {
             u.id = ?`, [id]);
     } catch (error) {
         console.error("Database Error:", error.message);
-        throw new Error("Failed to fetch clinic data.");
+        throw new Error("Failed to fetch web user data.");
     }
 };
 
