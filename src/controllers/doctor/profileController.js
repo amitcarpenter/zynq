@@ -159,6 +159,7 @@ export const addConsultationFeeAndAvailability = async (req, res) => {
                     day_of_week: Joi.string().valid('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday').required(),
                     start_time: Joi.string().required(),
                     end_time: Joi.string().required(),
+                    closed:Joi.number().integer().required()
                 })
             ).optional(),
         });
@@ -597,6 +598,7 @@ export const editConsultationFeeAndAvailability = async (req, res) => {
                     day_of_week: Joi.string().valid('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday').required(),
                     start_time: Joi.string().required(),
                     end_time: Joi.string().required(),
+                    closed:Joi.number().integer().required()
                 })
             ).optional(),
         });

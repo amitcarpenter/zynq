@@ -28,7 +28,6 @@ router.post('/add_fee_availability', authenticate(['DOCTOR']), doctorController.
 //======================================= Edit apis =========================================
 router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('profile_images'), doctorController.editPersonalInformation);
 
-
 router.post("/add_education", authenticate(['DOCTOR']), doctorController.addEducation);
 
 router.put("/edit_education", authenticate(['DOCTOR']), doctorController.editEducation);
@@ -44,9 +43,10 @@ router.delete("/delete_experience/:experience_id", authenticate(['DOCTOR']), doc
 
 
 router.post('/add_certification', authenticate(['DOCTOR']), uploadVariousFields, doctorController.addCertifications);
-router.put('/edit_certification', authenticate(['DOCTOR']), uploadFileTo('certifications'), doctorController.editCertification);
-router.delete('/delete_certification/:doctor_certification_id', authenticate(['DOCTOR']), doctorController.deleteCertification);
 
+router.put('/edit_certification', authenticate(['DOCTOR']), uploadFileTo('certifications'), doctorController.editCertification);
+
+router.delete('/delete_certification/:doctor_certification_id', authenticate(['DOCTOR']), doctorController.deleteCertification);
 
 // Expertise
 router.put("/edit_expertise", authenticate(['DOCTOR']), doctorController.editExpertise);
@@ -54,4 +54,5 @@ router.put("/edit_expertise", authenticate(['DOCTOR']), doctorController.editExp
 router.post('/edit_fee_availability', authenticate(['DOCTOR']), doctorController.editConsultationFeeAndAvailability);
 
 router.get("/get_linked_clinics", authenticate(['DOCTOR']), doctorController.getLinkedClinics);
+
 export default router;
