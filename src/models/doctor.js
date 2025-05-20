@@ -268,7 +268,7 @@ export const get_doctor_consultation_fee = async (doctorId) => {
 export const update_availability = async (doctorId, availabilityData) => {
     try {
         await db.query(`DELETE FROM tbl_doctor_availability WHERE doctor_id = ?`, [doctorId]);
-        const values = availabilityData.map(avail => [doctorId, avail.day_of_week, avail.start_time, avail.end_time,avail.closed]);
+        const values = availabilityData.map(avail => [doctorId, avail.day_of_week, avail.start_time, avail.end_time, avail.closed]);
         if (values.length > 0) {
             return await db.query(`INSERT INTO tbl_doctor_availability (doctor_id, day_of_week, start_time, end_time,closed) VALUES ?`, [values]);
         }
@@ -397,5 +397,61 @@ export const get_clinics_data_by_doctor_id = async (doctorId) => {
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to fetch clinic data by doctor ID.");
+    }
+};
+
+
+export const delete_all_education = async (doctor_id) => {
+    try {
+        return await db.query(`DELETE FROM tbl_doctor_educations WHERE doctor_id = ?`, [doctor_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete education.");
+    }
+};
+
+export const delete_all_experience = async (doctor_id) => {
+    try {
+        return await db.query(`DELETE FROM tbl_doctor_experiences WHERE doctor_id = ?`, [doctor_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete experience.");
+    }
+};
+
+export const delete_all_certifications_for_doctor = async (doctorId) => {
+    try {
+        return await db.query(`DELETE FROM tbl_doctor_certification WHERE doctor_id = ?`, [doctorId]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete all certifications for doctor.");
+    }
+};
+
+export const update_certification_upload_path = async (doctorId, certificationTypeId, newUploadPath) => {
+    try {
+        return await db.query(
+            `UPDATE tbl_doctor_certification
+             SET upload_path = ?
+             WHERE doctor_id = ? AND certification_type_id = ?`,
+            [newUploadPath, doctorId, certificationTypeId]
+        );
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update certification upload path.");
+    }
+};
+
+export const get_doctor_certification_by_type = async (doctorId, certificationTypeId) => {
+    try {
+        const [result] = await db.query(
+            `SELECT doctor_certification_id, upload_path FROM tbl_doctor_certification
+             WHERE doctor_id = ? AND certification_type_id = ?`,
+            [doctorId, certificationTypeId]
+        );
+        return result[0]; // Returns the first matching certification or undefined
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to get doctor certification by type.");
     }
 };

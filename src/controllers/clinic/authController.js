@@ -26,8 +26,6 @@ const daySchema = Joi.object({
     is_closed: Joi.boolean().optional().allow('', null)
 });
 
-
-
 export const getProfile = async (req, res) => {
     try {
         const language = req.user.language;
@@ -62,9 +60,8 @@ export const getProfile = async (req, res) => {
         });
         clinic.documents = documents;
 
-
         if (clinic.clinic_logo && !clinic.clinic_logo.startsWith("http")) {
-            clinic.clinic_logo = `${APP_URL}${clinic.clinic_logo}`;
+            clinic.clinic_logo = `${APP_URL}clinic/logo/${clinic.clinic_logo}`;
         }
         return handleSuccess(res, 200, language, "CLINIC_PROFILE_FETCHED", clinic);
     } catch (error) {
@@ -149,9 +146,41 @@ export const onboardClinic = async (req, res) => {
             try {
                 req.body.clinic_timing = JSON.parse(req.body.clinic_timing);
             } catch (err) {
-                return handleError(res, 400, "en", "Invalid JSON for clinic_timing");
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_CLINIC_TIMING");
             }
         }
+        if (typeof req.body.treatments === 'string') {
+            try {
+                req.body.treatments = JSON.parse(req.body.treatments);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_TREATMENTS");
+            }
+        }
+
+        if (typeof req.body.equipments === 'string') {
+            try {
+                req.body.equipments = JSON.parse(req.body.equipments);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_EQUIPMENTS");
+            }
+        }
+
+        if (typeof req.body.skin_types === 'string') {
+            try {
+                req.body.skin_types = JSON.parse(req.body.skin_types);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_SKIN_TYPES");
+            }
+        }
+
+        if (typeof req.body.severity_levels === 'string') {
+            try {
+                req.body.severity_levels = JSON.parse(req.body.severity_levels);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_SEVERITY_LEVELS");
+            }
+        }
+
 
         const { error, value } = clinicSchema.validate(req.body);
         if (error) return joiErrorHandle(res, error);
@@ -213,20 +242,73 @@ export const onboardClinic = async (req, res) => {
                 }
             });
         }
+
         if (street_address && city && state && zip_code && latitude && longitude) {
-            await clinicModels.insertClinicLocation({
-                clinic_id, street_address, city, state,
-                zip_code, latitude, longitude
-            });
+            const clinicLocation = await clinicModels.getClinicLocation(clinic_id); 
+            if (clinicLocation) {
+                await clinicModels.updateClinicLocation({
+                    clinic_id, street_address, city, state,
+                    zip_code, latitude, longitude
+                });
+            } else {
+                await clinicModels.insertClinicLocation({
+                    clinic_id, street_address, city, state,
+                    zip_code, latitude, longitude
+                });
+            }
+        }
+        if(treatments){
+            const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
+        if (treatmentsData) {
+            await clinicModels.updateClinicTreatments(treatments, clinic_id);
+        } else {
+                await clinicModels.insertClinicTreatments(treatments, clinic_id);
+            }
         }
 
-        await Promise.all([
-            treatments && clinicModels.insertClinicTreatments(treatments, clinic_id),
-            clinic_timing && clinicModels.insertClinicOperationHours(clinic_timing, clinic_id),
-            equipments && clinicModels.insertClinicEquipments(equipments, clinic_id),
-            skin_types && clinicModels.insertClinicSkinTypes(skin_types, clinic_id),
-            severity_levels && clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id)
-        ]);
+        if(clinic_timing){
+        const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
+        console.log("clinic_timing", typeof clinic_timing);
+        if (clinicTimingData) {
+            if (!clinic_timing) {
+                console.log("No clinic timing data provided");
+                return;
+            }
+            await clinicModels.updateClinicOperationHours(clinic_timing, clinic_id);
+        } else {
+            if (!clinic_timing) {
+                console.log("No clinic timing data provided");
+                return;
+            }
+                await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
+            }
+        }
+
+        if(equipments){ 
+        const equipmentsData = await clinicModels.getClinicEquipments(clinic_id);
+        if (equipmentsData) {
+            await clinicModels.updateClinicEquipments(equipments, clinic_id);
+        } else {
+            await clinicModels.insertClinicEquipments(equipments, clinic_id);
+            }
+        }
+
+        const skinTypesData = await clinicModels.getClinicSkinTypes(clinic_id);
+        if (skinTypesData) {
+            await clinicModels.updateClinicSkinTypes(skin_types, clinic_id);
+        } else {
+            await clinicModels.insertClinicSkinTypes(skin_types, clinic_id);
+        }
+
+        if(severity_levels){
+        const severityLevelsData = await clinicModels.getClinicSeverityLevels(clinic_id);   
+        if (severityLevelsData) {
+            await clinicModels.updateClinicSeverityLevels(severity_levels, clinic_id);
+        } else {
+                await clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id);
+            }
+        }
+
 
         return handleSuccess(res, 201, language, "CLINIC_ONBOARDED_SUCCESSFULLY");
     }
@@ -438,7 +520,6 @@ export const getCertificateType = async (req, res) => {
         return handleError(res, 500, "en", 'INTERNAL_SERVER_ERROR');
     }
 }
-
 
 export const searchLocation = async (req, res) => {
     try {

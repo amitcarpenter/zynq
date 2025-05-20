@@ -72,18 +72,40 @@ export const addEducationAndExperienceInformation = async (req, res) => {
         const experienceList = JSON.parse(value.experience);
 
         const files = req.files;
-        for (const key in files) {
-            const certType = await doctorModels.get_certification_type_by_filename(key)
+         if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
+            for (const key in files) { // 'key' is like 'medical_council', 'deramatology_board', etc.
+                const certTypeFromDb = await doctorModels.get_certification_type_by_filename(key);
 
-            if (certType.length > 0) {
-                const certification_type_id = certType[0].certification_type_id;
+                if (certTypeFromDb.length > 0) {
+                    const certification_type_id = certTypeFromDb[0].certification_type_id;
 
-                for (const file of files[key]) {
-                    console.log("file>>>>>>>", file)
-                    await doctorModels.add_certification(doctorId, certification_type_id, file.filename)
+                    for (const file of files[key]) { // Loop through potential multiple files for the same field name
+                        const newUploadPath = file.filename; // This is the new path
+
+                        // Check if this certification type already exists for the doctor
+                        const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
+
+                        if (existingCert) {
+                            // Certification already exists, update its file path
+                            await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
+                            console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);
+                        } else {
+                            // Certification does not exist, add it
+                            await doctorModels.add_certification(doctorId, certification_type_id, newUploadPath); // Add other metadata if available from req.body
+                            console.log(`Added new certification for doctor ${doctorId}, type ${certification_type_id} with file ${newUploadPath}`);
+                        }
+                    }
+                } else {
+                    console.warn(`Certification type with filename key '${key}' not found in tbl_certification_type. Skipping file processing.`);
                 }
             }
         }
+        // --- END IMPROVED LOGIC ---
+
+
+
+        await doctorModels.delete_all_education(doctorId);
+        await doctorModels.delete_all_experience(doctorId);
 
         // Save Education
         for (let edu of educationList) {
@@ -157,9 +179,13 @@ export const addConsultationFeeAndAvailability = async (req, res) => {
             availability: Joi.array().items(
                 Joi.object({
                     day_of_week: Joi.string().valid('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday').required(),
-                    start_time: Joi.string().required(),
-                    end_time: Joi.string().required(),
-                    closed:Joi.number().integer().required()
+
+                    start_time: Joi.string().required().allow(''),
+                    end_time: Joi.string().required().allow(''),
+
+
+
+                    closed: Joi.number().integer().required()
                 })
             ).optional(),
         });
@@ -596,9 +622,10 @@ export const editConsultationFeeAndAvailability = async (req, res) => {
             availability: Joi.array().items(
                 Joi.object({
                     day_of_week: Joi.string().valid('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday').required(),
-                    start_time: Joi.string().required(),
-                    end_time: Joi.string().required(),
-                    closed:Joi.number().integer().required()
+
+                    start_time: Joi.string().required().allow(''),
+                    end_time: Joi.string().required().allow(''),
+                    closed: Joi.number().integer().required()
                 })
             ).optional(),
         });
@@ -640,7 +667,7 @@ export const calculateProfileCompletionPercentageByDoctorId = async (doctorId) =
         let totalFieldsCount = 0;
 
         // Personal Details
-        const personalFields = ['name', 'phone', 'age', 'address', 'gender', 'profile_image','biography'];
+        const personalFields = ['name', 'phone', 'age', 'address', 'gender', 'profile_image', 'biography'];
         totalFieldsCount += personalFields.length;
         personalFields.forEach(field => {
             if (profileData[field]) filledFieldsCount++;
@@ -671,5 +698,90 @@ export const calculateProfileCompletionPercentageByDoctorId = async (doctorId) =
     } catch (error) {
         console.error("Error calculating profile completion:", error);
         return 0; // Or handle the error as needed
+    }
+};
+
+
+export const editEducationAndExperienceInformation = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            education: Joi.string().optional(),   // will be JSON
+            experience: Joi.string().optional(), // will be JSON
+        });
+
+        let language = 'en';
+
+        const payload = {
+            education: req.body.education,
+            experience: req.body.experience
+        };
+
+        const { error, value } = schema.validate(payload);
+        if (error) return joiErrorHandle(res, error);
+
+        const doctorId = req.user.doctorData.doctor_id;
+
+        const educationList = JSON.parse(value.education);
+        const experienceList = JSON.parse(value.experience);
+
+        const files = req.files;
+         if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
+            for (const key in files) { // 'key' is like 'medical_council', 'deramatology_board', etc.
+                const certTypeFromDb = await doctorModels.get_certification_type_by_filename(key);
+
+                if (certTypeFromDb.length > 0) {
+                    const certification_type_id = certTypeFromDb[0].certification_type_id;
+
+                    for (const file of files[key]) { // Loop through potential multiple files for the same field name
+                        const newUploadPath = file.filename; // This is the new path
+
+                        // Check if this certification type already exists for the doctor
+                        const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
+
+                        if (existingCert) {
+                            // Certification already exists, update its file path
+                            await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
+                            console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);
+                        } else {
+                            // Certification does not exist, add it
+                            await doctorModels.add_certification(doctorId, certification_type_id, newUploadPath); // Add other metadata if available from req.body
+                            console.log(`Added new certification for doctor ${doctorId}, type ${certification_type_id} with file ${newUploadPath}`);
+                        }
+                    }
+                } else {
+                    console.warn(`Certification type with filename key '${key}' not found in tbl_certification_type. Skipping file processing.`);
+                }
+            }
+        }
+
+        await doctorModels.delete_all_education(doctorId);
+        await doctorModels.delete_all_experience(doctorId);
+
+        // Save Education
+        for (let edu of educationList) {
+            await doctorModels.add_education(
+                doctorId,
+                edu.institute,
+                edu.degree,
+                edu.start_year,
+                edu.end_year,
+
+            );
+        }
+
+        // Save Experience
+        for (let exp of experienceList) {
+            await doctorModels.add_experience(
+                doctorId,
+                exp.organization,
+                exp.designation,
+                exp.start_date,
+                exp.end_date
+            );
+        }
+        return handleSuccess(res, 201, language, "DOCTOR_PROFILE_INFO_ADDED", {});
+    } catch (error) {
+        console.error(error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };

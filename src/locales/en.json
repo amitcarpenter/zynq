@@ -130,5 +130,10 @@
     "LAT_LONG_FETCHED_SUCCESSFULLY": "Lat-Long Fetched Successfully",
     "LAT_LONG_FETCHED_FAILED": "Lat-Long Fetch Failed",
     "PRODUCTS_FETCHED_SUCCESSFULLY": "Products Fetched Successfully",
-    "NO_PRODUCTS_FOUND": "No Products Found"
+    "NO_PRODUCTS_FOUND": "No Products Found",
+    "INVALID_JSON_FOR_TREATMENTS": "Invalid JSON for treatments",
+    "INVALID_JSON_FOR_EQUIPMENTS": "Invalid JSON for equipments",
+    "INVALID_JSON_FOR_SKIN_TYPES": "Invalid JSON for skin_types",
+    "INVALID_JSON_FOR_SEVERITY_LEVELS": "Invalid JSON for severity_levels",
+    "INVALID_JSON_FOR_CLINIC_LOCATION": "Invalid JSON for clinic_location"
 }
