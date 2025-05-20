@@ -59,6 +59,7 @@ export const login_web_user = async (req, res) => {
         if (get_clinic) {
             const form_stage = get_clinic.form_stage;
             user_data.form_stage = form_stage;
+            user_data.is_onboarded = get_clinic.is_onboarded;
         }
 
         return handleSuccess(res, 200, language, "LOGIN_SUCCESSFUL", user_data);
