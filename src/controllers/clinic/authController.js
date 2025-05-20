@@ -60,7 +60,6 @@ export const getProfile = async (req, res) => {
         });
         clinic.documents = documents;
 
-
         if (clinic.clinic_logo && !clinic.clinic_logo.startsWith("http")) {
             clinic.clinic_logo = `${APP_URL}clinic/clinic_logo/${clinic.clinic_logo}`;
         }
@@ -243,20 +242,56 @@ export const onboardClinic = async (req, res) => {
                 }
             });
         }
+        
         if (street_address && city && state && zip_code && latitude && longitude) {
-            await clinicModels.insertClinicLocation({
-                clinic_id, street_address, city, state,
-                zip_code, latitude, longitude
-            });
+            const clinicLocation = await clinicModels.getClinicLocation(clinic_id); 
+            if (clinicLocation) {
+                await clinicModels.updateClinicLocation({
+                    clinic_id, street_address, city, state,
+                    zip_code, latitude, longitude
+                });
+            } else {
+                await clinicModels.insertClinicLocation({
+                    clinic_id, street_address, city, state,
+                    zip_code, latitude, longitude
+                });
+            }
+        }
+        const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
+        if (treatmentsData) {
+            await clinicModels.updateClinicTreatments(treatments, clinic_id);
+        } else {
+            await clinicModels.insertClinicTreatments(treatments, clinic_id);
         }
 
-        await Promise.all([
-            treatments && clinicModels.insertClinicTreatments(treatments, clinic_id),
-            clinic_timing && clinicModels.insertClinicOperationHours(clinic_timing, clinic_id),
-            equipments && clinicModels.insertClinicEquipments(equipments, clinic_id),
-            skin_types && clinicModels.insertClinicSkinTypes(skin_types, clinic_id),
-            severity_levels && clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id)
-        ]);
+        const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
+        if (clinicTimingData) {
+            await clinicModels.updateClinicOperationHours(clinic_timing, clinic_id);
+        } else {
+            await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
+        }
+
+        const equipmentsData = await clinicModels.getClinicEquipments(clinic_id);
+        if (equipmentsData) {
+            await clinicModels.updateClinicEquipments(equipments, clinic_id);
+        } else {
+            await clinicModels.insertClinicEquipments(equipments, clinic_id);
+        }
+
+        const skinTypesData = await clinicModels.getClinicSkinTypes(clinic_id);
+        if (skinTypesData) {
+            await clinicModels.updateClinicSkinTypes(skin_types, clinic_id);
+        } else {
+            await clinicModels.insertClinicSkinTypes(skin_types, clinic_id);
+        }
+
+        const severityLevelsData = await clinicModels.getClinicSeverityLevels(clinic_id);   
+        if (severityLevelsData) {
+            await clinicModels.updateClinicSeverityLevels(severity_levels, clinic_id);
+        } else {
+            await clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id);
+        }
+
 
         return handleSuccess(res, 201, language, "CLINIC_ONBOARDED_SUCCESSFULLY");
     }
