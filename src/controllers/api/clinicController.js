@@ -67,7 +67,7 @@ export const get_all_clinics = async (req, res) => {
                 severity_levels: severityLevels || [],
                 documents: processedDocuments || [],
                 clinic_logo: clinic.clinic_logo && !clinic.clinic_logo.startsWith("http")
-                    ? `${APP_URL}${clinic.clinic_logo}`
+                    ? `${APP_URL}clinic/logo/${clinic.clinic_logo}`
                     : clinic.clinic_logo
             };
         }));
