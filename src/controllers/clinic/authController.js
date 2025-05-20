@@ -257,13 +257,16 @@ export const onboardClinic = async (req, res) => {
                 });
             }
         }
-        const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
+        if(treatments){
+            const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
         if (treatmentsData) {
             await clinicModels.updateClinicTreatments(treatments, clinic_id);
         } else {
-            await clinicModels.insertClinicTreatments(treatments, clinic_id);
+                await clinicModels.insertClinicTreatments(treatments, clinic_id);
+            }
         }
 
+        if(clinic_timing){
         const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
         console.log("clinic_timing", typeof clinic_timing);
         if (clinicTimingData) {
@@ -277,14 +280,17 @@ export const onboardClinic = async (req, res) => {
                 console.log("No clinic timing data provided");
                 return;
             }
-            await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
+                await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
+            }
         }
 
+        if(equipments){ 
         const equipmentsData = await clinicModels.getClinicEquipments(clinic_id);
         if (equipmentsData) {
             await clinicModels.updateClinicEquipments(equipments, clinic_id);
         } else {
             await clinicModels.insertClinicEquipments(equipments, clinic_id);
+            }
         }
 
         const skinTypesData = await clinicModels.getClinicSkinTypes(clinic_id);
@@ -294,11 +300,13 @@ export const onboardClinic = async (req, res) => {
             await clinicModels.insertClinicSkinTypes(skin_types, clinic_id);
         }
 
+        if(severity_levels){
         const severityLevelsData = await clinicModels.getClinicSeverityLevels(clinic_id);   
         if (severityLevelsData) {
             await clinicModels.updateClinicSeverityLevels(severity_levels, clinic_id);
         } else {
-            await clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id);
+                await clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id);
+            }
         }
 
 
