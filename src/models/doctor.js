@@ -268,7 +268,7 @@ export const get_doctor_consultation_fee = async (doctorId) => {
 export const update_availability = async (doctorId, availabilityData) => {
     try {
         await db.query(`DELETE FROM tbl_doctor_availability WHERE doctor_id = ?`, [doctorId]);
-        const values = availabilityData.map(avail => [doctorId, avail.day_of_week, avail.start_time, avail.end_time,avail.closed]);
+        const values = availabilityData.map(avail => [doctorId, avail.day_of_week, avail.start_time, avail.end_time, avail.closed]);
         if (values.length > 0) {
             return await db.query(`INSERT INTO tbl_doctor_availability (doctor_id, day_of_week, start_time, end_time,closed) VALUES ?`, [values]);
         }
@@ -416,5 +416,14 @@ export const delete_all_experience = async (doctor_id) => {
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to delete experience.");
+    }
+};
+
+export const delete_all_certifications_for_doctor = async (doctorId) => {
+    try {
+        return await db.query(`DELETE FROM tbl_doctor_certification WHERE doctor_id = ?`, [doctorId]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete all certifications for doctor.");
     }
 };

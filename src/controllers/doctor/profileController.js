@@ -72,18 +72,27 @@ export const addEducationAndExperienceInformation = async (req, res) => {
         const experienceList = JSON.parse(value.experience);
 
         const files = req.files;
-        for (const key in files) {
-            const certType = await doctorModels.get_certification_type_by_filename(key)
 
-            if (certType.length > 0) {
-                const certification_type_id = certType[0].certification_type_id;
+        const hasNewCertificationFiles = Object.keys(files).length > 0;
 
-                for (const file of files[key]) {
-                    console.log("file>>>>>>>", file)
-                    await doctorModels.add_certification(doctorId, certification_type_id, file.filename)
+        if (hasNewCertificationFiles) {
+            await doctorModels.delete_all_certifications_for_doctor(doctorId);
+
+            for (const key in files) {
+                const certType = await doctorModels.get_certification_type_by_filename(key)
+
+                if (certType.length > 0) {
+                    const certification_type_id = certType[0].certification_type_id;
+
+                    for (const file of files[key]) {
+                        console.log("file>>>>>>>", file)
+                        await doctorModels.add_certification(doctorId, certification_type_id, file.filename)
+                    }
                 }
             }
         }
+
+
 
         await doctorModels.delete_all_education(doctorId);
         await doctorModels.delete_all_experience(doctorId);
@@ -166,7 +175,7 @@ export const addConsultationFeeAndAvailability = async (req, res) => {
 
 
 
-                    closed:Joi.number().integer().required()
+                    closed: Joi.number().integer().required()
                 })
             ).optional(),
         });
@@ -606,7 +615,7 @@ export const editConsultationFeeAndAvailability = async (req, res) => {
 
                     start_time: Joi.string().required().allow(''),
                     end_time: Joi.string().required().allow(''),
-                    closed:Joi.number().integer().required()
+                    closed: Joi.number().integer().required()
                 })
             ).optional(),
         });
@@ -648,7 +657,7 @@ export const calculateProfileCompletionPercentageByDoctorId = async (doctorId) =
         let totalFieldsCount = 0;
 
         // Personal Details
-        const personalFields = ['name', 'phone', 'age', 'address', 'gender', 'profile_image','biography'];
+        const personalFields = ['name', 'phone', 'age', 'address', 'gender', 'profile_image', 'biography'];
         totalFieldsCount += personalFields.length;
         personalFields.forEach(field => {
             if (profileData[field]) filledFieldsCount++;
@@ -679,5 +688,83 @@ export const calculateProfileCompletionPercentageByDoctorId = async (doctorId) =
     } catch (error) {
         console.error("Error calculating profile completion:", error);
         return 0; // Or handle the error as needed
+    }
+};
+
+
+export const editEducationAndExperienceInformation = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            education: Joi.string().optional(),   // will be JSON
+            experience: Joi.string().optional(), // will be JSON
+        });
+
+        let language = 'en';
+
+        const payload = {
+            education: req.body.education,
+            experience: req.body.experience
+        };
+
+        const { error, value } = schema.validate(payload);
+        if (error) return joiErrorHandle(res, error);
+
+        const doctorId = req.user.doctorData.doctor_id;
+
+        const educationList = JSON.parse(value.education);
+        const experienceList = JSON.parse(value.experience);
+
+
+        const files = req.files;
+
+        const hasNewCertificationFiles = Object.keys(files).length > 0;
+
+        if (hasNewCertificationFiles) {
+            await doctorModels.delete_all_certifications_for_doctor(doctorId);
+
+            for (const key in files) {
+                const certType = await doctorModels.get_certification_type_by_filename(key)
+
+                if (certType.length > 0) {
+                    const certification_type_id = certType[0].certification_type_id;
+
+                    for (const file of files[key]) {
+                        console.log("file>>>>>>>", file)
+                        await doctorModels.add_certification(doctorId, certification_type_id, file.filename)
+                    }
+                }
+            }
+        }
+
+
+        await doctorModels.delete_all_education(doctorId);
+        await doctorModels.delete_all_experience(doctorId);
+
+        // Save Education
+        for (let edu of educationList) {
+            await doctorModels.add_education(
+                doctorId,
+                edu.institute,
+                edu.degree,
+                edu.start_year,
+                edu.end_year,
+
+            );
+        }
+
+        // Save Experience
+        for (let exp of experienceList) {
+            await doctorModels.add_experience(
+                doctorId,
+                exp.organization,
+                exp.designation,
+                exp.start_date,
+                exp.end_date
+            );
+        }
+        return handleSuccess(res, 201, language, "DOCTOR_PROFILE_INFO_ADDED", {});
+    } catch (error) {
+        console.error(error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
     }
 };
