@@ -162,14 +162,10 @@ export const insertClinicOperationHours = async (timing, clinic_id) => {
             const openTime = timing[day]?.open ?? '';
             const closeTime = timing[day]?.close ?? '';
             const isClosed = timing[day]?.is_closed ?? false;
-
-            if (openTime.trim() !== '' || closeTime.trim() !== '') {
                 return db.query(
                     'INSERT INTO tbl_clinic_operation_hours (clinic_id, day_of_week, open_time, close_time, is_closed) VALUES (?, ?, ?, ?, ?)',
                     [clinic_id, day, openTime, closeTime, isClosed ? 1 : 0]
                 );
-            }
-            return null;
         }).filter(Boolean);
 
         return await Promise.all(timingPromises);
@@ -432,14 +428,12 @@ export const updateClinicOperationHours = async (clinic_timing, clinic_id) => {
             const closeTime = clinic_timing[day]?.close ?? '';
             const isClosed = clinic_timing[day]?.is_closed ?? false;
 
-            if (openTime.trim() !== '' || closeTime.trim() !== '') {
-                return db.query(
-                    'INSERT INTO tbl_clinic_operation_hours (clinic_id, day_of_week, open_time, close_time, is_closed) VALUES (?, ?, ?, ?, ?)',
-                    [clinic_id, day, openTime, closeTime, isClosed ? 1 : 0]
-                );
-            }
-            return null;
-        }).filter(Boolean);
+            return db.query(
+                'INSERT INTO tbl_clinic_operation_hours (clinic_id, day_of_week, open_time, close_time, is_closed) VALUES (?, ?, ?, ?, ?)',
+                [clinic_id, day, openTime, closeTime, isClosed ? 1 : 0]
+            );
+        }
+        ).filter(Boolean);
         return await Promise.all(timingPromises);
     }
     catch (error) {
