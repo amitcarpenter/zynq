@@ -1,5 +1,6 @@
 import express from 'express';
-const router = express.Router();
+import { upload } from '../services/multer.js';
+import { authenticateAdmin } from "../middleware/auth.js";
 
 //==================================== Import Controllers ==============================
 import * as authControllers from "../controllers/admin/authController.js"
@@ -7,8 +8,8 @@ import * as dashboardControllers from "../controllers/admin/dashboardController.
 import * as userControllers from "../controllers/admin/userController.js";
 import * as clinicControllers from "../controllers/admin/clinicController.js";
 import * as doctorControllers from "../controllers/admin/doctorController.js";
-import { upload } from '../services/multer.js';
-import { authenticate } from '../middleware/web_user_auth.js';
+
+const router = express.Router();
 
 //==================================== Authentication ==============================
 router.post('/login', authControllers.login);
@@ -16,7 +17,9 @@ router.post('/forgot-password', authControllers.forgotPassword);
 router.get('/reset-password/:token', authControllers.renderResetPasswordPage);
 router.post('/reset-password', authControllers.resetPassword);
 router.get('/success-change', authControllers.successChange);
-router.get('/get-profile', authenticate, authControllers.successChange);
+router.get('/get-profile', authenticateAdmin, authControllers.profile);
+router.post('/update-profile', authenticateAdmin, upload.single('profile_images'), authControllers.updateProfile);
+router.post('/change-password', authenticateAdmin, authControllers.changePassword);
 
 //==================================== Dashboard ==============================
 router.get('/get-dashboard', dashboardControllers.get_dashboard);

@@ -4,10 +4,11 @@ import dotenv from "dotenv";
 import ejs from "ejs";
 import path from "path";
 import { fileURLToPath } from "url";
+
 import * as apiModels from "../../models/api.js";
 import * as adminModels from "../../models/admin.js";
 import { sendEmail } from "../../services/send_email.js";
-import { generateAccessToken, generateAccessTokenVerify } from "../../utils/user_helper.js";
+import { generateAccessTokenAdmin, generateAccessTokenVerifyAdmin } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 
 dotenv.config();
@@ -22,7 +23,7 @@ export const login = async (req, res) => {
         const loginSchema = Joi.object({
             email: Joi.string().email().required(),
             password: Joi.string().required(),
-            fcm_token: Joi.string().required().allow(null, '')
+            fcm_token: Joi.string().optional().allow('', null)
         });
 
         const { error, value } = loginSchema.validate(req.body);
@@ -30,16 +31,13 @@ export const login = async (req, res) => {
 
         const { email, password, fcm_token } = value;
 
-        const findEmail = await adminModels.findEmail(email);
-        if (!findEmail.length) return handleError(res, 404, "en", "User not found or invalid email.");
-
-        const user = findEmail[0];
+        const [user] = await adminModels.findEmail(email);
+        if (!user) return handleError(res, 404, "en", "User not found or invalid email.");
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return handleError(res, 401, "en", "Incorrect password.");
 
-        const token = generateAccessToken({ id: user.admin_id });
-
+        const token = generateAccessTokenAdmin({ id: user.admin_id });
         await adminModels.updateData(user.admin_id, token, fcm_token);
 
         return handleSuccess(res, 200, "en", "Login successful.", {
@@ -69,17 +67,13 @@ export const forgotPassword = async (req, res) => {
 
         const { email } = value;
 
-        const userResult = await adminModels.findEmail(email);
-        if (!userResult || userResult.length === 0) return handleError(res, 404, 'en', 'No account found with this email address.');
+        const [user] = await adminModels.findEmail(email);
+        if (!user) return handleError(res, 404, "en", "No account found with this email address.");
 
-        const user = userResult[0];
-
-        const token = generateAccessToken({ id: user.admin_id });
-
+        const token = generateAccessTokenAdmin({ id: user.admin_id });
         await adminModels.updateData(user.admin_id, token, user.fcm_token);
 
         const resetLink = `${process.env.LOCAL_APP_URL}admin/reset-password/${token}`;
-
         const html = await ejs.renderFile(path.join(__dirname, "../../views/ZYNQ_all_mail-template/forgot-password.ejs"), { image_logo, resetLink });
 
         await sendEmail({
@@ -105,7 +99,7 @@ export const renderResetPasswordPage = async (req, res) => {
 
     const { token } = value;
 
-    const decoded = generateAccessTokenVerify(token);
+    const decoded = generateAccessTokenVerifyAdmin(token);
     if (!decoded || !decoded.id) return res.status(400).render("errorPage.ejs", { message: "Invalid or expired reset token." });
 
     const user = await adminModels.findById(decoded.admin_id);
@@ -115,16 +109,23 @@ export const renderResetPasswordPage = async (req, res) => {
 };
 
 export const resetPassword = async (req, res) => {
-    const { token, new_password, confirm_password } = req.body;
+    const forgetSchema = Joi.object({
+        token: Joi.string().required(),
+        new_password: Joi.string().min(6).required(),
+        confirm_password: Joi.string().valid(Joi.ref('new_password')).required()
+            .messages({ 'any.only': 'Passwords do not match.' })
+    });
 
-    if (new_password !== confirm_password) {
-        return res.send("Passwords do not match.");
-    }
-    const decoded = generateAccessTokenVerify(token);
+    const { error, value } = forgetSchema.validate(req.params);
+    if (error) return joiErrorHandle(res, error);
+
+    const { token, new_password } = value;
+    console.log(true);
+
+    const decoded = generateAccessTokenVerifyAdmin(token);
     if (!decoded || !decoded.id) return res.status(400).render("errorPage.ejs", { message: "Invalid or expired reset token." });
 
     const hashedPassword = await bcrypt.hash(new_password, 10);
-
     await adminModels.updatePassword(decoded.admin_id, hashedPassword)
 
     res.json({
@@ -135,6 +136,84 @@ export const resetPassword = async (req, res) => {
 
 export const successChange = async (req, res) => {
     res.render("success_reset/en.ejs");
+};
+
+export const profile = async (req, res) => {
+    try {
+        const user = req.admin;
+        if (user) {
+            user.profile_image = user.profile_image == null ? null : process.env.APP_URL + user.profile_image;
+            return handleSuccess(res, 200, "en", "Admin profile fetched successfully", user);
+        } else {
+            return handleError(res, 404, "en", "Admin not found");
+        }
+    } catch (error) {
+        console.error("Update profile error:", error);
+        return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
+    }
+};
+
+export const updateProfile = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            email: Joi.string().email().required(),
+            full_name: Joi.string().min(2).required(),
+            mobile_number: Joi.string().pattern(/^[0-9]{10,15}$/).required(),
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        const admin = req.admin;
+        if (!admin) return handleError(res, 401, "en", "Unauthorized");
+
+        const profileImage = req.file ? req.file.filename : admin.profile_image;
+
+        const updateData = {
+            ...value,
+            profile_image: profileImage
+        };
+
+        await adminModels.updateProfile(admin.admin_id, updateData);
+
+        return handleSuccess(res, 200, "en", "Profile updated successfully");
+    } catch (error) {
+        console.error("Update profile error:", error);
+        return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
+    }
+};
+
+export const changePassword = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            current_password: Joi.string().required(),
+            new_password: Joi.string().min(6).required(),
+            confirm_password: Joi.string().valid(Joi.ref('new_password')).required()
+                .messages({ 'any.only': 'Passwords do not match.' })
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        const { current_password, new_password } = value;
+
+        const admin = req.admin;
+        if (!admin) return handleError(res, 401, "en", "Unauthorized");
+
+        const [user] = await adminModels.findById(admin.admin_id);
+        if (!user) return handleError(res, 404, "en", "User not found");
+
+        const isMatch = await bcrypt.compare(current_password, user.password);
+        if (!isMatch) return handleError(res, 400, "en", "Incorrect current password");
+
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+        await adminModels.updatePassword(admin.admin_id, hashedPassword);
+
+        return handleSuccess(res, 200, "en", "Password changed successfully");
+    } catch (error) {
+        console.error("Change password error:", error);
+        return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
+    }
 };
 
 export const login_with_mobile = async (req, res) => {

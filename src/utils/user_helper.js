@@ -5,10 +5,8 @@ import base64url from 'base64url';
 
 import { handleError, handleSuccess } from '../utils/responseHandler.js';
 
-
 export const generateRandomString = async (length) => {
-    const characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -20,10 +18,21 @@ export const generateVerificationLink = (token, baseUrl) => {
     return `${baseUrl}/api/verify-email?token=${token}`;
 };
 
+export const generateAccessTokenAdmin = (payload) => {
+    const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET;
+    const JWT_EXPIRY = process.env.JWT_EXPIRY;
+    return jwt.sign(payload, ADMIN_JWT_SECRET, { expiresIn: JWT_EXPIRY });
+};
+
 export const generateAccessToken = (payload) => {
     const USER_JWT_SECRET = process.env.USER_JWT_SECRET;
     const JWT_EXPIRY = process.env.JWT_EXPIRY;
     return jwt.sign(payload, USER_JWT_SECRET, { expiresIn: JWT_EXPIRY });
+};
+
+export const generateAccessTokenVerifyAdmin = (payload) => {
+    const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET;
+    return jwt.verify(payload, ADMIN_JWT_SECRET);
 };
 
 export const generateAccessTokenVerify = (payload) => {
