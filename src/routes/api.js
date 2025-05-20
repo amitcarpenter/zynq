@@ -42,7 +42,7 @@ router.get("/get-face-scan-history", authenticateUser, faceScanControllers.get_f
 router.get("/get-all-doctors", authenticateUser, doctorControllers.get_all_doctors);
 
 // //==================================== Product ==============================
-router.get("/get_all_products", authenticateUser, productControllers.getAllProducts);
+router.get("/get-all-products", authenticateUser, productControllers.getAllProducts);
 
 // ==================================== Clinic ==============================
 router.get("/get-all-clinics", authenticateUser, clinicControllers.get_all_clinics);

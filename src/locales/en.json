@@ -120,8 +120,6 @@
     "PRODUCT_ADDED_SUCCESSFULLY": "Product Added Successfully",
     "PRODUCT_ADDED_FAILED": "Product Addition Failed",
     "IMAGE_URL_REQUIRED": "Image URL is required",
-    "PRODUCTS_FETCHED_SUCCESSFULLY": "Products Fetched Successfully",
-    "NO_PRODUCTS_FOUND": "No Products Found",
     "PRODUCT_UPDATED_SUCCESSFULLY": "Product Updated Successfully",
     "PRODUCT_UPDATED_FAILED": "Product Update Failed",
     "PRODUCT_NOT_FOUND": "Product Not Found",
@@ -130,5 +128,7 @@
     "PASSWORD_SET_FAILED": "Password Set Failed",
     "NO_RESULT_FOUND": "No Result Found",
     "LAT_LONG_FETCHED_SUCCESSFULLY": "Lat-Long Fetched Successfully",
-    "LAT_LONG_FETCHED_FAILED": "Lat-Long Fetch Failed"
+    "LAT_LONG_FETCHED_FAILED": "Lat-Long Fetch Failed",
+    "PRODUCTS_FETCHED_SUCCESSFULLY": "Products Fetched Successfully",
+    "NO_PRODUCTS_FOUND": "No Products Found"
 }
