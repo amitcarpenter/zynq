@@ -39,7 +39,7 @@ export const addProduct = async (req, res) => {
 
         const { error, value } = schema.validate(req.body);
         if (error) {
-            return joiErrorHandle(error, res);
+            return joiErrorHandle(res, error);
         }
 
         const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(req.user.id);
