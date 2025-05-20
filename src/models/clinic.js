@@ -422,6 +422,9 @@ export const updateClinicTreatments = async (treatments, clinic_id) => {
 
 export const updateClinicOperationHours = async (clinic_timing, clinic_id) => {
     try {
+        if (!clinic_timing) {
+            return;
+        }
         await db.query('DELETE FROM tbl_clinic_operation_hours WHERE clinic_id = ?', [clinic_id]);
         const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
         const timingPromises = daysOfWeek.map(day => {
