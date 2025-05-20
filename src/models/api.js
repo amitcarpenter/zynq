@@ -114,3 +114,138 @@ export const get_face_scan_history = async (user_id) => {
 };
 
 
+//======================================= Doctor =========================================
+export const getAllDoctors = async () => {
+    try {
+        const doctors = await db.query(`
+            SELECT d.*, z.email 
+            FROM tbl_doctors d
+            LEFT JOIN tbl_zqnq_users z ON d.zynq_user_id = z.id 
+            WHERE d.profile_completion_percentage >= 50 
+            ORDER BY d.created_at DESC`);
+
+        return doctors;
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch all doctors.");
+    }
+}
+
+export const getDoctorAvailability = async (doctor_id) => {
+    try {
+        const availability = await db.query('SELECT * FROM tbl_doctor_availability WHERE doctor_id = ?', [doctor_id]);
+        return availability;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor availability.");
+    }
+};
+
+export const getDoctorCertifications = async (doctor_id) => {
+    try {
+        const certifications = await db.query(`
+            SELECT c.*, ct.* 
+            FROM tbl_doctor_certification c
+            LEFT JOIN tbl_certification_type ct ON c.certification_type_id = ct.certification_type_id 
+            WHERE c.doctor_id = ?`, [doctor_id]);
+        return certifications;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor certifications.");
+    }
+};
+
+export const getDoctorEducation = async (doctor_id) => {
+    try {
+        const education = await db.query('SELECT * FROM tbl_doctor_educations WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
+        return education;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor education.");
+    }
+};
+
+export const getDoctorExperience = async (doctor_id) => {
+    try {
+        const experience = await db.query('SELECT * FROM tbl_doctor_experiences WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
+        return experience;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor experience.");
+    }
+};
+
+export const getDoctorReviews = async (doctor_id) => {
+    try {
+        const reviews = await db.query('SELECT * FROM tbl_doctor_reviews WHERE doctor_id = ?', [doctor_id]);
+        return reviews;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor reviews.");
+    }
+};
+
+export const getDoctorSeverityLevels = async (doctor_id) => {
+    try {
+        const severityLevels = await db.query('SELECT * FROM tbl_doctor_severity_levels WHERE doctor_id = ?', [doctor_id]);
+        return severityLevels;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor severity levels.");
+    }
+};
+
+export const getDoctorSkinTypes = async (doctor_id) => {
+    try {
+        const skinTypes = await db.query('SELECT * FROM tbl_doctor_skin_types WHERE doctor_id = ?', [doctor_id]);
+        return skinTypes;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor skin types.");
+    }
+};
+
+export const getDoctorTreatments = async (doctor_id) => {
+    try {
+        const treatments = await db.query('SELECT * FROM tbl_doctor_treatments WHERE doctor_id = ?', [doctor_id]);
+        return treatments;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor treatments.");
+    }
+};
+
+
+//======================================= Product =========================================
+export const get_all_products_for_user = async () => {
+    try {
+        return await db.query(`SELECT * FROM tbl_products`);
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch products.");
+    }
+}
+
+
+//======================================= Clinic =========================================
+export const getAllClinicsForUser = async () => {
+    try {
+        return await db.query(`SELECT * FROM tbl_clinics WHERE profile_completion_percentage >= 50`);
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch clinics.");
+    }
+}
+
+
+

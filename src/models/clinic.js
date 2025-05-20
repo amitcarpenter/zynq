@@ -524,7 +524,7 @@ export const get_all_doctors = async () => {
         console.error("Database Error:", error.message);
         throw new Error("Failed to fetch doctors.");
     }
-};
+ }; 
 
 
 export const getDoctorAvailability = async (doctor_id) => {
@@ -540,7 +540,11 @@ export const getDoctorAvailability = async (doctor_id) => {
 
 export const getDoctorCertifications = async (doctor_id) => {
     try {
-        const certifications = await db.query('SELECT * FROM tbl_doctor_certification WHERE doctor_id = ?', [doctor_id]);
+        const certifications = await db.query(`
+            SELECT c.*, ct.* 
+            FROM tbl_doctor_certification c
+            LEFT JOIN tbl_certification_type ct ON c.certification_type_id = ct.certification_type_id 
+            WHERE c.doctor_id = ?`, [doctor_id]);
         return certifications;
     }
     catch (error) {
@@ -652,9 +656,10 @@ export const get_doctor_by_zynq_user_id = async (zynq_user_id) => {
 export const get_all_doctors_by_clinic_id = async (clinic_id) => {
     try {
         const query = `
-            SELECT dcm.*, d.*
+            SELECT dcm.*, d.*, zu.email
             FROM tbl_doctor_clinic_map dcm
             JOIN tbl_doctors d ON dcm.doctor_id = d.doctor_id
+            JOIN tbl_zqnq_users zu ON d.zynq_user_id = zu.id
             WHERE dcm.clinic_id = ?`;
         const result = await db.query(query, [clinic_id]);
         return result;

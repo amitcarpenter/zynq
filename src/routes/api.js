@@ -8,6 +8,9 @@ import { uploadFile, uploadMultipleFiles } from '../services/multer.js';
 import * as authControllers from "../controllers/api/authController.js";
 import * as aiPromptControllers from "../controllers/api/aiPromptController.js";
 import * as faceScanControllers from "../controllers/api/faceScanController.js";
+import * as doctorControllers from "../controllers/api/doctorController.js";
+import * as productControllers from "../controllers/api/productController.js";
+import * as clinicControllers from "../controllers/api/clinicController.js";
 
 
 const router = express.Router();
@@ -33,5 +36,16 @@ router.post("/get-prompt", aiPromptControllers.get_prompt_data_by_prompt_type);
 // router.post("/add-face-scan-result", authenticateUser, upload.single("file"), faceScanControllers.add_face_scan_result);
 router.post("/add-face-scan-result", authenticateUser, uploadFile, faceScanControllers.add_face_scan_result);
 router.get("/get-face-scan-history", authenticateUser, faceScanControllers.get_face_scan_history);
+
+
+//==================================== Doctor ==============================
+router.get("/get-all-doctors", authenticateUser, doctorControllers.get_all_doctors);
+
+// //==================================== Product ==============================
+router.get("/get-all-products", authenticateUser, productControllers.getAllProducts);
+
+// ==================================== Clinic ==============================
+router.get("/get-all-clinics", authenticateUser, clinicControllers.get_all_clinics);
+
 
 export default router;

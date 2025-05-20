@@ -83,7 +83,7 @@ const calculateProfileCompletion = (data) => {
         total + (data[field] ? percentPerField : 0), 0);
 };
 
-const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_number, address, fee_range, website_url, clinic_description, clinic_logo, form_stage }) => {
+const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_number, address, fee_range, website_url, clinic_description, clinic_logo, form_stage, ivo_registration_number, hsa_id }) => {
     const data = {
         zynq_user_id,
         clinic_name,
@@ -99,7 +99,9 @@ const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_
         website_url,
         clinic_description,
         clinic_logo,
-        form_stage
+        form_stage,
+        ivo_registration_number,
+        hsa_id
     };
     data.profile_completion_percentage = Math.round(calculateProfileCompletion(data));
     return data;
@@ -137,7 +139,9 @@ export const onboardClinic = async (req, res) => {
             equipments: Joi.array().items(Joi.string()).optional().allow('', null),
             skin_types: Joi.array().items(Joi.string()).optional().allow('', null),
             severity_levels: Joi.array().items(Joi.string()).optional().allow('', null),
-            form_stage: Joi.number().optional().allow('', null)
+            form_stage: Joi.number().optional().allow('', null),
+            ivo_registration_number: Joi.string().optional().allow('', null),
+            hsa_id: Joi.string().optional().allow('', null),
         });
 
         if (typeof req.body.clinic_timing === 'string') {
@@ -155,7 +159,8 @@ export const onboardClinic = async (req, res) => {
             zynq_user_id, clinic_name, org_number, email, mobile_number,
             address, street_address, city, state, zip_code, latitude, longitude,
             treatments, clinic_timing, website_url, clinic_description,
-            equipments, skin_types, severity_levels, fee_range, language, form_stage
+            equipments, skin_types, severity_levels, fee_range, language, form_stage,
+            ivo_registration_number, hsa_id
         } = value;
 
         language = language || "en";
@@ -170,20 +175,22 @@ export const onboardClinic = async (req, res) => {
 
 
         const clinicData = buildClinicData({
-            zynq_user_id : zynq_user_id || clinic_data.zynq_user_id,
-            clinic_name : clinic_name || clinic_data.clinic_name,   
-            org_number : org_number || clinic_data.org_number,
-            email : email || clinic_data.email,
-            mobile_number : mobile_number || clinic_data.mobile_number,
-            address : address || clinic_data.address,
-            fee_range : fee_range || clinic_data.fee_range,
-            website_url : website_url || clinic_data.website_url,
-            clinic_description : clinic_description || clinic_data.clinic_description,
-            language : language || clinic_data.language,
-            clinic_logo : clinic_logo ? clinic_logo : clinic_data.clinic_logo,
-            form_stage : form_stage || clinic_data.form_stage
+            zynq_user_id: zynq_user_id || clinic_data.zynq_user_id,
+            clinic_name: clinic_name || clinic_data.clinic_name,
+            org_number: org_number || clinic_data.org_number,
+            email: email || clinic_data.email,
+            mobile_number: mobile_number || clinic_data.mobile_number,
+            address: address || clinic_data.address,
+            fee_range: fee_range || clinic_data.fee_range,
+            website_url: website_url || clinic_data.website_url,
+            clinic_description: clinic_description || clinic_data.clinic_description,
+            language: language || clinic_data.language,
+            clinic_logo: clinic_logo ? clinic_logo : clinic_data.clinic_logo,
+            form_stage: form_stage || clinic_data.form_stage,
+            ivo_registration_number: ivo_registration_number || clinic_data.ivo_registration_number,
+            hsa_id: hsa_id || clinic_data.hsa_id
         });
-  
+
 
         if (clinic_data) {
             await clinicModels.updateClinicData(clinicData, clinic_data.clinic_id);
@@ -205,11 +212,12 @@ export const onboardClinic = async (req, res) => {
                 }
             });
         }
-
-        await clinicModels.insertClinicLocation({
-            clinic_id, street_address, city, state,
-            zip_code, latitude, longitude
-        });
+        if (street_address && city && state && zip_code && latitude && longitude) {
+            await clinicModels.insertClinicLocation({
+                clinic_id, street_address, city, state,
+                zip_code, latitude, longitude
+            });
+        }
 
         await Promise.all([
             treatments && clinicModels.insertClinicTreatments(treatments, clinic_id),
@@ -259,7 +267,9 @@ export const updateClinic = async (req, res) => {
             equipments: Joi.array().items(Joi.string()).optional(),
             skin_types: Joi.array().items(Joi.string()).optional(),
             severity_levels: Joi.array().items(Joi.string()).optional(),
-            language: Joi.string().valid('en', 'sv').optional()
+            language: Joi.string().valid('en', 'sv').optional(),
+            ivo_registration_number: Joi.string().optional(),
+            hsa_id: Joi.string().optional()
         });
 
         if (typeof req.body.clinic_timing === 'string') {
@@ -278,7 +288,8 @@ export const updateClinic = async (req, res) => {
             clinic_name, org_number, email, mobile_number,
             address, fee_range, website_url, clinic_description,
             street_address, city, state, zip_code, latitude, longitude,
-            treatments, clinic_timing, equipments, skin_types, severity_levels, language
+            treatments, clinic_timing, equipments, skin_types, severity_levels, language,
+            ivo_registration_number, hsa_id
         } = value;
 
         const uploadedFiles = req.files;
@@ -298,7 +309,9 @@ export const updateClinic = async (req, res) => {
         const clinicData = buildClinicData({
             zynq_user_id, clinic_name, org_number, email, mobile_number,
             address, fee_range, website_url, clinic_description, language,
-            clinic_logo
+            clinic_logo,
+            ivo_registration_number,
+            hsa_id
         });
 
         await clinicModels.updateClinicData(clinicData, clinic_id);
@@ -447,4 +460,34 @@ export const searchLocation = async (req, res) => {
         console.error("Error in searchLocationRequest:", error);
         return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
     }
+};
+
+export const getLatLong = (req, res) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { address } = req.query;
+            const googleApiKey = process.env.GOOGLE_API_KEY;
+            const apiUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+            const response = await axios.get(apiUrl, {
+                params: {
+                    address,
+                    key: googleApiKey,
+                },
+            });
+            const { results } = response.data;
+            if (results && results.length > 0) {
+                const { lat, lng } = results[0].geometry.location;
+                let data = {
+                    lat,
+                    lng
+                }   
+                return handleSuccess(res, 200, "en", "LAT_LONG_FETCHED_SUCCESSFULLY", data);
+            } else {
+                return handleError(res, 404, "en", "NO_RESULT_FOUND");
+            }
+        } catch (error) {
+            handleError(res, 500, "en", error.message);
+            reject(error);
+            }
+    });
 };

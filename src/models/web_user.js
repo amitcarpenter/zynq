@@ -15,7 +15,7 @@ export const get_web_user_by_id = async (id) => {
             u.id = ?`, [id]);
     } catch (error) {
         console.error("Database Error:", error.message);
-        throw new Error("Failed to fetch clinic data.");
+        throw new Error("Failed to fetch web user data.");
     }
 };
 
@@ -81,8 +81,6 @@ export const update_onboarding_status = async (status, id) => {
     }
 }
 
-
-
 export const update_web_user_password_set = async (password, show_password, id) => {
     try {
         return await db.query(`UPDATE tbl_zqnq_users SET password = ?, show_password = ?, is_password_set = 1 WHERE id = ?`, [password, show_password, id]);
@@ -100,5 +98,9 @@ export const create_web_user = async (userData) => {
         throw new Error("Failed to create web user.");
     }
 }
+
+
+
+
 
 
