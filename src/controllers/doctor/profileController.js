@@ -72,25 +72,35 @@ export const addEducationAndExperienceInformation = async (req, res) => {
         const experienceList = JSON.parse(value.experience);
 
         const files = req.files;
+         if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
+            for (const key in files) { // 'key' is like 'medical_council', 'deramatology_board', etc.
+                const certTypeFromDb = await doctorModels.get_certification_type_by_filename(key);
 
-        const hasNewCertificationFiles = Object.keys(files).length > 0;
+                if (certTypeFromDb.length > 0) {
+                    const certification_type_id = certTypeFromDb[0].certification_type_id;
 
-        if (hasNewCertificationFiles) {
-            await doctorModels.delete_all_certifications_for_doctor(doctorId);
+                    for (const file of files[key]) { // Loop through potential multiple files for the same field name
+                        const newUploadPath = file.filename; // This is the new path
 
-            for (const key in files) {
-                const certType = await doctorModels.get_certification_type_by_filename(key)
+                        // Check if this certification type already exists for the doctor
+                        const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
 
-                if (certType.length > 0) {
-                    const certification_type_id = certType[0].certification_type_id;
-
-                    for (const file of files[key]) {
-                        console.log("file>>>>>>>", file)
-                        await doctorModels.add_certification(doctorId, certification_type_id, file.filename)
+                        if (existingCert) {
+                            // Certification already exists, update its file path
+                            await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
+                            console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);
+                        } else {
+                            // Certification does not exist, add it
+                            await doctorModels.add_certification(doctorId, certification_type_id, newUploadPath); // Add other metadata if available from req.body
+                            console.log(`Added new certification for doctor ${doctorId}, type ${certification_type_id} with file ${newUploadPath}`);
+                        }
                     }
+                } else {
+                    console.warn(`Certification type with filename key '${key}' not found in tbl_certification_type. Skipping file processing.`);
                 }
             }
         }
+        // --- END IMPROVED LOGIC ---
 
 
 
@@ -714,28 +724,35 @@ export const editEducationAndExperienceInformation = async (req, res) => {
         const educationList = JSON.parse(value.education);
         const experienceList = JSON.parse(value.experience);
 
-
         const files = req.files;
+         if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
+            for (const key in files) { // 'key' is like 'medical_council', 'deramatology_board', etc.
+                const certTypeFromDb = await doctorModels.get_certification_type_by_filename(key);
 
-        const hasNewCertificationFiles = Object.keys(files).length > 0;
+                if (certTypeFromDb.length > 0) {
+                    const certification_type_id = certTypeFromDb[0].certification_type_id;
 
-        if (hasNewCertificationFiles) {
-            await doctorModels.delete_all_certifications_for_doctor(doctorId);
+                    for (const file of files[key]) { // Loop through potential multiple files for the same field name
+                        const newUploadPath = file.filename; // This is the new path
 
-            for (const key in files) {
-                const certType = await doctorModels.get_certification_type_by_filename(key)
+                        // Check if this certification type already exists for the doctor
+                        const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
 
-                if (certType.length > 0) {
-                    const certification_type_id = certType[0].certification_type_id;
-
-                    for (const file of files[key]) {
-                        console.log("file>>>>>>>", file)
-                        await doctorModels.add_certification(doctorId, certification_type_id, file.filename)
+                        if (existingCert) {
+                            // Certification already exists, update its file path
+                            await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
+                            console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);
+                        } else {
+                            // Certification does not exist, add it
+                            await doctorModels.add_certification(doctorId, certification_type_id, newUploadPath); // Add other metadata if available from req.body
+                            console.log(`Added new certification for doctor ${doctorId}, type ${certification_type_id} with file ${newUploadPath}`);
+                        }
                     }
+                } else {
+                    console.warn(`Certification type with filename key '${key}' not found in tbl_certification_type. Skipping file processing.`);
                 }
             }
         }
-
 
         await doctorModels.delete_all_education(doctorId);
         await doctorModels.delete_all_experience(doctorId);

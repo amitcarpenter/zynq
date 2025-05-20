@@ -427,3 +427,31 @@ export const delete_all_certifications_for_doctor = async (doctorId) => {
         throw new Error("Failed to delete all certifications for doctor.");
     }
 };
+
+export const update_certification_upload_path = async (doctorId, certificationTypeId, newUploadPath) => {
+    try {
+        return await db.query(
+            `UPDATE tbl_doctor_certification
+             SET upload_path = ?
+             WHERE doctor_id = ? AND certification_type_id = ?`,
+            [newUploadPath, doctorId, certificationTypeId]
+        );
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update certification upload path.");
+    }
+};
+
+export const get_doctor_certification_by_type = async (doctorId, certificationTypeId) => {
+    try {
+        const [result] = await db.query(
+            `SELECT doctor_certification_id, upload_path FROM tbl_doctor_certification
+             WHERE doctor_id = ? AND certification_type_id = ?`,
+            [doctorId, certificationTypeId]
+        );
+        return result[0]; // Returns the first matching certification or undefined
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to get doctor certification by type.");
+    }
+};
