@@ -161,16 +161,16 @@ export const insertClinicOperationHours = async (timing, clinic_id) => {
         const timingPromises = daysOfWeek.map(day => {
             const openTime = timing[day]?.open ?? '';
             const closeTime = timing[day]?.close ?? '';
+            const isClosed = timing[day]?.is_closed ?? false;
 
-            // Insert only if open or close time is non-empty string
             if (openTime.trim() !== '' || closeTime.trim() !== '') {
                 return db.query(
-                    'INSERT INTO tbl_clinic_operation_hours (clinic_id, day_of_week, open_time, close_time) VALUES (?, ?, ?, ?)',
-                    [clinic_id, day, openTime, closeTime]
+                    'INSERT INTO tbl_clinic_operation_hours (clinic_id, day_of_week, open_time, close_time, is_closed) VALUES (?, ?, ?, ?, ?)',
+                    [clinic_id, day, openTime, closeTime, isClosed ? 1 : 0]
                 );
             }
-            return null;  // skip insertion if both are empty
-        }).filter(Boolean);  // remove null entries
+            return null;    
+        }).filter(Boolean); 
 
         return await Promise.all(timingPromises);
     } catch (error) {
