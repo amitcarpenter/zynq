@@ -26,8 +26,6 @@ const daySchema = Joi.object({
     is_closed: Joi.boolean().optional().allow('', null)
 });
 
-
-
 export const getProfile = async (req, res) => {
     try {
         const language = req.user.language;
@@ -149,9 +147,41 @@ export const onboardClinic = async (req, res) => {
             try {
                 req.body.clinic_timing = JSON.parse(req.body.clinic_timing);
             } catch (err) {
-                return handleError(res, 400, "en", "Invalid JSON for clinic_timing");
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_CLINIC_TIMING");
             }
         }
+        if (typeof req.body.treatments === 'string') {
+            try {
+                req.body.treatments = JSON.parse(req.body.treatments);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_TREATMENTS");
+            }
+        }
+
+        if (typeof req.body.equipments === 'string') {
+            try {
+                req.body.equipments = JSON.parse(req.body.equipments);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_EQUIPMENTS");
+            }
+        }
+
+        if (typeof req.body.skin_types === 'string') {
+            try {
+                req.body.skin_types = JSON.parse(req.body.skin_types);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_SKIN_TYPES");
+            }
+        }
+
+        if (typeof req.body.severity_levels === 'string') {
+            try {
+                req.body.severity_levels = JSON.parse(req.body.severity_levels);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_SEVERITY_LEVELS");
+            }
+        }
+
 
         const { error, value } = clinicSchema.validate(req.body);
         if (error) return joiErrorHandle(res, error);
@@ -438,7 +468,6 @@ export const getCertificateType = async (req, res) => {
         return handleError(res, 500, "en", 'INTERNAL_SERVER_ERROR');
     }
 }
-
 
 export const searchLocation = async (req, res) => {
     try {
