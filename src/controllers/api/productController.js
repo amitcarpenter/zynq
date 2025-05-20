@@ -5,7 +5,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken"
-import * as userModels from "../../models/web_user.js";
+import * as apiModels from "../../models/api.js";
 import { sendEmail } from "../../services/send_email.js";
 import { generateAccessToken, generatePassword, generateVerificationLink } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
@@ -22,12 +22,8 @@ const image_logo = process.env.LOGO_URL;
 
 export const getAllProducts = async (req, res) => {
     try {
-        const [clinic] = await userModels.get_clinic_by_zynq_user_id(req.user.id);
-        if (!clinic) {
-            return handleError(res, 404, "en", "CLINIC_NOT_FOUND");
-        }
-
-        const products = await clinicModels.get_all_products(clinic.clinic_id);
+ 
+        const products = await apiModels.get_all_products_for_user();
 
         if (products.length === 0) {
             return handleError(res, 404, "en", "NO_PRODUCTS_FOUND");

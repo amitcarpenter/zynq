@@ -215,3 +215,15 @@ export const getDoctorTreatments = async (doctor_id) => {
         throw new Error("Failed to fetch doctor treatments.");
     }
 };
+
+
+//======================================= Product =========================================
+export const get_all_products_for_user = async (user_id) => {
+    try {
+        return await db.query(`SELECT * FROM tbl_products WHERE user_id = ?`, [user_id]);
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch products.");
+    }
+}

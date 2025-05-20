@@ -127,5 +127,8 @@
     "PRODUCT_NOT_FOUND": "Product Not Found",
     "PRODUCT_DELETED_SUCCESSFULLY": "Product Deleted Successfully",
     "PASSWORD_SET_SUCCESSFULLY": "Password Set Successfully",
-    "PASSWORD_SET_FAILED": "Password Set Failed"
+    "PASSWORD_SET_FAILED": "Password Set Failed",
+    "NO_RESULT_FOUND": "No Result Found",
+    "LAT_LONG_FETCHED_SUCCESSFULLY": "Lat-Long Fetched Successfully",
+    "LAT_LONG_FETCHED_FAILED": "Lat-Long Fetch Failed"
 }
