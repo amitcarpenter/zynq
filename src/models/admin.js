@@ -36,7 +36,16 @@ export const updatePassword = async (admin_id, password) => {
         console.error("Update Error:", error.message);
         throw new Error("Failed to update password.");
     }
-}
+};
+
+export const updateProfile = async (admin_id, updateData) => {
+    try {
+        return await db.query('UPDATE `tbl_admin` SET `full_name` = ?,`email` = ?,`mobile_number` = ?,`profile_image`= ? WHERE admin_id = ?', [updateData.full_name, updateData.email, updateData.mobile_number, updateData.profile_image, admin_id])
+    } catch (error) {
+        console.error("Update Error:", error.message);
+        throw new Error("Failed to update profile.");
+    }
+};
 
 //======================================= Dashboard =========================================
 

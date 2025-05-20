@@ -10,7 +10,6 @@ dotenv.config();
 
 const WEB_JWT_SECRET = process.env.WEB_JWT_SECRET;
 
-
 export const authenticate = (allowedRoles = []) => {
     return async (req, res, next) => {
         try {
