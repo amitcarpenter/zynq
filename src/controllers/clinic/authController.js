@@ -242,7 +242,7 @@ export const onboardClinic = async (req, res) => {
                 }
             });
         }
-        
+
         if (street_address && city && state && zip_code && latitude && longitude) {
             const clinicLocation = await clinicModels.getClinicLocation(clinic_id); 
             if (clinicLocation) {
@@ -266,8 +266,10 @@ export const onboardClinic = async (req, res) => {
 
         const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
         if (clinicTimingData) {
+            console.log("clinic_timing1", clinic_timing);
             await clinicModels.updateClinicOperationHours(clinic_timing, clinic_id);
         } else {
+            console.log("clinic_timing2", clinic_timing);
             await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
         }
 
