@@ -52,6 +52,7 @@ router.get("/get-skin-types", authControllers.getClinicSkinTypes);
 router.get("/get-severity-levels", authControllers.getClinicSeverityLevels);
 router.get("/get-certificate-type", authControllers.getCertificateType);
 router.get("/search-location", authControllers.searchLocation);
+router.get("/get-lat-long", authControllers.getLatLong);
 
 //==================================== Roles ==============================
 router.get("/get-roles", authControllers.getAllRoles);

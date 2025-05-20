@@ -461,3 +461,33 @@ export const searchLocation = async (req, res) => {
         return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
     }
 };
+
+export const getLatLong = (req, res) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { address } = req.query;
+            const googleApiKey = process.env.GOOGLE_API_KEY;
+            const apiUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+            const response = await axios.get(apiUrl, {
+                params: {
+                    address,
+                    key: googleApiKey,
+                },
+            });
+            const { results } = response.data;
+            if (results && results.length > 0) {
+                const { lat, lng } = results[0].geometry.location;
+                let data = {
+                    lat,
+                    lng
+                }   
+                return handleSuccess(res, 200, "en", "LAT_LONG_FETCHED_SUCCESSFULLY", data);
+            } else {
+                return handleError(res, 404, "en", "NO_RESULT_FOUND");
+            }
+        } catch (error) {
+            handleError(res, 500, "en", error.message);
+            reject(error);
+            }
+    });
+};
