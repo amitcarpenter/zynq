@@ -17,6 +17,7 @@ const uploadVariousFields = uploadCertificationFieldsTo([
     { name: 'medical_council', maxCount: 1, subfolder: 'certifications' },
     { name: 'deramatology_board', maxCount: 1, subfolder: 'certifications' },
     { name: 'laser_safety', maxCount: 1, subfolder: 'certifications' },
+     { name: 'cosmetology_license', maxCount: 1, subfolder: 'certifications' },
 ]);
 
 router.post('/add_education_experience', authenticate(['DOCTOR']), uploadVariousFields, doctorController.addEducationAndExperienceInformation);
@@ -27,6 +28,12 @@ router.post('/add_fee_availability', authenticate(['DOCTOR']), doctorController.
 
 //======================================= Edit apis =========================================
 router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('profile_images'), doctorController.editPersonalInformation);
+
+router.post('/edit_education_experience', authenticate(['DOCTOR']), uploadVariousFields, doctorController.editEducationAndExperienceInformation);
+
+
+router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('profile_images'), doctorController.editPersonalInformation);
+
 
 router.post("/add_education", authenticate(['DOCTOR']), doctorController.addEducation);
 
