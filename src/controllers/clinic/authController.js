@@ -62,7 +62,7 @@ export const getProfile = async (req, res) => {
 
 
         if (clinic.clinic_logo && !clinic.clinic_logo.startsWith("http")) {
-            clinic.clinic_logo = `${APP_URL}${clinic.clinic_logo}`;
+            clinic.clinic_logo = `${APP_URL}clinic/clinic_logo/${clinic.clinic_logo}`;
         }
         return handleSuccess(res, 200, language, "CLINIC_PROFILE_FETCHED", clinic);
     } catch (error) {
