@@ -22,7 +22,8 @@ const WEB_JWT_SECRET = process.env.WEB_JWT_SECRET;
 
 const daySchema = Joi.object({
     open: Joi.string().allow('').optional().allow('', null),
-    close: Joi.string().allow('').optional().allow('', null)
+    close: Joi.string().allow('').optional().allow('', null),
+    is_closed: Joi.boolean().optional().allow('', null)
 });
 
 
