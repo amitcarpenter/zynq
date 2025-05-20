@@ -265,11 +265,18 @@ export const onboardClinic = async (req, res) => {
         }
 
         const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
+        console.log("clinic_timing", typeof clinic_timing);
         if (clinicTimingData) {
-            console.log("clinic_timing1", clinic_timing);
+            if (!clinic_timing) {
+                console.log("No clinic timing data provided");
+                return;
+            }
             await clinicModels.updateClinicOperationHours(clinic_timing, clinic_id);
         } else {
-            console.log("clinic_timing2", clinic_timing);
+            if (!clinic_timing) {
+                console.log("No clinic timing data provided");
+                return;
+            }
             await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
         }
 
