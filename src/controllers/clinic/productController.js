@@ -81,7 +81,7 @@ export const getAllProducts = async (req, res) => {
         }
         products.forEach(product => {
             if (product.image_url && !product.image_url.startsWith('http')) {
-                product.image_url = APP_URL + '/clinic/product_image/' + product.image_url;
+                product.image_url = APP_URL + 'clinic/product_image/' + product.image_url;
             }
         });
 

@@ -114,8 +114,6 @@ export const update_clinic_timing = async (timing, clinic_id) => {
     }
 };
 
-
-
 export const insertClinicData = async (clinicData) => {
     try {
         const result = await db.query('INSERT INTO tbl_clinics SET ?', [clinicData]);
@@ -232,7 +230,7 @@ export const insertClinicDocuments = async (clinic_id, certification_type_id, do
 
 export const getAllTreatments = async () => {
     try {
-        const treatments = await db.query('SELECT * FROM tbl_treatments');
+        const treatments = await db.query('SELECT * FROM tbl_treatments ORDER BY created_at DESC');
         return treatments;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -244,7 +242,7 @@ export const getClinicTreatments = async (clinic_id) => {
     try {
         const treatments = await db.query('SELECT t.* FROM tbl_treatments t ' +
             'INNER JOIN tbl_clinic_treatments ct ON t.treatment_id = ct.treatment_id ' +
-            'WHERE ct.clinic_id = ?', [clinic_id]);
+            'WHERE ct.clinic_id = ? ORDER BY t.created_at DESC', [clinic_id]);
         return treatments;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -266,7 +264,7 @@ export const getClinicEquipments = async (clinic_id) => {
     try {
         const equipments = await db.query('SELECT e.* FROM tbl_equipments e ' +
             'INNER JOIN tbl_clinic_equipments ce ON e.equipment_id = ce.equipment_id ' +
-            'WHERE ce.clinic_id = ?', [clinic_id]);
+            'WHERE ce.clinic_id = ? ORDER BY e.created_at DESC', [clinic_id]);
         return equipments;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -278,7 +276,7 @@ export const getClinicSkinTypes = async (clinic_id) => {
     try {
         const skinTypes = await db.query('SELECT s.* FROM tbl_skin_types s ' +
             'INNER JOIN tbl_clinic_skin_types cst ON s.skin_type_id = cst.skin_type_id ' +
-            'WHERE cst.clinic_id = ?', [clinic_id]);
+            'WHERE cst.clinic_id = ? ORDER BY s.created_at DESC', [clinic_id]);
         return skinTypes;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -290,7 +288,7 @@ export const getClinicSeverityLevels = async (clinic_id) => {
     try {
         const severityLevels = await db.query('SELECT sl.* FROM tbl_severity_levels sl ' +
             'INNER JOIN tbl_clinic_severity_levels csl ON sl.severity_level_id = csl.severity_id ' +
-            'WHERE csl.clinic_id = ?', [clinic_id]);
+            'WHERE csl.clinic_id = ? ORDER BY sl.created_at DESC', [clinic_id]);
         return severityLevels;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -300,7 +298,7 @@ export const getClinicSeverityLevels = async (clinic_id) => {
 
 export const getClinicDocuments = async (clinic_id) => {
     try {
-        const documents = await db.query('SELECT * FROM tbl_clinic_documents WHERE clinic_id = ?', [clinic_id]);
+        const documents = await db.query('SELECT * FROM tbl_clinic_documents WHERE clinic_id = ? ORDER BY created_at DESC', [clinic_id]);
         return documents;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -310,7 +308,7 @@ export const getClinicDocuments = async (clinic_id) => {
 
 export const getClinicLocation = async (clinic_id) => {
     try {
-        const location = await db.query('SELECT * FROM tbl_clinic_locations WHERE clinic_id = ?', [clinic_id]);
+        const location = await db.query('SELECT * FROM tbl_clinic_locations WHERE clinic_id = ? ORDER BY created_at DESC', [clinic_id]);
         return location;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -320,7 +318,7 @@ export const getClinicLocation = async (clinic_id) => {
 
 export const getClinicProfile = async (clinic_id) => {
     try {
-        const clinic = await db.query('SELECT * FROM tbl_clinics WHERE clinic_id = ?', [clinic_id]);
+        const clinic = await db.query('SELECT * FROM tbl_clinics WHERE clinic_id = ? ORDER BY created_at DESC', [clinic_id]);
         return clinic;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -330,7 +328,7 @@ export const getClinicProfile = async (clinic_id) => {
 
 export const getAllClinicEquipments = async () => {
     try {
-        const equipments = await db.query('SELECT * FROM tbl_equipments');
+        const equipments = await db.query('SELECT * FROM tbl_equipments ORDER BY created_at DESC');
         return equipments;
     } catch (error) {
         console.error("Database Error:", error.message);
@@ -351,7 +349,7 @@ export const getAllRoles = async () => {
 
 export const getAllSkinTypes = async () => {
     try {
-        const skinTypes = await db.query('SELECT * FROM tbl_skin_types');
+        const skinTypes = await db.query('SELECT * FROM tbl_skin_types ORDER BY created_at DESC');
         return skinTypes;
     }
     catch (error) {
@@ -362,7 +360,7 @@ export const getAllSkinTypes = async () => {
 
 export const getAllSeverityLevels = async () => {
     try {
-        const severityLevels = await db.query('SELECT * FROM tbl_severity_levels');
+        const severityLevels = await db.query('SELECT * FROM tbl_severity_levels ORDER BY created_at DESC');
         return severityLevels;
     }
     catch (error) {
@@ -373,7 +371,7 @@ export const getAllSeverityLevels = async () => {
 
 export const getCertificateType = async () => {
     try {
-        const documents = await db.query('SELECT * FROM tbl_certification_type WHERE file_name IS NOT NULL');
+        const documents = await db.query('SELECT * FROM tbl_certification_type WHERE file_name IS NOT NULL ORDER BY created_at DESC');
         return documents;
     }
     catch (error) {
@@ -504,7 +502,7 @@ export const deleteClinicData = async (clinic_id) => {
 
 export const getCertificateTypeByFileName = async (file_name) => {
     try {
-        const documents = await db.query('SELECT * FROM tbl_certification_type WHERE file_name = ?', [file_name]);
+        const documents = await db.query('SELECT * FROM tbl_certification_type WHERE file_name = ? ORDER BY created_at DESC', [file_name]);
         return documents;
     }
     catch (error) {
@@ -527,7 +525,7 @@ export const get_all_doctors = async () => {
 
 export const getDoctorAvailability = async (doctor_id) => {
     try {
-        const availability = await db.query('SELECT * FROM tbl_doctor_availability WHERE doctor_id = ?', [doctor_id]);
+        const availability = await db.query('SELECT * FROM tbl_doctor_availability WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return availability;
     }
     catch (error) {
@@ -542,7 +540,7 @@ export const getDoctorCertifications = async (doctor_id) => {
             SELECT c.*, ct.* 
             FROM tbl_doctor_certification c
             LEFT JOIN tbl_certification_type ct ON c.certification_type_id = ct.certification_type_id 
-            WHERE c.doctor_id = ?`, [doctor_id]);
+            WHERE c.doctor_id = ? ORDER BY c.created_at DESC`, [doctor_id]);
         return certifications;
     }
     catch (error) {
@@ -575,7 +573,7 @@ export const getDoctorExperience = async (doctor_id) => {
 
 export const getDoctorReviews = async (doctor_id) => {
     try {
-        const reviews = await db.query('SELECT * FROM tbl_doctor_reviews WHERE doctor_id = ?', [doctor_id]);
+        const reviews = await db.query('SELECT * FROM tbl_doctor_reviews WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return reviews;
     }
     catch (error) {
@@ -586,7 +584,7 @@ export const getDoctorReviews = async (doctor_id) => {
 
 export const getDoctorSeverityLevels = async (doctor_id) => {
     try {
-        const severityLevels = await db.query('SELECT * FROM tbl_doctor_severity_levels WHERE doctor_id = ?', [doctor_id]);
+        const severityLevels = await db.query('SELECT * FROM tbl_doctor_severity_levels WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return severityLevels;
     }
     catch (error) {
@@ -597,7 +595,7 @@ export const getDoctorSeverityLevels = async (doctor_id) => {
 
 export const getDoctorSkinTypes = async (doctor_id) => {
     try {
-        const skinTypes = await db.query('SELECT * FROM tbl_doctor_skin_types WHERE doctor_id = ?', [doctor_id]);
+        const skinTypes = await db.query('SELECT * FROM tbl_doctor_skin_types WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return skinTypes;
     }
     catch (error) {
@@ -608,7 +606,7 @@ export const getDoctorSkinTypes = async (doctor_id) => {
 
 export const getDoctorTreatments = async (doctor_id) => {
     try {
-        const treatments = await db.query('SELECT * FROM tbl_doctor_treatments WHERE doctor_id = ?', [doctor_id]);
+        const treatments = await db.query('SELECT * FROM tbl_doctor_treatments WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return treatments;
     }
     catch (error) {
@@ -616,7 +614,6 @@ export const getDoctorTreatments = async (doctor_id) => {
         throw new Error("Failed to fetch doctor treatments.");
     }
 };
-
 
 export const create_doctor = async (doctorData) => {
     try {
@@ -642,7 +639,7 @@ export const create_doctor_clinic_map = async (clinicMapData) => {
 
 export const get_doctor_by_zynq_user_id = async (zynq_user_id) => {
     try {
-        const result = await db.query('SELECT * FROM tbl_doctors WHERE zynq_user_id = ?', [zynq_user_id]);
+        const result = await db.query('SELECT * FROM tbl_doctors WHERE zynq_user_id = ? ORDER BY created_at DESC', [zynq_user_id]);
         return result;
     }
     catch (error) {
@@ -658,7 +655,7 @@ export const get_all_doctors_by_clinic_id = async (clinic_id) => {
             FROM tbl_doctor_clinic_map dcm
             JOIN tbl_doctors d ON dcm.doctor_id = d.doctor_id
             JOIN tbl_zqnq_users zu ON d.zynq_user_id = zu.id
-            WHERE dcm.clinic_id = ?`;
+            WHERE dcm.clinic_id = ? ORDER BY dcm.created_at DESC`;
         const result = await db.query(query, [clinic_id]);
         return result;
     }
@@ -701,7 +698,6 @@ export const get_mapping_data_by_doctor_id = async (doctor_id) => {
     }
 };
 
-
 export const update_doctor_password = async (clinic_id, password) => {
     try {
         const result = await db.query('UPDATE tbl_zqnq_users SET password = ? WHERE id = ?', [password, clinic_id]);
@@ -726,7 +722,7 @@ export const insertProduct = async (productData) => {
 
 export const get_all_products = async (clinic_id) => {
     try {
-        const result = await db.query('SELECT * FROM tbl_products WHERE clinic_id = ?', [clinic_id]);
+        const result = await db.query('SELECT * FROM tbl_products WHERE clinic_id = ? ORDER BY created_at DESC', [clinic_id]);
         return result;
     }
     catch (error) {
@@ -756,7 +752,6 @@ export const updateProduct = async (productData, product_id) => {
         throw new Error("Failed to update product.");
     }
 };
-
 
 export const deleteProduct = async (product_id) => {
     try {

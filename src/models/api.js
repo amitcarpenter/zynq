@@ -122,7 +122,7 @@ export const getAllDoctors = async () => {
             FROM tbl_doctors d
             LEFT JOIN tbl_zqnq_users z ON d.zynq_user_id = z.id 
             WHERE d.profile_completion_percentage >= 50 
-            ORDER BY d.created_at DESC`);
+            ORDER BY d.created_at DESC `);
 
         return doctors;
     } catch (error) {
@@ -133,7 +133,7 @@ export const getAllDoctors = async () => {
 
 export const getDoctorAvailability = async (doctor_id) => {
     try {
-        const availability = await db.query('SELECT * FROM tbl_doctor_availability WHERE doctor_id = ?', [doctor_id]);
+        const availability = await db.query('SELECT * FROM tbl_doctor_availability WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return availability;
     }
     catch (error) {
@@ -148,7 +148,7 @@ export const getDoctorCertifications = async (doctor_id) => {
             SELECT c.*, ct.* 
             FROM tbl_doctor_certification c
             LEFT JOIN tbl_certification_type ct ON c.certification_type_id = ct.certification_type_id 
-            WHERE c.doctor_id = ?`, [doctor_id]);
+            WHERE c.doctor_id = ? ORDER BY c.created_at DESC`, [doctor_id]);
         return certifications;
     }
     catch (error) {
@@ -181,7 +181,7 @@ export const getDoctorExperience = async (doctor_id) => {
 
 export const getDoctorReviews = async (doctor_id) => {
     try {
-        const reviews = await db.query('SELECT * FROM tbl_doctor_reviews WHERE doctor_id = ?', [doctor_id]);
+        const reviews = await db.query('SELECT * FROM tbl_doctor_reviews WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return reviews;
     }
     catch (error) {
@@ -192,7 +192,7 @@ export const getDoctorReviews = async (doctor_id) => {
 
 export const getDoctorSeverityLevels = async (doctor_id) => {
     try {
-        const severityLevels = await db.query('SELECT * FROM tbl_doctor_severity_levels WHERE doctor_id = ?', [doctor_id]);
+        const severityLevels = await db.query('SELECT * FROM tbl_doctor_severity_levels WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return severityLevels;
     }
     catch (error) {
@@ -203,7 +203,7 @@ export const getDoctorSeverityLevels = async (doctor_id) => {
 
 export const getDoctorSkinTypes = async (doctor_id) => {
     try {
-        const skinTypes = await db.query('SELECT * FROM tbl_doctor_skin_types WHERE doctor_id = ?', [doctor_id]);
+        const skinTypes = await db.query('SELECT * FROM tbl_doctor_skin_types WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return skinTypes;
     }
     catch (error) {
@@ -214,7 +214,7 @@ export const getDoctorSkinTypes = async (doctor_id) => {
 
 export const getDoctorTreatments = async (doctor_id) => {
     try {
-        const treatments = await db.query('SELECT * FROM tbl_doctor_treatments WHERE doctor_id = ?', [doctor_id]);
+        const treatments = await db.query('SELECT * FROM tbl_doctor_treatments WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
         return treatments;
     }
     catch (error) {
@@ -227,7 +227,7 @@ export const getDoctorTreatments = async (doctor_id) => {
 //======================================= Product =========================================
 export const get_all_products_for_user = async () => {
     try {
-        return await db.query(`SELECT * FROM tbl_products`);
+        return await db.query(`SELECT * FROM tbl_products ORDER BY created_at DESC`);
     }
     catch (error) {
         console.error("Database Error:", error.message);
@@ -239,7 +239,7 @@ export const get_all_products_for_user = async () => {
 //======================================= Clinic =========================================
 export const getAllClinicsForUser = async () => {
     try {
-        return await db.query(`SELECT * FROM tbl_clinics WHERE profile_completion_percentage >= 50`);
+        return await db.query(`SELECT * FROM tbl_clinics WHERE profile_completion_percentage >= 50 ORDER BY created_at DESC`);
     }
     catch (error) {
         console.error("Database Error:", error.message);
