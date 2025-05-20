@@ -85,6 +85,9 @@ export const addEducationAndExperienceInformation = async (req, res) => {
             }
         }
 
+        await doctorModels.delete_all_education(doctorId);
+        await doctorModels.delete_all_experience(doctorId);
+
         // Save Education
         for (let edu of educationList) {
             await doctorModels.add_education(

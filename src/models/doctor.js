@@ -399,3 +399,22 @@ export const get_clinics_data_by_doctor_id = async (doctorId) => {
         throw new Error("Failed to fetch clinic data by doctor ID.");
     }
 };
+
+
+export const delete_all_education = async (doctor_id) => {
+    try {
+        return await db.query(`DELETE FROM tbl_doctor_educations WHERE doctor_id = ?`, [doctor_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete education.");
+    }
+};
+
+export const delete_all_experience = async (doctor_id) => {
+    try {
+        return await db.query(`DELETE FROM tbl_doctor_experiences WHERE doctor_id = ?`, [doctor_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete experience.");
+    }
+};
