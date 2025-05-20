@@ -20,13 +20,13 @@ const APP_URL = process.env.APP_URL;
 const image_logo = process.env.LOGO_URL;
 
 
-
 export const get_all_doctors = async (req, res) => {
     try {
         const doctors = await userModels.getAllDoctors();
         if (!doctors || doctors.length === 0) {
             return handleError(res, 404, 'en', "NO_DOCTORS_FOUND");
         }
+        
         for (const doctor of doctors) {
             const availability = await userModels.getDoctorAvailability(doctor.doctor_id);
             doctor.availability = availability || null;
