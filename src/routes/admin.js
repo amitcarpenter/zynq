@@ -30,6 +30,7 @@ router.post('/update-user-status', userControllers.update_user_status);
 
 //==================================== Clinic Managment ==============================
 router.post('/import-clinics-from-CSV', upload.single("file"), clinicControllers.import_clinics_from_CSV);
+router.post('/add-clinic-managment', clinicControllers.add_clinic_managment);
 router.get('/get-clinic-managment', clinicControllers.get_clinic_managment);
 
 //==================================== Doctor Managment ==============================

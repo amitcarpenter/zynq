@@ -133,6 +133,42 @@ export const update_user_status = async (user_id, is_active) => {
 
 //======================================= Clinic Managment =========================================
 
+export const findRole = async (role) => {
+    try {
+        return await db.query('SELECT * FROM `tbl_roles` WHERE role = ?', [role]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to find role.");
+    }
+};
+
+export const findClinicEmail = async (email) => {
+    try {
+        return await db.query('SELECT * FROM `tbl_zqnq_users` WHERE email = ?', [email])
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to find zync users email.");
+    }
+};
+
+export const findClinicByClinicUserId = async (id) => {
+    try {
+        return await db.query('SELECT * FROM `tbl_clinics` WHERE zynq_user_id = ?', [id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to find clinic by zynq user id.");
+    }
+};
+
+export const addZynqUsers = async (data) => {
+    try {
+        return await db.query('INSERT INTO `tbl_zqnq_users`(`email`, `role_id`) VALUES (?,?)', [data.email, data.role_id])
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to add zync users.");
+    }
+}
+
 export const insert_clinic = async (clinic) => {
     try {
         return await db.query(

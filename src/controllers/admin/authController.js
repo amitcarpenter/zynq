@@ -116,11 +116,10 @@ export const resetPassword = async (req, res) => {
             .messages({ 'any.only': 'Passwords do not match.' })
     });
 
-    const { error, value } = forgetSchema.validate(req.params);
+    const { error, value } = forgetSchema.validate(req.body);
     if (error) return joiErrorHandle(res, error);
 
     const { token, new_password } = value;
-    console.log(true);
 
     const decoded = generateAccessTokenVerifyAdmin(token);
     if (!decoded || !decoded.id) return res.status(400).render("errorPage.ejs", { message: "Invalid or expired reset token." });

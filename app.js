@@ -19,6 +19,7 @@ const PORT = process.env.PORT;
 const APP_URL = process.env.APP_URL;
 const IS_LIVE = process.env.IS_LIVE === "true";
 
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 app.use('/', express.static(path.join(__dirname, 'src/uploads')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
