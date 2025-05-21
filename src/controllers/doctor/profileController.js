@@ -85,7 +85,7 @@ export const addEducationAndExperienceInformation = async (req, res) => {
                         // Check if this certification type already exists for the doctor
                         const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
 
-                        if (existingCert) {
+                        if (existingCert.length>0) {
                             // Certification already exists, update its file path
                             await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
                             console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);
@@ -701,12 +701,11 @@ export const calculateProfileCompletionPercentageByDoctorId = async (doctorId) =
     }
 };
 
-
 export const editEducationAndExperienceInformation = async (req, res) => {
     try {
         const schema = Joi.object({
-            education: Joi.string().optional(),   // will be JSON
-            experience: Joi.string().optional(), // will be JSON
+            education: Joi.string().optional(),  
+            experience: Joi.string().optional(),
         });
 
         let language = 'en';
@@ -738,7 +737,7 @@ export const editEducationAndExperienceInformation = async (req, res) => {
                         // Check if this certification type already exists for the doctor
                         const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
 
-                        if (existingCert) {
+                        if (existingCert.length>0) {
                             // Certification already exists, update its file path
                             await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
                             console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);

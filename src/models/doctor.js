@@ -46,6 +46,7 @@ export const update_education = async (educationId, institute, degree, start_yea
         throw new Error("Failed to update education.");
     }
 };
+
 export const delete_education = async (educationId) => {
     try {
         return await db.query(`DELETE FROM tbl_doctor_educations WHERE education_id = ?`, [educationId]);
@@ -444,14 +445,27 @@ export const update_certification_upload_path = async (doctorId, certificationTy
 
 export const get_doctor_certification_by_type = async (doctorId, certificationTypeId) => {
     try {
-        const [result] = await db.query(
+        return await db.query(
             `SELECT doctor_certification_id, upload_path FROM tbl_doctor_certification
              WHERE doctor_id = ? AND certification_type_id = ?`,
             [doctorId, certificationTypeId]
-        );
-        return result[0]; // Returns the first matching certification or undefined
+        );// Returns the first matching certification or undefined
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get doctor certification by type.");
+    }
+};
+
+
+export const update_doctor_profile_completion = async (doctorId, percentage) => {
+    try {
+        return await db.query(`
+            UPDATE tbl_doctors
+            SET profile_completion_percentage = ?
+            WHERE doctor_id = ?
+        `, [percentage, doctorId]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update profile completion percentage.");
     }
 };

@@ -31,9 +31,7 @@ router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('pr
 
 router.post('/edit_education_experience', authenticate(['DOCTOR']), uploadVariousFields, doctorController.editEducationAndExperienceInformation);
 
-
 router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('profile_images'), doctorController.editPersonalInformation);
-
 
 router.post("/add_education", authenticate(['DOCTOR']), doctorController.addEducation);
 
@@ -56,7 +54,7 @@ router.put('/edit_certification', authenticate(['DOCTOR']), uploadFileTo('certif
 router.delete('/delete_certification/:doctor_certification_id', authenticate(['DOCTOR']), doctorController.deleteCertification);
 
 // Expertise
-router.put("/edit_expertise", authenticate(['DOCTOR']), doctorController.editExpertise);
+router.post("/edit_expertise", authenticate(['DOCTOR']), doctorController.editExpertise);
 
 router.post('/edit_fee_availability', authenticate(['DOCTOR']), doctorController.editConsultationFeeAndAvailability);
 
