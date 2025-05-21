@@ -655,7 +655,7 @@ export const get_all_doctors_by_clinic_id = async (clinic_id) => {
             FROM tbl_doctor_clinic_map dcm
             JOIN tbl_doctors d ON dcm.doctor_id = d.doctor_id
             JOIN tbl_zqnq_users zu ON d.zynq_user_id = zu.id
-            WHERE dcm.clinic_id = ? ORDER BY dcm.created_at DESC`;
+            WHERE dcm.clinic_id = ?  and d.profile_completion_percentage >= 50 ORDER BY dcm.created_at DESC`;
         const result = await db.query(query, [clinic_id]);
         return result;
     }
