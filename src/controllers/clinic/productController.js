@@ -77,7 +77,7 @@ export const getAllProducts = async (req, res) => {
         const products = await clinicModels.get_all_products(clinic.clinic_id);
 
         if (products.length === 0) {
-            return handleError(res, 404, "en", "NO_PRODUCTS_FOUND");
+            return handleSuccess(res, 200, "en", "PRODUCTS_FETCHED_SUCCESSFULLY", []);
         }
         products.forEach(product => {
             if (product.image_url && !product.image_url.startsWith('http')) {

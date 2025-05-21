@@ -103,7 +103,7 @@ export const getAllDoctors = async (req, res) => {
         const clinic_id = req.user.clinicData.clinic_id;
         const doctors = await clinicModels.get_all_doctors_by_clinic_id(clinic_id);
         if (!doctors || doctors.length === 0) {
-            return handleError(res, 404, 'en', "NO_DOCTORS_FOUND");
+            return handleSuccess(res, 200, 'en', "DOCTORS_FETCHED_SUCCESSFULLY", []);
         }
         // Get additional doctor data for each doctor
         for (const doctor of doctors) {
