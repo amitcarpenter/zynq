@@ -160,10 +160,10 @@ export const insertClinicOperationHours = async (timing, clinic_id) => {
             const openTime = timing[day]?.open ?? '';
             const closeTime = timing[day]?.close ?? '';
             const isClosed = timing[day]?.is_closed ?? false;
-                return db.query(
-                    'INSERT INTO tbl_clinic_operation_hours (clinic_id, day_of_week, open_time, close_time, is_closed) VALUES (?, ?, ?, ?, ?)',
-                    [clinic_id, day, openTime, closeTime, isClosed ? 1 : 0]
-                );
+            return db.query(
+                'INSERT INTO tbl_clinic_operation_hours (clinic_id, day_of_week, open_time, close_time, is_closed) VALUES (?, ?, ?, ?, ?)',
+                [clinic_id, day, openTime, closeTime, isClosed ? 1 : 0]
+            );
         }).filter(Boolean);
 
         return await Promise.all(timingPromises);
@@ -584,7 +584,14 @@ export const getDoctorReviews = async (doctor_id) => {
 
 export const getDoctorSeverityLevels = async (doctor_id) => {
     try {
-        const severityLevels = await db.query('SELECT * FROM tbl_doctor_severity_levels WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
+        const severityLevels = await db.query(`
+            SELECT dsl.*, sl.* 
+            FROM tbl_doctor_severity_levels dsl 
+            LEFT JOIN tbl_severity_levels sl ON dsl.severity_id = sl.severity_level_id  
+            WHERE dsl.doctor_id = ? 
+            ORDER BY dsl.created_at DESC`,
+            [doctor_id]
+        );
         return severityLevels;
     }
     catch (error) {
@@ -595,7 +602,14 @@ export const getDoctorSeverityLevels = async (doctor_id) => {
 
 export const getDoctorSkinTypes = async (doctor_id) => {
     try {
-        const skinTypes = await db.query('SELECT * FROM tbl_doctor_skin_types WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
+        const skinTypes = await db.query(`
+            SELECT dst.*, st.* 
+            FROM tbl_doctor_skin_types dst 
+            LEFT JOIN tbl_skin_types st ON dst.skin_type_id = st.skin_type_id 
+            WHERE dst.doctor_id = ? 
+            ORDER BY dst.created_at DESC`,
+            [doctor_id]
+        );
         return skinTypes;
     }
     catch (error) {
@@ -606,7 +620,14 @@ export const getDoctorSkinTypes = async (doctor_id) => {
 
 export const getDoctorTreatments = async (doctor_id) => {
     try {
-        const treatments = await db.query('SELECT * FROM tbl_doctor_treatments WHERE doctor_id = ? ORDER BY created_at DESC', [doctor_id]);
+        const treatments = await db.query(`
+            SELECT dt.*, t.* 
+            FROM tbl_doctor_treatments dt 
+            LEFT JOIN tbl_treatments t ON dt.treatment_id = t.treatment_id 
+            WHERE dt.doctor_id = ? 
+            ORDER BY dt.created_at DESC`,
+            [doctor_id]
+        );
         return treatments;
     }
     catch (error) {
@@ -637,6 +658,28 @@ export const create_doctor_clinic_map = async (clinicMapData) => {
     }
 };
 
+export const get_mapping_data_by_map_id = async (map_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_doctor_clinic_map WHERE map_id = ?', [map_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch mapping data by map id.");
+    }
+};
+
+export const update_clinic_maping_data_accept_invitation = async (map_id) => {
+    try {
+        const result = await db.query('UPDATE tbl_doctor_clinic_map SET is_invitation_accepted = 1 WHERE map_id = ?', [map_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update clinic maping data accept invitation.");
+    }
+};
+
 export const get_doctor_by_zynq_user_id = async (zynq_user_id) => {
     try {
         const result = await db.query('SELECT * FROM tbl_doctors WHERE zynq_user_id = ? ORDER BY created_at DESC', [zynq_user_id]);
@@ -645,6 +688,28 @@ export const get_doctor_by_zynq_user_id = async (zynq_user_id) => {
     catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to fetch doctor by zynq user id.");
+    }
+};
+
+export const get_doctor_clinic_map_by_both = async (doctor_id, clinic_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_doctor_clinic_map WHERE doctor_id = ? AND clinic_id = ?', [doctor_id, clinic_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch doctor clinic map by both.");
+    }
+};
+
+export const get_clinic_location_by_clinic_id = async (clinic_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_clinic_locations WHERE clinic_id = ?', [clinic_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch clinic location by clinic id.");
     }
 };
 
