@@ -31,9 +31,7 @@ router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('pr
 
 router.post('/edit_education_experience', authenticate(['DOCTOR']), uploadVariousFields, doctorController.editEducationAndExperienceInformation);
 
-
 router.post("/edit_personal_details", authenticate(['DOCTOR']), uploadFileTo('profile_images'), doctorController.editPersonalInformation);
-
 
 router.post("/add_education", authenticate(['DOCTOR']), doctorController.addEducation);
 

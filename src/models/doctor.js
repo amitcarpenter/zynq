@@ -445,12 +445,11 @@ export const update_certification_upload_path = async (doctorId, certificationTy
 
 export const get_doctor_certification_by_type = async (doctorId, certificationTypeId) => {
     try {
-        const [result] = await db.query(
+        return await db.query(
             `SELECT doctor_certification_id, upload_path FROM tbl_doctor_certification
              WHERE doctor_id = ? AND certification_type_id = ?`,
             [doctorId, certificationTypeId]
-        );
-        return result[0]; // Returns the first matching certification or undefined
+        );// Returns the first matching certification or undefined
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get doctor certification by type.");
