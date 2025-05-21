@@ -59,7 +59,7 @@ export const get_all_doctors = async (req, res) => {
         }
         doctors.forEach(doctor => {
             if (doctor.profile_image && !doctor.profile_image.startsWith('http')) {
-                doctor.profile_image = `${APP_URL}/doctors/${doctor.profile_image}`;
+                doctor.profile_image = `${APP_URL}doctor/profile_images/${doctor.profile_image}`;
             }
         });
 

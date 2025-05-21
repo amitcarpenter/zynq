@@ -61,7 +61,7 @@ export const getProfile = async (req, res) => {
         clinic.documents = documents;
 
         if (clinic.clinic_logo && !clinic.clinic_logo.startsWith("http")) {
-            clinic.clinic_logo = `${APP_URL}clinic/clinic_logo/${clinic.clinic_logo}`;
+            clinic.clinic_logo = `${APP_URL}clinic/logo/${clinic.clinic_logo}`;
         }
         return handleSuccess(res, 200, language, "CLINIC_PROFILE_FETCHED", clinic);
     } catch (error) {
@@ -81,7 +81,7 @@ const calculateProfileCompletion = (data) => {
         total + (data[field] ? percentPerField : 0), 0);
 };
 
-const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_number, address, fee_range, website_url, clinic_description, clinic_logo, form_stage, ivo_registration_number, hsa_id }) => {
+const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_number, address, fee_range, website_url, clinic_description, clinic_logo, form_stage, ivo_registration_number, hsa_id, is_onboarded }) => {
     const data = {
         zynq_user_id,
         clinic_name,
@@ -99,7 +99,8 @@ const buildClinicData = ({ zynq_user_id, clinic_name, org_number, email, mobile_
         clinic_logo,
         form_stage,
         ivo_registration_number,
-        hsa_id
+        hsa_id,
+        is_onboarded
     };
     data.profile_completion_percentage = Math.round(calculateProfileCompletion(data));
     return data;
@@ -140,6 +141,7 @@ export const onboardClinic = async (req, res) => {
             form_stage: Joi.number().optional().allow('', null),
             ivo_registration_number: Joi.string().optional().allow('', null),
             hsa_id: Joi.string().optional().allow('', null),
+            is_onboarded: Joi.boolean().optional().allow('', null),
         });
 
         if (typeof req.body.clinic_timing === 'string') {
@@ -190,7 +192,7 @@ export const onboardClinic = async (req, res) => {
             address, street_address, city, state, zip_code, latitude, longitude,
             treatments, clinic_timing, website_url, clinic_description,
             equipments, skin_types, severity_levels, fee_range, language, form_stage,
-            ivo_registration_number, hsa_id
+            ivo_registration_number, hsa_id, is_onboarded
         } = value;
 
         language = language || "en";
@@ -218,7 +220,8 @@ export const onboardClinic = async (req, res) => {
             clinic_logo: clinic_logo ? clinic_logo : clinic_data.clinic_logo,
             form_stage: form_stage || clinic_data.form_stage,
             ivo_registration_number: ivo_registration_number || clinic_data.ivo_registration_number,
-            hsa_id: hsa_id || clinic_data.hsa_id
+            hsa_id: hsa_id || clinic_data.hsa_id,
+            is_onboarded: is_onboarded || clinic_data.is_onboarded
         });
 
 
@@ -242,7 +245,7 @@ export const onboardClinic = async (req, res) => {
                 }
             });
         }
-        
+
         if (street_address && city && state && zip_code && latitude && longitude) {
             const clinicLocation = await clinicModels.getClinicLocation(clinic_id); 
             if (clinicLocation) {
@@ -257,25 +260,40 @@ export const onboardClinic = async (req, res) => {
                 });
             }
         }
-        const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
+        if(treatments){
+            const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
         if (treatmentsData) {
             await clinicModels.updateClinicTreatments(treatments, clinic_id);
         } else {
-            await clinicModels.insertClinicTreatments(treatments, clinic_id);
+                await clinicModels.insertClinicTreatments(treatments, clinic_id);
+            }
         }
 
+        if(clinic_timing){
         const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
+        console.log("clinic_timing", typeof clinic_timing);
         if (clinicTimingData) {
+            if (!clinic_timing) {
+                console.log("No clinic timing data provided");
+                return;
+            }
             await clinicModels.updateClinicOperationHours(clinic_timing, clinic_id);
         } else {
-            await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
+            if (!clinic_timing) {
+                console.log("No clinic timing data provided");
+                return;
+            }
+                await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
+            }
         }
 
+        if(equipments){ 
         const equipmentsData = await clinicModels.getClinicEquipments(clinic_id);
         if (equipmentsData) {
             await clinicModels.updateClinicEquipments(equipments, clinic_id);
         } else {
             await clinicModels.insertClinicEquipments(equipments, clinic_id);
+            }
         }
 
         const skinTypesData = await clinicModels.getClinicSkinTypes(clinic_id);
@@ -285,11 +303,13 @@ export const onboardClinic = async (req, res) => {
             await clinicModels.insertClinicSkinTypes(skin_types, clinic_id);
         }
 
+        if(severity_levels){
         const severityLevelsData = await clinicModels.getClinicSeverityLevels(clinic_id);   
         if (severityLevelsData) {
             await clinicModels.updateClinicSeverityLevels(severity_levels, clinic_id);
         } else {
-            await clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id);
+                await clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id);
+            }
         }
 
 

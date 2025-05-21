@@ -1,4 +1,5 @@
 import fs from 'fs';
+import Joi from "joi";
 import path from 'path';
 import csv from 'csv-parser';
 import xlsx from 'xlsx';
@@ -75,6 +76,51 @@ export const import_clinics_from_CSV = async (req, res) => {
 
     } catch (error) {
         console.error("Import failed:", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
+    }
+};
+
+export const add_clinic_managment = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            json_data: Joi.string().required()
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        const { json_data } = value;
+
+        const clinic = JSON.parse(json_data);
+        for (const ele of clinic) {
+            const findRole = await adminModels.findRole('CLINIC')
+            if (!findRole) return handleError(res, 404, 'en', "Not find role");
+            const data = {
+                email: ele['Email'],
+                role_id: findRole[0].id
+            }
+            const findEmail = await adminModels.findClinicEmail(ele['Email'])
+            if (findEmail) {
+                await adminModels.addZynqUsers(data);
+                const findEmailResponse = await adminModels.findClinicEmail(ele['Email']);
+                if (findEmailResponse) {
+                    const data = {
+                        zynq_user_id: findEmailResponse[0].id,
+                        clinic_name: ele['Clinic Name'],
+                        org_number: ele['Swedish Organization Number'],
+                        mobile_number: ele['Contact Number'],
+                        address: ele['Address']
+                    }
+                    await adminModels.addClinic(data);
+                    const findClinicByClinicId = await adminModels.findClinicByClinicUserId(findEmailResponse[0].id);
+                    if (findClinicByClinicId.lenght > 0) {
+
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("internal E", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
     }
 };

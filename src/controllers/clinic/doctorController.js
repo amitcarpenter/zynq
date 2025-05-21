@@ -103,7 +103,7 @@ export const getAllDoctors = async (req, res) => {
         const clinic_id = req.user.clinicData.clinic_id;
         const doctors = await clinicModels.get_all_doctors_by_clinic_id(clinic_id);
         if (!doctors || doctors.length === 0) {
-            return handleError(res, 404, 'en', "NO_DOCTORS_FOUND");
+            return handleSuccess(res, 200, 'en', "DOCTORS_FETCHED_SUCCESSFULLY", []);
         }
         // Get additional doctor data for each doctor
         for (const doctor of doctors) {
@@ -147,7 +147,7 @@ export const getAllDoctors = async (req, res) => {
         }
         doctors.forEach(doctor => {
             if (doctor.profile_image && !doctor.profile_image.startsWith('http')) {
-                doctor.profile_image = `${APP_URL}/uploads/doctors/${doctor.profile_image}`;
+                doctor.profile_image = `${APP_URL}doctor/profile_images/${doctor.profile_image}`;
             }
         });
 

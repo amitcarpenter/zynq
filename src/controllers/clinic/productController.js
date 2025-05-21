@@ -39,7 +39,7 @@ export const addProduct = async (req, res) => {
 
         const { error, value } = schema.validate(req.body);
         if (error) {
-            return joiErrorHandle(error, res);
+            return joiErrorHandle(res, error);
         }
 
         const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(req.user.id);
@@ -77,11 +77,11 @@ export const getAllProducts = async (req, res) => {
         const products = await clinicModels.get_all_products(clinic.clinic_id);
 
         if (products.length === 0) {
-            return handleError(res, 404, "en", "NO_PRODUCTS_FOUND");
+            return handleSuccess(res, 200, "en", "PRODUCTS_FETCHED_SUCCESSFULLY", []);
         }
         products.forEach(product => {
             if (product.image_url && !product.image_url.startsWith('http')) {
-                product.image_url = APP_URL + '/clinic/product_image/' + product.image_url;
+                product.image_url = APP_URL + 'clinic/product_image/' + product.image_url;
             }
         });
 
