@@ -1,75 +1,249 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE HTML
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Account Credentials</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .logo img {
-            max-width: 200px;
-        }
-        .content {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        .credentials-box {
-            background: #ffffff;
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-        }
-        .important-note {
-            color: #dc3545;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+  <title>Verify Your Account</title>
+
+  <style type="text/css">
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+    a,
+    a[href],
+    a:hover,
+    a:link,
+    a:visited {
+      /* This is the link colour */
+      text-decoration: none !important;
+      color: #0000EE;
+    }
+
+    .link {
+      text-decoration: underline !important;
+    }
+
+    p,
+    p:visited {
+      /* Fallback paragraph style */
+      font-size: 15px;
+      line-height: 24px;
+      font-family: 'Poppins', sans-serif;
+
+      font-weight: 300;
+      text-decoration: none;
+      color: #000000;
+    }
+
+    h1 {
+      /* Fallback heading style */
+      font-size: 22px;
+      line-height: 24px;
+      font-family: "Poppins", sans-serif;
+
+      font-weight: normal;
+      text-decoration: none;
+      color: #000000;
+    }
+
+    .ExternalClass p,
+    .ExternalClass span,
+    .ExternalClass font,
+    .ExternalClass td {
+      line-height: 100%;
+    }
+
+    .ExternalClass {
+      width: 100%;
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <div class="logo">
-            <img src="<%= image_logo %>" alt="Logo">
-        </div>
-        <div class="content">
-            <h2>Welcome to Our Medical Platform</h2>
-            <p>Dear Dr,</p>
-            <p>Your account has been created in our medical platform. Below are your login credentials:</p>
-            
-            <div class="credentials-box">
-                <p><strong>Email:</strong> <%= email %></p>
-                <p><strong>Temporary Password:</strong> <%= password %></p>
+
+<body
+  style="text-align: center; margin: 0; padding-top: 30px; padding-bottom: 10px; padding-left: 0; padding-right: 0; -webkit-text-size-adjust: 100%;background-color: #f2f4f6; color: #000000"
+  align="center">
+  <div style="text-align: center;">
+    <!-- Start container for logo -->
+    <table align="center"
+      style="text-align: center; vertical-align: top; width: 100%; max-width: 620px; background-color: #ffffff;"
+      width="100%">
+      <tbody>
+        <tr>
+          <td
+            style="width: 100%; vertical-align: top; padding-left: 0; padding-right: 0; padding-top: 15px; padding-bottom: 15px;">
+
+            <!-- Your logo is here -->
+            <img
+              style="width: 180px; max-width: 180px; height: 85px; max-height: 85px; text-align: center; color: #ffffff; object-fit: contain;"
+              alt="Logo" src="<%= image_logo %>" align="center" width="180" height="85">
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- End container for logo -->
+    <!-- Start single column section -->
+    <table align="center"
+      style="text-align: center; vertical-align: top; width: 100%; max-width: 620px; background-color: #ffffff;">
+      <tbody>
+        <tr>
+          <td
+            style="max-width: 620px; width: 100%; vertical-align: top; padding-left: 30px; padding-right: 30px; padding-top: 30px; padding-bottom: 40px;">
+
+            <!--  <h1 style="font-size: 20px; line-height: 24px; font-family: 'Poppins', sans-serif; font-weight: 600; text-decoration: none; color: #000000;">Forgot Your Password?
+
+</h1> -->
+            <h6
+              style="font-size:20px; margin-top: 0px; margin-bottom:15px; font-weight:600;font-family: 'Poppins', sans-serif;text-align: start;">
+              Clinic Details</h6>
+            <table class="table_33">
+              <tr>
+                <td style="border-bottom: 1px dashed #aaaaaa5c;padding: 4px 0px; vertical-align: top; width:200px">
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px; "><span style="font-weight:600">Clinic
+                      Name :</span></p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px">
+                    <%= clinic_name %>
+                  </p>
+
+                </td>
+                <td colspan="2" style="border-bottom: 1px dashed #aaaaaa5c;padding: 4px 0px; vertical-align: top; ">
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span style="font-weight:600">Swedish
+                      Organization Number:</span></p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px">
+                    <%= clinic_org_number %>
+                  </p>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="border-bottom: 1px dashed #aaaaaa5c;padding: 4px 0px; vertical-align: top; width:200px">
+
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span style="font-weight:600">Email
+                      :</span> </p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px">
+                    <%= clinic_email %>
+                  </p>
+                </td>
+                <td colspan="2" style="border-bottom: 1px dashed #aaaaaa5c;padding: 4px 0px">
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span style="font-weight:600">Phone
+                      Number :</span></p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px">
+                    <%= clinic_phone %>
+                  </p>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="border-bottom: 1px dashed #aaaaaa5c;padding: 4px 0px; vertical-align: top; width:200px">
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span style="font-weight:600">Address
+                      :</span> </p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px">
+                    <%= clinic_street_address %>
+                  </p>
+                </td>
+                <td style="border-bottom: 1px dashed #aaaaaa5c;padding: 4px 0px;width:200px">
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span style="font-weight:600">City
+                      :</span> </p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px">
+                    <%= clinic_city %>
+                  </p>
+                </td>
+                <td style="padding: 4px 0px;border-bottom: 1px dashed #aaaaaa5c; vertical-align: top; width:200px">
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span style="font-weight:600">Postal
+                      Code :</span> </p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px">
+                    <%= clinic_zip %>
+                  </p>
+
+
+                </td>
+              </tr>
+
+
+            </table>
+
+            <div>
+
             </div>
 
-            <p>To access your account, please follow these steps:</p>
-            <ol>
-                <li>Visit our platform login page</li>
-                <li>Enter your email address</li>
-                <li>Use the temporary password provided above</li>
-                <li>You will be prompted to change your password upon first login</li>
-            </ol>
 
-            <p class="important-note">Important: For security reasons, please change your password immediately after your first login.</p>
+            <h6
+              style="font-size:20px; margin-top: 30px; margin-bottom:15px; font-weight:600;font-family: 'Poppins', sans-serif;text-align: start;">
+              Invitation Login Credential</h6>
+            <div>
+              <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span
+                  style="font-weight:600; width:100px; display:inline-block">Email :</span>
+                <%= email %>
+                </p>
+                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span
+                      style="font-weight:600; width:100px; display:inline-block">Password :</span>
+                    <%= password %>
+                  </p>
+            </div>
 
-            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
 
-            <p>Best regards,<br>The Medical Team</p>
-        </div>
-    </div>
+            <p
+              style="font-size: 16px; line-height: 24px; margin-bottom: 0px; margin-top: 30px; font-family: 'Poppins', sans-serif; font-weight: 500; text-decoration: none; color: #333;">
+              Please click the button below to accept your invitation and access your ZYNQ dashboard.
+
+            </p>
+            <a href="#" target="_blank"
+              style="background-color: #282828; font-size: 15px;  margin-top: 30px; line-height: 22px; font-family: 'Poppins', sans-serif; font-weight: normal; text-decoration: none; padding: 12px 15px; color: #ffffff; border-radius: 5px; display: inline-block; mso-padding-alt: 0;">
+
+
+              <span style="mso-text-raise: 15pt; color: #ffffff;"> <%= invitation_id %> Accept Invitation</span>
+ 
+
+            </a>
+            <!-- Start button (You can change the background colour by the hex code below) -->
+            <!--  <a href="#" target="_blank" style="background-color: #000000; font-size: 15px; line-height: 22px; font-family: 'Poppins', sans-serif; font-weight: normal; text-decoration: none; padding: 12px 15px; color: #ffffff; border-radius: 5px; display: inline-block; mso-padding-alt: 0;">
+                  <span style="mso-text-raise: 15pt; color: #ffffff;">521545</span>
+              </a> -->
+            <div style="padding-top: 50px; text-align: left;">
+              <h4 style="margin-bottom: 10px;font-family: 'Poppins', sans-serif;">Cheers,</h4>
+              <p style="margin-top: 0px;font-family: 'Poppins', sans-serif;">ZYNQ Team</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <!-- End single column section -->
+    <!-- Start footer -->
+    <table align="center"
+      style="text-align: center; vertical-align: top; width: 100%; max-width: 620px; background-color: #282828;"
+      width="600">
+      <tbody>
+        <tr>
+          <td
+            style="width: 596px; vertical-align: top; padding-left: 30px; padding-right: 30px; padding-top: 30px; padding-bottom: 30px;"
+            width="596">
+
+            <!-- Your inverted logo is here -->
+            <!--   <img style="width: 180px; max-width: 180px; height: 85px; margin-bottom: 15px; max-height: 85px; text-align: center; color: #ffffff;" alt="Logo" src="logo.svg" align="center" width="180" height="85"> -->
+
+            <p
+              style="margin-bottom:10px; margin-top: 0px; text-align:center; color:#fff;font-family: 'Poppins', sans-serif;">
+              Need More Help?</p>
+
+            <a href="#"
+              style="color:#fff; text-decoration: underline; text-align:center; display: block; font-family: 'Poppins', sans-serif;">We
+              are here to help you out</a>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- End footer -->
+  </div>
+
 </body>
+
 </html>
