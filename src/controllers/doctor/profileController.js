@@ -533,7 +533,7 @@ export const editExpertise = async (req, res) => {
             await doctorModels.update_doctor_severity_levels(doctorId, severityLevelIds);
         }
 
-        return handleSuccess(res, 200, language, "EXPERTISE_UPDATED", {});
+        return handleSuccess(res, 200, language, "DOCTOR_PERSONAL_DETAILS_UPDATED", {});
     } catch (error) {
         console.error(error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
@@ -635,7 +635,7 @@ export const editConsultationFeeAndAvailability = async (req, res) => {
         const doctorId = req.user.doctorData.doctor_id;
         await doctorModels.update_consultation_fee(doctorId, value.fee_per_session, "USD", value.session_duration);
         await doctorModels.update_availability(doctorId, value.availability);
-        return handleSuccess(res, 200, language, "FEE_AVAILABILITY_UPDATED", {});
+        return handleSuccess(res, 200, language, "DOCTOR_PERSONAL_DETAILS_UPDATED", {});
     } catch (error) {
         console.error(error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
@@ -778,7 +778,7 @@ export const editEducationAndExperienceInformation = async (req, res) => {
                 exp.end_date
             );
         }
-        return handleSuccess(res, 201, language, "DOCTOR_PROFILE_INFO_ADDED", {});
+        return handleSuccess(res, 201, language, "DOCTOR_PERSONAL_DETAILS_UPDATED", {});
     } catch (error) {
         console.error(error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
