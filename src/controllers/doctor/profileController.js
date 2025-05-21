@@ -701,12 +701,11 @@ export const calculateProfileCompletionPercentageByDoctorId = async (doctorId) =
     }
 };
 
-
 export const editEducationAndExperienceInformation = async (req, res) => {
     try {
         const schema = Joi.object({
-            education: Joi.string().optional(),   // will be JSON
-            experience: Joi.string().optional(), // will be JSON
+            education: Joi.string().optional(),  
+            experience: Joi.string().optional(),
         });
 
         let language = 'en';
