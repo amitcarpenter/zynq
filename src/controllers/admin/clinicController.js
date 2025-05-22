@@ -4,7 +4,7 @@ import path from 'path';
 import csv from 'csv-parser';
 import xlsx from 'xlsx';
 import { generateToken } from '../../utils/user_helper.js';
-import { handleError, handleSuccess } from '../../utils/responseHandler.js';
+import { handleError, handleSuccess, joiErrorHandle } from '../../utils/responseHandler.js';
 import { insert_clinic } from '../../models/admin.js';
 import * as adminModels from "../../models/admin.js";
 
@@ -73,7 +73,6 @@ export const import_clinics_from_CSV = async (req, res) => {
 
         fs.unlinkSync(filePath);
         return handleSuccess(res, 200, 'en', "CLINIC_IMPORT");
-
     } catch (error) {
         console.error("Import failed:", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
@@ -89,36 +88,75 @@ export const add_clinic_managment = async (req, res) => {
         const { error, value } = schema.validate(req.body);
         if (error) return joiErrorHandle(res, error);
 
-        const { json_data } = value;
+        const clinicList = JSON.parse(value.json_data);
 
-        const clinic = JSON.parse(json_data);
-        for (const ele of clinic) {
-            const findRole = await adminModels.findRole('CLINIC')
-            if (!findRole) return handleError(res, 404, 'en', "Not find role");
-            const data = {
-                email: ele['Email'],
-                role_id: findRole[0].id
-            }
-            const findEmail = await adminModels.findClinicEmail(ele['Email'])
-            if (findEmail) {
-                await adminModels.addZynqUsers(data);
-                const findEmailResponse = await adminModels.findClinicEmail(ele['Email']);
-                if (findEmailResponse) {
-                    const data = {
-                        zynq_user_id: findEmailResponse[0].id,
-                        clinic_name: ele['Clinic Name'],
-                        org_number: ele['Swedish Organization Number'],
-                        mobile_number: ele['Contact Number'],
-                        address: ele['Address']
-                    }
-                    await adminModels.addClinic(data);
-                    const findClinicByClinicId = await adminModels.findClinicByClinicUserId(findEmailResponse[0].id);
-                    if (findClinicByClinicId.lenght > 0) {
+        const findRole = await adminModels.findRole('CLINIC');
+        if (!findRole) return handleError(res, 404, 'en', "Role 'CLINIC' not found");
 
-                    }
+        const roleId = findRole.id;
+        const insertedClinics = [];
+        const skippedClinics = [];
+
+        // Parallel processing using Promise.all with map
+        await Promise.all(clinicList.map(async (ele) => {
+            const email = ele['Email'];
+
+            try {
+                // Check email existence
+                const existingUser = await adminModels.findClinicEmail(email);
+                if (existingUser?.length > 0) {
+                    skippedClinics.push({ email, reason: "Email already exists" });
+                    return;
                 }
+
+                // Insert User
+                await adminModels.addZynqUsers({ email, role_id: roleId });
+
+                const [newUser] = await adminModels.findClinicEmail(email);
+                if (!newUser) {
+                    skippedClinics.push({ email, reason: "User not found after insert" });
+                    return;
+                }
+
+                // Insert Clinic
+                const clinicData = {
+                    zynq_user_id: newUser.id,
+                    clinic_name: ele['Clinic Name'],
+                    org_number: ele['Swedish Organization Number'],
+                    email: ele['Email'],
+                    mobile_number: ele['Contact Number'],
+                    address: ele['Address']
+                };
+
+                await adminModels.addClinic(clinicData);
+
+                const [createdClinic] = await adminModels.findClinicByClinicUserId(newUser.id);
+                if (!createdClinic) {
+                    skippedClinics.push({ email, reason: "Clinic insert failed" });
+                    return;
+                }
+
+                // Insert Clinic Location
+                const clinicLocation = {
+                    clinic_id: createdClinic.clinic_id,
+                    city: ele['City'],
+                    zip_code: ele['Postal Code']
+                };
+                await adminModels.addClinicLocationAddress(clinicLocation);
+
+                insertedClinics.push({
+                    email,
+                    clinic_id: createdClinic.clinic_id
+                });
+            } catch (error) {
+                skippedClinics.push({ email, reason: error.message });
             }
-        }
+        }));
+
+        return handleSuccess(res, 200, 'en', "Clinic import completed.", {
+            inserted: insertedClinics,
+            skipped: skippedClinics
+        });
     } catch (error) {
         console.error("internal E", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
@@ -127,27 +165,99 @@ export const add_clinic_managment = async (req, res) => {
 
 export const get_clinic_managment = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const search = req.query.search || "";
+        const clinics = await adminModels.get_clinic_managment();
 
-        const offset = (page - 1) * limit;
-
-        const { users, total } = await adminModels.get_clinic_managment(limit, offset, search);
-
-        const data = {
-            users: users,
-            pagination: {
-                totalUsers: total,
-                totalPages: Math.ceil(total / limit),
-                currentPage: page,
-                clinicsPerPage: limit,
-            }
+        if (!clinics || clinics.length === 0) {
+            return handleSuccess(res, 200, 'en', "No clinics found", { clinics: [] });
         }
 
-        return handleSuccess(res, 200, 'en', "Fetch clinic management successfully", data);
+        const fullClinicData = await Promise.all(
+            clinics.map(async (clinic) => {
+                clinic.clinic_logo = clinic.clinic_logo == null ? null : process.env.APP_URL + 'clinic/logo/' + clinic.clinic_logo;
+                const treatments = await adminModels.get_clinic_treatments(clinic.clinic_id);
+                // const equipments = await adminModels.get_clinic_equipments(clinic.clinic_id);
+                const skinTypes = await adminModels.get_clinic_skintype(clinic.clinic_id);
+                const severityLevels = await adminModels.get_clinic_serveritylevel(clinic.clinic_id);
+
+                return {
+                    ...clinic,
+                    treatments,
+                    // equipments,
+                    skinTypes,
+                    severityLevels
+                };
+            })
+        );
+
+        return handleSuccess(res, 200, 'en', "Fetch clinic management successfully", { clinics: fullClinicData });
+
     } catch (error) {
         console.error("internal E", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
+    }
+};
+
+export const delete_clinic_management = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            clinic_id: Joi.string().required()
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        const { clinic_id } = value;
+
+        const result = await adminModels.delete_clinic_by_id(clinic_id);
+
+        if (result && result.affectedRows === 0) {
+            return handleSuccess(res, 404, 'en', "Clinic not found or already deleted", {});
+        }
+
+        return handleSuccess(res, 200, 'en', "Clinic deleted successfully", result);
+    } catch (error) {
+        console.error("Delete Clinic Error:", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
+    }
+};
+
+export const send_invitation = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            invitation_ids: Joi.string().required()
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        let invitation_ids;
+
+        if (typeof value.invitation_ids === 'string') {
+            const cleanJson = value.invitation_ids.replace(/'/g, '"');
+
+            try {
+                invitation_ids = JSON.parse(cleanJson);
+            } catch (err) {
+                console.error('Invalid JSON format in invitation_ids:', err.message);
+                return handleError(res, 400, 'en', 'Invalid format for invitation_ids');
+            }
+        } else {
+            invitation_ids = value.invitation_ids;
+        }
+        const findClinic = await adminModels.findClinicById(invitation_ids);
+        if (findClinic) {
+            await Promise.all(findClinic.map(async val => {
+                const html = await ejs.renderFile(path.join(__dirname, "../../views/invitation-mail.html"), { name: val.name, email: val.email });
+
+                await sendEmail({
+                    to: email,
+                    subject: "Send Invaitation Request",
+                    html,
+                });
+            }))
+        }
+    } catch (error) {
+        console.error("Delete Clinic Error:", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
     }
 };
