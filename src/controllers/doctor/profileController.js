@@ -72,7 +72,7 @@ export const addEducationAndExperienceInformation = async (req, res) => {
         const experienceList = JSON.parse(value.experience);
 
         const files = req.files;
-         if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
+        if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
             for (const key in files) { // 'key' is like 'medical_council', 'deramatology_board', etc.
                 const certTypeFromDb = await doctorModels.get_certification_type_by_filename(key);
 
@@ -85,7 +85,7 @@ export const addEducationAndExperienceInformation = async (req, res) => {
                         // Check if this certification type already exists for the doctor
                         const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
 
-                        if (existingCert.length>0) {
+                        if (existingCert.length > 0) {
                             // Certification already exists, update its file path
                             await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
                             console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);
@@ -704,7 +704,7 @@ export const calculateProfileCompletionPercentageByDoctorId = async (doctorId) =
 export const editEducationAndExperienceInformation = async (req, res) => {
     try {
         const schema = Joi.object({
-            education: Joi.string().optional(),  
+            education: Joi.string().optional(),
             experience: Joi.string().optional(),
         });
 
@@ -724,7 +724,7 @@ export const editEducationAndExperienceInformation = async (req, res) => {
         const experienceList = JSON.parse(value.experience);
 
         const files = req.files;
-         if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
+        if (Object.keys(files).length > 0) { // Only process if new files are actually uploaded
             for (const key in files) { // 'key' is like 'medical_council', 'deramatology_board', etc.
                 const certTypeFromDb = await doctorModels.get_certification_type_by_filename(key);
 
@@ -737,7 +737,7 @@ export const editEducationAndExperienceInformation = async (req, res) => {
                         // Check if this certification type already exists for the doctor
                         const existingCert = await doctorModels.get_doctor_certification_by_type(doctorId, certification_type_id);
 
-                        if (existingCert.length>0) {
+                        if (existingCert.length > 0) {
                             // Certification already exists, update its file path
                             await doctorModels.update_certification_upload_path(doctorId, certification_type_id, newUploadPath);
                             console.log(`Updated certification for doctor ${doctorId}, type ${certification_type_id} with new file ${newUploadPath}`);
@@ -779,6 +779,23 @@ export const editEducationAndExperienceInformation = async (req, res) => {
             );
         }
         return handleSuccess(res, 201, language, "DOCTOR_PERSONAL_DETAILS_UPDATED", {});
+    } catch (error) {
+        console.error(error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
+    }
+};
+
+
+export const deleteProfileImage = async (req, res) => {
+    try {
+        const doctorId = req.user.doctorData.doctor_id;
+        const result = await doctorModels.delete_profile_image(doctorId);
+        const language = 'en'
+        if (result.affectedRows > 0) {
+            return handleSuccess(res, 200, language, "PROFILE_IMAGE_DELETED", result.affectedRows);
+        } else {
+            return handleError(res, 500, language, 'CERTIFICATION_NOT_FOUND');
+        }
     } catch (error) {
         console.error(error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");

@@ -159,6 +159,7 @@
     "DOCTOR_INVITATION_ACCEPTED_FAILED_DOCTOR_ALREADY_EXISTS_CLINIC_DOCTOR_MAP": "Doctor Invitation Accept Failed Doctor Already Exists Clinic Doctor Map",
     "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_DOCTOR": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Doctor",
     "DOCTOR_INVITATION_ACCEPTED_FAILED_DOCTOR_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Doctor Already Exists Clinic",
-    "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Clinic"
+    "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Clinic",
+    "PROFILE_IMAGE_DELETED":"Profile Image Deleted"
     
 }

@@ -456,7 +456,6 @@ export const get_doctor_certification_by_type = async (doctorId, certificationTy
     }
 };
 
-
 export const update_doctor_profile_completion = async (doctorId, percentage) => {
     try {
         return await db.query(`
@@ -467,5 +466,18 @@ export const update_doctor_profile_completion = async (doctorId, percentage) => 
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to update profile completion percentage.");
+    }
+};
+
+export const delete_profile_image = async (doctor_id) => {
+    try {
+        return await db.query(`
+            UPDATE tbl_doctors
+            SET profile_image = NULL
+            WHERE doctor_id = ?
+        `, [doctor_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update profile image.");
     }
 };

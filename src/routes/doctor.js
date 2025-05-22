@@ -60,4 +60,6 @@ router.post('/edit_fee_availability', authenticate(['DOCTOR']), doctorController
 
 router.get("/get_linked_clinics", authenticate(['DOCTOR']), doctorController.getLinkedClinics);
 
+router.delete('/delete_profile_image', authenticate(['DOCTOR']), doctorController.deleteProfileImage);
+
 export default router;
