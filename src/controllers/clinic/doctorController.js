@@ -356,9 +356,7 @@ export const unlinkDoctor = async (req, res) => {
         });
 
         const { error, value } = schema.validate(req.body);
-        if (error) {
-            return joiErrorHandle(error, res);
-        }
+        if (error) return joiErrorHandle(res, error);
         const { doctor_id } = value;
 
         const clinic_id = req.user.clinicData.clinic_id;
@@ -388,7 +386,7 @@ export const acceptInvitation = async (req, res) => {
         });
 
         const { error, value } = schema.validate(req.query);
-        if (error) return joiErrorHandle(error, res);
+        if (error) return joiErrorHandle(res, error);
 
         const { invitation_id } = value;
 

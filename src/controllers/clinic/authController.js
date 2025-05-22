@@ -246,53 +246,53 @@ export const onboardClinic = async (req, res) => {
             });
         }
 
-        if (street_address && city && state && zip_code && latitude && longitude) {
-            const [clinicLocation] = await clinicModels.getClinicLocation(clinic_id); 
-            if (clinicLocation) {
-                await clinicModels.updateClinicLocation({
-                    clinic_id, street_address, city, state,
-                    zip_code, latitude, longitude
-                });
-            } else {
-                await clinicModels.insertClinicLocation({
-                    clinic_id, street_address, city, state,
-                    zip_code, latitude, longitude
-                });
-            }
-        }
-        if(treatments){
-            const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
-        if (treatmentsData) {
-            await clinicModels.updateClinicTreatments(treatments, clinic_id);
+
+        const [clinicLocation] = await clinicModels.getClinicLocation(clinic_id);
+        if (clinicLocation) {
+            await clinicModels.updateClinicLocation({
+                clinic_id, street_address, city, state,
+                zip_code, latitude, longitude
+            });
         } else {
+            await clinicModels.insertClinicLocation({
+                clinic_id, street_address, city, state,
+                zip_code, latitude, longitude
+            });
+        }
+
+        if (treatments) {
+            const treatmentsData = await clinicModels.getClinicTreatments(clinic_id);
+            if (treatmentsData) {
+                await clinicModels.updateClinicTreatments(treatments, clinic_id);
+            } else {
                 await clinicModels.insertClinicTreatments(treatments, clinic_id);
             }
         }
 
-        if(clinic_timing){
-        const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
-        console.log("clinic_timing", typeof clinic_timing);
-        if (clinicTimingData) {
-            if (!clinic_timing) {
-                console.log("No clinic timing data provided");
-                return;
-            }
-            await clinicModels.updateClinicOperationHours(clinic_timing, clinic_id);
-        } else {
-            if (!clinic_timing) {
-                console.log("No clinic timing data provided");
-                return;
-            }
+        if (clinic_timing) {
+            const clinicTimingData = await clinicModels.getClinicOperationHours(clinic_id);
+            console.log("clinic_timing", typeof clinic_timing);
+            if (clinicTimingData) {
+                if (!clinic_timing) {
+                    console.log("No clinic timing data provided");
+                    return;
+                }
+                await clinicModels.updateClinicOperationHours(clinic_timing, clinic_id);
+            } else {
+                if (!clinic_timing) {
+                    console.log("No clinic timing data provided");
+                    return;
+                }
                 await clinicModels.insertClinicOperationHours(clinic_timing, clinic_id);
             }
         }
 
-        if(equipments){ 
-        const equipmentsData = await clinicModels.getClinicEquipments(clinic_id);
-        if (equipmentsData) {
-            await clinicModels.updateClinicEquipments(equipments, clinic_id);
-        } else {
-            await clinicModels.insertClinicEquipments(equipments, clinic_id);
+        if (equipments) {
+            const equipmentsData = await clinicModels.getClinicEquipments(clinic_id);
+            if (equipmentsData) {
+                await clinicModels.updateClinicEquipments(equipments, clinic_id);
+            } else {
+                await clinicModels.insertClinicEquipments(equipments, clinic_id);
             }
         }
 
@@ -303,11 +303,11 @@ export const onboardClinic = async (req, res) => {
             await clinicModels.insertClinicSkinTypes(skin_types, clinic_id);
         }
 
-        if(severity_levels){
-        const severityLevelsData = await clinicModels.getClinicSeverityLevels(clinic_id);   
-        if (severityLevelsData) {
-            await clinicModels.updateClinicSeverityLevels(severity_levels, clinic_id);
-        } else {
+        if (severity_levels) {
+            const severityLevelsData = await clinicModels.getClinicSeverityLevels(clinic_id);
+            if (severityLevelsData) {
+                await clinicModels.updateClinicSeverityLevels(severity_levels, clinic_id);
+            } else {
                 await clinicModels.insertClinicSeverityLevels(severity_levels, clinic_id);
             }
         }
@@ -531,9 +531,8 @@ export const searchLocation = async (req, res) => {
         });
 
         const { error, value } = schema.validate(req.query);
-        if (error) {
-            return joiErrorHandle(error, res);
-        }
+        if (error) return joiErrorHandle(res, error);
+
         const { input } = value;
         const googleApiKey = process.env.GOOGLE_API_KEY;
         const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${googleApiKey}&input=${input}`;
@@ -565,7 +564,7 @@ export const getLatLong = (req, res) => {
                 let data = {
                     lat,
                     lng
-                }   
+                }
                 return handleSuccess(res, 200, "en", "LAT_LONG_FETCHED_SUCCESSFULLY", data);
             } else {
                 return handleError(res, 404, "en", "NO_RESULT_FOUND");
@@ -573,6 +572,6 @@ export const getLatLong = (req, res) => {
         } catch (error) {
             handleError(res, 500, "en", error.message);
             reject(error);
-            }
+        }
     });
 };
