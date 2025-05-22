@@ -141,7 +141,6 @@ export const getProductById = async (req, res) => {
     }
 }
 
-
 export const updateProduct = async (req, res) => {
     try {
         const schema = Joi.object({
