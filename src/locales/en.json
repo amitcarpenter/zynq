@@ -170,5 +170,12 @@
     "PRODUCT_FETCHED_FAILED": "Product Fetch Failed",
     "INVALID_INVITATION_ID": "Invalid Invitation ID",
     "INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS": "Invitation Accept Failed Clinic Doctor Map Already Exists",
-    "INVITATION_ACCEPTED_FAILED_DOCTOR_ALREADY_EXISTS": "Invitation Accept Failed Doctor Already Exists"
+    "INVITATION_ACCEPTED_FAILED_DOCTOR_ALREADY_EXISTS": "Invitation Accept Failed Doctor Already Exists",
+    "ISSUE_CATEGORIES_FETCHED_SUCCESSFULLY": "Issue Categories Fetched Successfully",
+    "ISSUE_CATEGORIES_FETCHED_FAILED": "Issue Categories Fetch Failed",
+    "SUPPORT_TICKET_CREATED_SUCCESSFULLY": "Support Ticket Created Successfully",
+    "SUPPORT_TICKET_CREATION_FAILED": "Support Ticket Creation Failed",
+    "SUPPORT_TICKETS_FETCHED_SUCCESSFULLY": "Support Tickets Fetched Successfully",
+    "SUPPORT_TICKETS_FETCHED_FAILED": "Support Tickets Fetch Failed",
+    "SUPPORT_TICKET_NOT_FOUND": "Support Ticket Not Found"
 }

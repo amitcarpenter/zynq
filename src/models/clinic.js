@@ -874,7 +874,6 @@ export const get_product_images = async (product_id) => {
     }
 };
 
-
 export const get_product_image_by_id = async (product_image_id) => {
     try {
         const result = await db.query('SELECT * FROM tbl_product_images WHERE product_image_id = ?', [product_image_id]);
@@ -885,7 +884,6 @@ export const get_product_image_by_id = async (product_image_id) => {
         throw new Error("Failed to fetch product image by id.");
     }
 };
-
 
 export const deleteProductImage = async (product_image_id) => {
     try {
@@ -898,6 +896,43 @@ export const deleteProductImage = async (product_image_id) => {
     }
 };
 
+export const get_issue_categories = async () => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_issue_categories');
+        return result;
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch issue categories.");
+    }
+}
 
+export const insertSupportTicket = async (supportTicketData) => {
+    try {
+        const result = await db.query('INSERT INTO tbl_support_tickets SET ?', [supportTicketData]);
+        return result;
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to insert support ticket.");
+    }
+}
 
+export const get_support_tickets_by_clinic_id = async (clinic_id) => {
+    try {
+        const result = await db.query('SELECT *, ic.name FROM tbl_support_tickets st JOIN tbl_issue_categories ic ON st.issue_category_id = ic.issue_category_id WHERE st.clinic_id = ?', [clinic_id]);
 
+        return result;
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch support tickets.");
+    }
+}
+
+export const get_support_tickets_by_doctor_id = async (doctor_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_support_tickets WHERE doctor_id = ?', [doctor_id]);
+        return result;
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch support tickets.");
+    }
+}

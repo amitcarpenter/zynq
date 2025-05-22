@@ -296,7 +296,6 @@ export const getAllDoctors = async (req, res) => {
         if (!doctors || doctors.length === 0) {
             return handleSuccess(res, 200, 'en', "DOCTORS_FETCHED_SUCCESSFULLY", []);
         }
-        // Get additional doctor data for each doctor
         for (const doctor of doctors) {
             // Get doctor availability
             const availability = await clinicModels.getDoctorAvailability(doctor.doctor_id);
