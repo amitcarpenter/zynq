@@ -4,7 +4,7 @@ const router = express.Router();
 import * as doctorController from "../controllers/doctor/profileController.js";
 import { authenticate } from '../middleware/web_user_auth.js';
 import { uploadCertificationFieldsTo, uploadFileTo } from '../services/doctor_multer.js';
-;
+import * as supportControllers from "../controllers/doctor/supportController.js";
 
 
 router.get("/get_profile", authenticate(['DOCTOR']), doctorController.getDoctorProfile);
@@ -61,5 +61,11 @@ router.post('/edit_fee_availability', authenticate(['DOCTOR']), doctorController
 router.get("/get_linked_clinics", authenticate(['DOCTOR']), doctorController.getLinkedClinics);
 
 router.delete('/delete_profile_image', authenticate(['DOCTOR']), doctorController.deleteProfileImage);
+
+
+//======================================= Support apis =========================================
+router.get("/get-issue-categories", supportControllers.get_issue_categories);
+router.post("/create-support-ticket", authenticate(['DOCTOR']), supportControllers.create_support_ticket);
+router.get("/get-support-tickets-by-doctor-id", authenticate(['DOCTOR']), supportControllers.get_support_tickets_by_doctor_id);
 
 export default router;
