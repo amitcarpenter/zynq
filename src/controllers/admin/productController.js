@@ -1,39 +1,52 @@
+import Joi from "joi";
 import * as adminModels from "../../models/admin.js";
-import { handleError, handleSuccess } from "../../utils/responseHandler.js";
+import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 
 export const get_products_managment = async (req, res) => {
     try {
-        const page = parseInt(req.query.page);
-        const limit = parseInt(req.query.limit);
-        const search = req.query.search || "";
+        const products = await adminModels.get_products_management();
 
-        const offset = (limit && page) ? (page - 1) * limit : undefined;
-
-        const { products, total } = await adminModels.get_products_management(limit, offset, search);
-
-        if (products) {
-            products.forEach(product => {
-                product.product_image = product.image_url != null
-                    ? `${process.env.APP_URL}products/images/${product.image_url}`
-                    : null;
-            });
+        if (!products || products.length === 0) {
+            return handleSuccess(res, 200, 'en', "No products found", { products: [] });
         }
 
-        const data = {
-            products,
-            ...(limit && page && {
-                pagination: {
-                    totalProducts: total,
-                    totalPages: Math.ceil(total / limit),
-                    currentPage: page,
-                    productsPerPage: limit,
-                }
+        const fullProductData = await Promise.all(
+            products.map(async (product) => {
+                product.total_revenue = 0;
+                product.product_image = product.product_image == null ? null : process.env.APP_URL + 'products/profile_images/' + product.product_image;
+                return {
+                    ...product
+                };
             })
-        };
+        );
 
-        return handleSuccess(res, 200, 'en', "Fetch product management successfully", data);
+        return handleSuccess(res, 200, 'en', "Fetch product management successfully", { Products: fullProductData });
     } catch (error) {
         console.error("internal E", error);
+        return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
+    }
+};
+
+export const delete_products_managment = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            product_id: Joi.string().required()
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        const { product_id } = value;
+
+        const result = await adminModels.delete_product_by_id(product_id);
+
+        if (result && result.affectedRows === 0) {
+            return handleSuccess(res, 404, 'en', "Product not found or already deleted", {});
+        }
+
+        return handleSuccess(res, 200, 'en', "Product deleted successfully", result);
+    } catch (error) {
+        console.error("Delete Clinic Error:", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
     }
 };

@@ -69,53 +69,26 @@ export const get_doctors = async () => {
 
 export const get_users = async () => {
     try {
-        return await db.query('SELECT * FROM `tbl_users` WHERE is_active = true;');
+        return await db.query('SELECT * FROM `tbl_users` WHERE is_verified = 1;');
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get dashboard users data.");
     }
 };
 
-export const get_latest_clinic = async (limit, offset) => {
+export const get_latest_clinic = async () => {
     try {
-        return await db.query('SELECT clinic_id, clinic_name, address, DATE_FORMAT(created_at, "%M %d, %Y") AS date_joined, profile_completion_percentage AS onboarding_progress FROM `tbl_clinics` ORDER BY created_at DESC LIMIT ? OFFSET ?;', [limit, offset])
+        return await db.query('SELECT clinic_id, clinic_name, address, DATE_FORMAT(created_at, "%M %d, %Y") AS date_joined, profile_completion_percentage AS onboarding_progress FROM `tbl_clinics` WHERE is_deleted = 0 ORDER BY created_at DESC;')
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get dashboard latest data.");
     }
 };
 
-export const get_total_clinic_count = async () => {
-    try {
-        const [rows] = await db.query('SELECT COUNT(*) AS total FROM `tbl_clinics`');
-
-        return rows.total;
-    } catch (error) {
-        console.error("Database Error:", error.message);
-        throw new Error("Failed to get total clinic count.");
-    }
-};
-
 //======================================= User Managment =========================================
-export const get_users_managment = async (limit, offset, search) => {
+export const get_users_managment = async () => {
     try {
-        const users = await db.query(`
-        SELECT tbl_users.*, COUNT(tbl_face_scan_results.face_scan_result_id) AS total_ai_scan_done 
-        FROM tbl_users 
-        LEFT JOIN tbl_face_scan_results ON tbl_face_scan_results.user_id = tbl_users.user_id 
-        WHERE tbl_users.is_verified = true AND (tbl_users.full_name LIKE ? OR tbl_users.email LIKE ?) 
-        GROUP BY tbl_users.user_id 
-        ORDER BY tbl_users.created_at DESC 
-        LIMIT ? OFFSET ?
-    `, [`%${search}%`, `%${search}%`, limit, offset]);
-
-        const [countResult] = await db.query(`
-        SELECT COUNT(*) AS total 
-        FROM tbl_users 
-        WHERE is_verified = true AND (full_name LIKE ? OR email LIKE ?)
-    `, [`%${search}%`, `%${search}%`]);
-
-        return { users, total: countResult.total };
+        return await db.query(`SELECT tbl_users.*, COUNT(DISTINCT tbl_face_scan_results.face_scan_result_id) AS total_ai_scan_done, COUNT(DISTINCT tbl_appointments.appointment_id) AS total_appointment FROM tbl_users LEFT JOIN tbl_face_scan_results ON tbl_face_scan_results.user_id = tbl_users.user_id LEFT JOIN tbl_appointments ON tbl_appointments.patient_id = tbl_users.user_id WHERE tbl_users.is_verified = 1 GROUP BY tbl_users.user_id ORDER BY tbl_users.created_at DESC;`);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get user latest data.");
@@ -135,7 +108,8 @@ export const update_user_status = async (user_id, is_active) => {
 
 export const findRole = async (role) => {
     try {
-        return await db.query('SELECT * FROM `tbl_roles` WHERE role = ?', [role]);
+        const [rows] = await db.query('SELECT * FROM `tbl_roles` WHERE role = ?', [role]);
+        return rows;
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to find role.");
@@ -144,10 +118,22 @@ export const findRole = async (role) => {
 
 export const findClinicEmail = async (email) => {
     try {
-        return await db.query('SELECT * FROM `tbl_zqnq_users` WHERE email = ?', [email])
+        return await db.query('SELECT * FROM `tbl_zqnq_users` WHERE email = ?', [email]);
     } catch (error) {
         console.error("Database Error:", error.message);
-        throw new Error("Failed to find zync users email.");
+        throw new Error("Failed to find zynq users email.");
+    }
+};
+
+export const addClinic = async (data) => {
+    try {
+        return await db.query(
+            'INSERT INTO `tbl_clinics`(`zynq_user_id`, `clinic_name`, `org_number`, `email`, `mobile_number`, `address`) VALUES (?, ?, ?, ?, ?, ?)',
+            [data.zynq_user_id, data.clinic_name, data.org_number, data.email, data.mobile_number, data.address]
+        );
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to add clinic.");
     }
 };
 
@@ -160,14 +146,31 @@ export const findClinicByClinicUserId = async (id) => {
     }
 };
 
-export const addZynqUsers = async (data) => {
+export const addClinicLocationAddress = async (data) => {
     try {
-        return await db.query('INSERT INTO `tbl_zqnq_users`(`email`, `role_id`) VALUES (?,?)', [data.email, data.role_id])
+        return await db.query(
+            'INSERT INTO `tbl_clinic_locations`(`clinic_id`, `city`, `zip_code`) VALUES (?, ?, ?)',
+            [data.clinic_id, data.city, data.zip_code]
+        );
     } catch (error) {
         console.error("Database Error:", error.message);
-        throw new Error("Failed to add zync users.");
+        throw new Error("Failed to add zynq user.");
     }
 }
+
+export const addZynqUsers = async (data) => {
+    try {
+        const result = await db.query(
+            'INSERT INTO `tbl_zqnq_users`(`email`, `role_id`) VALUES (?, ?)',
+            [data.email, data.role_id]
+        );
+
+        return result;
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to add zynq user.");
+    }
+};
 
 export const insert_clinic = async (clinic) => {
     try {
@@ -191,58 +194,94 @@ export const insert_clinic = async (clinic) => {
     }
 };
 
-export const get_clinic_managment = async (limit, offset, search) => {
+export const get_clinic_managment = async () => {
     try {
-        const searchQuery = `%${search}%`;
-
-        const users = await db.query(
-            `SELECT * FROM tbl_clinics 
-         WHERE clinic_name LIKE ? OR email LIKE ? OR mobile_number LIKE ? 
-         ORDER BY created_at DESC 
-         LIMIT ? OFFSET ?`,
-            [searchQuery, searchQuery, searchQuery, limit, offset]
-        );
-
-        const totalResult = await db.query(
-            `SELECT COUNT(*) AS total FROM tbl_clinics 
-         WHERE clinic_name LIKE ? OR email LIKE ? OR mobile_number LIKE ?`,
-            [searchQuery, searchQuery, searchQuery]
-        );
-
-        const total = totalResult[0]?.total || 0;
-
-        return { users, total };
+        return await db.query(`SELECT tbl_clinics.clinic_id, tbl_clinics.clinic_name, tbl_clinics.org_number, tbl_clinics.email, tbl_clinics.mobile_number, tbl_clinics.address, tbl_clinics.email_sent_count, tbl_clinics.clinic_logo, tbl_clinics.clinic_description, tbl_clinics.profile_completion_percentage AS onboarding_progress, tbl_clinic_locations.city, tbl_clinic_locations.zip_code AS postal_code FROM tbl_clinics LEFT JOIN tbl_clinic_locations ON tbl_clinic_locations.clinic_id = tbl_clinics.clinic_id WHERE tbl_clinics.is_deleted = 0 ORDER BY tbl_clinics.created_at DESC;`);
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get clinic latest data.");
     }
 };
 
+export const get_clinic_treatments = async (clinic_id) => {
+    return await db.query('SELECT tbl_clinic_treatments.clinic_treatment_id, tbl_clinic_treatments.clinic_id, tbl_treatments.name FROM tbl_clinic_treatments LEFT JOIN tbl_treatments ON tbl_treatments.treatment_id = tbl_clinic_treatments.treatment_id WHERE tbl_clinic_treatments.clinic_id = ? ORDER BY tbl_clinic_treatments.created_at DESC;', [clinic_id])
+};
+
+export const get_clinic_equipments = async (clinic_id) => {
+    return await db.query('SELECT tbl_clinic_equipments.clinic_equipment_id, tbl_clinic_equipments.clinic_id, tbl_equipments.name FROM tbl_clinic_equipments LEFT JOIN tbl_equipments ON tbl_equipments.equipment_id = tbl_clinic_equipments.equipment_id WHERE tbl_clinic_equipments.clinic_id = ? ORDER BY tbl_clinic_equipments.created_at DESC;', [clinic_id])
+};
+
+export const get_clinic_skintype = async (clinic_id) => {
+    return await db.query('SELECT tbl_clinic_skin_types.clinic_skin_type_id, tbl_clinic_skin_types.clinic_id, tbl_skin_types.name FROM tbl_clinic_skin_types LEFT JOIN tbl_skin_types ON tbl_skin_types.skin_type_id = tbl_clinic_skin_types.skin_type_id WHERE tbl_clinic_skin_types.clinic_id = ? ORDER BY tbl_clinic_skin_types.created_at DESC;', [clinic_id])
+};
+
+export const get_clinic_serveritylevel = async (clinic_id) => {
+    return await db.query('SELECT tbl_clinic_severity_levels.clinic_severity_level_id, tbl_clinic_severity_levels.clinic_id, tbl_severity_levels.level FROM tbl_clinic_severity_levels LEFT JOIN tbl_severity_levels ON tbl_severity_levels.severity_level_id = tbl_clinic_severity_levels.severity_id WHERE tbl_clinic_severity_levels.clinic_id = ? ORDER BY tbl_clinic_severity_levels.created_at DESC;', [clinic_id])
+}
+
+export const delete_clinic_by_id = async (clinic_id) => {
+    try {
+        return await db.query('UPDATE `tbl_clinics` SET `is_deleted`= 1 WHERE clinic_id = ?', [clinic_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete clinic data.");
+    }
+};
+
+export const findClinicById = async (clinic_id) => {
+    try {
+        return await db.query('SELECT * FROM `tbl_clinics` WHERE clinic_id IN(?)', [clinic_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to find clinic data.");
+    }
+};
+
 //======================================= Doctor Managment =========================================
 
-export const get_doctors_management = async (limit, offset, search) => {
+export const get_doctors_management = async () => {
     try {
-        const searchQuery = `%${search}%`;
-
-        const doctors = await db.query(
-            `SELECT * FROM tbl_doctors 
-         WHERE name LIKE ? OR email LIKE ? OR specialization LIKE ? 
-         ORDER BY created_at DESC 
-         LIMIT ? OFFSET ?`,
-            [searchQuery, searchQuery, searchQuery, limit, offset]
-        );
-
-        const totalResult = await db.query(
-            `SELECT COUNT(*) AS total FROM tbl_doctors 
-         WHERE name LIKE ? OR email LIKE ? OR specialization LIKE ?`,
-            [searchQuery, searchQuery, searchQuery]
-        );
-
-        const total = totalResult[0]?.total || 0;
-
-        return { doctors, total };
+        return await db.query('SELECT tbl_doctors.doctor_id, tbl_doctors.name, tbl_doctors.specialization, tbl_doctors.fee_per_session, tbl_doctors.phone, tbl_doctors.profile_image, tbl_doctors.rating, tbl_doctors.age, tbl_doctors.address, tbl_doctors.gender, tbl_doctors.experience_years, tbl_doctors.biography, tbl_doctors.profile_completion_percentage AS onboarding_progress tbl_zqnq_users.email FROM `tbl_doctors` LEFT JOIN tbl_zqnq_users ON tbl_zqnq_users.id = tbl_doctors.zynq_user_id ORDER BY tbl_doctors.created_at DESC;');
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get doctor latest data.");
     }
 };
+
+export const get_doctor_experience = async (doctor_id) => {
+    try {
+        return await db.query('SELECT experience_id, organization, designation, start_date, end_date FROM `tbl_doctor_experiences` WHERE doctor_id = ?', [doctor_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to get doctor latest data.");
+    }
+};
+
+export const get_doctor_education = async (doctor_id) => {
+    try {
+        return await db.query('SELECT education_id, degree, institution, start_year, end_year FROM `tbl_doctor_educations` WHERE doctor_id = ?', [doctor_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to get doctor latest data.");
+    }
+};
+
+//======================================= Product Managment =========================================
+
+export const get_products_management = async () => {
+    try {
+        return await db.query('SELECT tbl_products.product_id, tbl_products.image_url AS profile_image, tbl_products.name AS product_name, tbl_clinics.clinic_name, tbl_products.price, tbl_products.stock, tbl_products.rating, tbl_products.image_url AS product_image, tbl_products.short_description, tbl_products.full_description FROM `tbl_products` LEFT JOIN tbl_clinics ON tbl_clinics.clinic_id = tbl_products.clinic_id WHERE tbl_products.is_deleted = 0 ORDER BY tbl_products.created_at DESC;')
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to get product latest data.");
+    }
+};
+
+export const delete_product_by_id = async (product_id) => {
+    try {
+        return await db.query('UPDATE `tbl_products` SET `is_deleted`= 1 WHERE product_id = ?', [product_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete product data.");
+    }
+}

@@ -32,7 +32,7 @@ const getFieldsFn = async (req) => {
 };
 
 const getProductFields = () => [
-    { name: 'product_image', maxCount: 1 }
+    { name: 'product_image', maxCount: 10 }
 ];
 
 const uploadProductImage = uploadDynamicClinicFiles(getProductFields);
@@ -64,10 +64,14 @@ router.get("/get-all-doctors", authenticate(['CLINIC']), doctorControllers.getAl
 router.post("/unlink-doctor", authenticate(['CLINIC']), doctorControllers.unlinkDoctor);
 router.post("/accept-invitation", doctorControllers.acceptInvitation);
 
+
 //==================================== Product ==============================
 router.post("/add-product", authenticate(['CLINIC']), uploadProductImage, productControllers.addProduct);
 router.get("/get-all-products", authenticate(['CLINIC']), productControllers.getAllProducts);
 router.post("/update-product", authenticate(['CLINIC']), uploadProductImage, productControllers.updateProduct);
-router.delete("/delete-product", authenticate(['CLINIC']), productControllers.deleteProduct);
+router.delete("/delete-product/:product_id", authenticate(['CLINIC']), productControllers.deleteProduct);
+router.delete("/delete-product-image/:product_image_id", authenticate(['CLINIC']), productControllers.deleteProductImage);
+router.post("/get-product-by-id", authenticate(['CLINIC']), productControllers.getProductById);
+
 
 export default router;

@@ -235,6 +235,16 @@ export const get_all_products_for_user = async () => {
     }
 }
 
+export const get_product_images = async (product_id) => {
+    try {
+        return await db.query(`SELECT * FROM tbl_product_images WHERE product_id = ? ORDER BY created_at DESC`, [product_id]);
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch product images.");
+    }
+}
+
 
 //======================================= Clinic =========================================
 export const getAllClinicsForUser = async () => {

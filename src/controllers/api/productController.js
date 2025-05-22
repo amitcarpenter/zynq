@@ -23,16 +23,24 @@ const image_logo = process.env.LOGO_URL;
 export const getAllProducts = async (req, res) => {
     try {
 
-        const products = await apiModels.get_all_products_for_user();
+        let products = await apiModels.get_all_products_for_user();
 
         if (products.length === 0) {
             return handleError(res, 404, "en", "NO_PRODUCTS_FOUND");
         }
-        products.forEach(product => {
-            if (product.image_url && !product.image_url.startsWith('http')) {
-                product.image_url = APP_URL + 'clinic/product_image/' + product.image_url;
-            }
-        });
+    
+
+        products = await Promise.all(products.map(async (product) => {
+            const productImages = await apiModels.get_product_images(product.product_id);
+            product.product_images = productImages.map((image) => {
+                if (image.image && !image.image.startsWith('http')) {
+                    image.image = APP_URL + 'clinic/product_image/' + image.image;
+                }
+                return image;
+            });
+            return product;
+        }));
+
 
         return handleSuccess(res, 200, "en", "PRODUCTS_FETCHED_SUCCESSFULLY", products);
     } catch (error) {
