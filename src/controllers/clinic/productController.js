@@ -234,7 +234,7 @@ export const deleteProduct = async (req, res) => {
             return handleError(res, 404, "en", "PRODUCT_NOT_FOUND");
         }
 
-        await deleteProductImageByProductId(value.product_id);
+        await clinicModels.deleteProductImageByProductId(value.product_id);
         await clinicModels.deleteProduct(value.product_id);
 
         return handleSuccess(res, 200, "en", "PRODUCT_DELETED_SUCCESSFULLY");
