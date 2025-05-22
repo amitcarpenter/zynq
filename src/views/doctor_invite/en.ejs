@@ -180,11 +180,11 @@
               <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span
                   style="font-weight:600; width:100px; display:inline-block">Email :</span>
                 <%= email %>
-                </p>
-                  <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span
-                      style="font-weight:600; width:100px; display:inline-block">Password :</span>
-                    <%= password %>
-                  </p>
+              </p>
+              <p style="text-align:left; margin-bottom:5px; margin-top:5px"><span
+                  style="font-weight:600; width:100px; display:inline-block">Password :</span>
+                <%= password %>
+              </p>
             </div>
 
 
@@ -193,18 +193,15 @@
               Please click the button below to accept your invitation and access your ZYNQ dashboard.
 
             </p>
-            <a href="#" target="_blank"
+            <a href="<%= invitation_link %>" target="_blank"
               style="background-color: #282828; font-size: 15px;  margin-top: 30px; line-height: 22px; font-family: 'Poppins', sans-serif; font-weight: normal; text-decoration: none; padding: 12px 15px; color: #ffffff; border-radius: 5px; display: inline-block; mso-padding-alt: 0;">
 
 
-              <span style="mso-text-raise: 15pt; color: #ffffff;"> <%= invitation_id %> Accept Invitation</span>
- 
+
+              <span style="mso-text-raise: 15pt; color: #ffffff;">
+                Accept Invitation</span>
 
             </a>
-            <!-- Start button (You can change the background colour by the hex code below) -->
-            <!--  <a href="#" target="_blank" style="background-color: #000000; font-size: 15px; line-height: 22px; font-family: 'Poppins', sans-serif; font-weight: normal; text-decoration: none; padding: 12px 15px; color: #ffffff; border-radius: 5px; display: inline-block; mso-padding-alt: 0;">
-                  <span style="mso-text-raise: 15pt; color: #ffffff;">521545</span>
-              </a> -->
             <div style="padding-top: 50px; text-align: left;">
               <h4 style="margin-bottom: 10px;font-family: 'Poppins', sans-serif;">Cheers,</h4>
               <p style="margin-top: 0px;font-family: 'Poppins', sans-serif;">ZYNQ Team</p>

@@ -62,8 +62,7 @@ router.get("/get-roles", authControllers.getAllRoles);
 router.post("/send-doctor-invitation", authenticate(['CLINIC']), doctorControllers.sendDoctorInvitation);
 router.get("/get-all-doctors", authenticate(['CLINIC']), doctorControllers.getAllDoctors);
 router.post("/unlink-doctor", authenticate(['CLINIC']), doctorControllers.unlinkDoctor);
-router.post("/accept-invitation", doctorControllers.acceptInvitation);
-
+router.get("/accept-invitation", doctorControllers.acceptInvitation);
 
 //==================================== Product ==============================
 router.post("/add-product", authenticate(['CLINIC']), uploadProductImage, productControllers.addProduct);
