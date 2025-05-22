@@ -693,6 +693,7 @@ export const get_doctor_by_zynq_user_id = async (zynq_user_id) => {
 
 export const get_doctor_clinic_map_by_both = async (doctor_id, clinic_id) => {
     try {
+        console.log(doctor_id, clinic_id, "doctor_id, clinic_id");
         const result = await db.query('SELECT * FROM tbl_doctor_clinic_map WHERE doctor_id = ? AND clinic_id = ?', [doctor_id, clinic_id]);
         return result;
     }

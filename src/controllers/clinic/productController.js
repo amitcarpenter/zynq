@@ -113,6 +113,35 @@ export const getAllProducts = async (req, res) => {
     }
 };
 
+export const getProductById = async (req, res) => {
+    try {
+        const schema = Joi.object({
+            product_id: Joi.string().required(),
+        });
+
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
+
+        const [product] = await clinicModels.get_product_by_id(value.product_id);
+        if (!product) {
+            return handleError(res, 404, "en", "PRODUCT_NOT_FOUND");
+        }
+
+        const productImages = await clinicModels.get_product_images(product.product_id);
+        product.product_images = productImages.map((image) => {
+            if (image.image && !image.image.startsWith('http')) {
+                image.image = APP_URL + 'clinic/product_image/' + image.image;
+            }
+            return image;
+        });
+        return handleSuccess(res, 200, "en", "PRODUCT_FETCHED_SUCCESSFULLY", product);
+    } catch (error) {
+        console.error("Error in getProductById:", error);
+        return handleError(res, 500, "en", "INTERNAL_SERVER_ERROR");
+    }
+}
+
+
 export const updateProduct = async (req, res) => {
     try {
         const schema = Joi.object({
@@ -168,7 +197,7 @@ export const deleteProductImage = async (req, res) => {
             product_image_id: Joi.string().required(),
         });
 
-        const { error, value } = schema.validate(req.body);
+        const { error, value } = schema.validate(req.params);
         if (error) return joiErrorHandle(res, error);
         const { product_image_id } = value;
 
@@ -192,7 +221,7 @@ export const deleteProduct = async (req, res) => {
             product_id: Joi.string().required(),
         });
 
-        const { error, value } = schema.validate(req.body);
+        const { error, value } = schema.validate(req.params);
         if (error) return joiErrorHandle(res, error);
 
         const [clinic] = await clinicModels.get_clinic_by_zynq_user_id(req.user.id);
@@ -214,4 +243,3 @@ export const deleteProduct = async (req, res) => {
 
     }
 }
-

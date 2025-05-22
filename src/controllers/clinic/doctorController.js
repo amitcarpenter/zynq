@@ -11,6 +11,7 @@ import { sendEmail } from "../../services/send_email.js";
 import { generateAccessToken, generatePassword, generateVerificationLink } from "../../utils/user_helper.js";
 import { handleError, handleSuccess, joiErrorHandle } from "../../utils/responseHandler.js";
 import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,8 @@ dotenv.config();
 const APP_URL = process.env.APP_URL;
 const image_logo = process.env.LOGO_URL;
 
+
+
 // export const sendDoctorInvitation = async (req, res) => {
 //     try {
 //         const schema = Joi.object({
@@ -28,80 +31,33 @@ const image_logo = process.env.LOGO_URL;
 
 //         const { error, value } = schema.validate(req.body);
 //         if (error) return joiErrorHandle(error, res);
-//         const emailTemplatePath = path.resolve(__dirname, "../../views/doctor_invite/en.ejs");
+
 //         const { email } = value;
+//         const emailTemplatePath = path.resolve(__dirname, "../../views/doctor_invite/en.ejs");
 
 //         const [existingUser] = await webModels.get_web_user_by_email(email);
 //         const get_location = await clinicModels.get_clinic_location_by_clinic_id(req.user.clinicData.clinic_id);
 
+//         let doctor, doctor_id, password, newWebUser;
+
+//         // If user exists
 //         if (existingUser) {
-//             console.log(existingUser, "existingUser");
-//             const zynq_user_id = existingUser.id;
-//             const [doctor] = await clinicModels.get_doctor_by_zynq_user_id(zynq_user_id);
-//             if (doctor) {
-//                 const [get_doctor_clinic_map] = await clinicModels.get_doctor_clinic_map_by_both(doctor.doctor_id, req.user.clinicData.clinic_id);
-//                 console.log(get_doctor_clinic_map, "get_doctor_clinic_map");
-//                 if (get_doctor_clinic_map) {
-//                     return handleError(res, 400, 'en', "DOCTOR_ALREADY_EXISTS");
-//                 }
-//                 else {
-//                     const clinicMapData = {
-//                         doctor_id: doctor.doctor_id,
-//                         clinic_id: req.user.clinicData.clinic_id,
-//                         assigned_at: new Date()
-//                     };
+//             const [existingDoctor] = await clinicModels.get_doctor_by_zynq_user_id(existingUser.id);
+//             if (!existingDoctor) return handleError(res, 404, 'en', "DOCTOR_NOT_FOUND");
 
-//                     await clinicModels.create_doctor_clinic_map(clinicMapData);
-//                     let [get_doctor_clinic_map] = await clinicModels.get_doctor_clinic_map_by_both(doctor.id, req.user.clinicData.clinic_id);
-//                     if (!get_doctor_clinic_map) {
-//                         const clinicMapData = {
-//                             doctor_id: doctor.doctor_id,
-//                             clinic_id: req.user.clinicData.clinic_id,
-//                             assigned_at: new Date()
-//                         };
-//                         await clinicModels.create_doctor_clinic_map(clinicMapData);
-//                         // return handleError(res, 400, 'en', "DOCTOR_CLINIC_MAP_NOT_FOUND");
-//                         [get_doctor_clinic_map] = await clinicModels.get_doctor_clinic_map_by_both(doctor.id, req.user.clinicData.clinic_id);
-//                     }
-//                     const get_doctor_clinic_map_id = get_doctor_clinic_map.map_id;
-//                     console.log(get_doctor_clinic_map_id, "get_doctor_clinic_map_id");
+//             doctor = existingDoctor;
+//             doctor_id = doctor.doctor_id;
 
-//                     console.log(req.user.clinicData.clinic_name, "req.user.clinicData.clinic_name");
-//                     const emailHtml = await ejs.renderFile(emailTemplatePath, {
-//                         clinic_name: req.user.clinicData.clinic_name,
-//                         clinic_city: get_location.city,
-//                         clinic_street_address: get_location.street_address,
-//                         clinic_state: get_location.state,
-//                         clinic_zip: get_location.zip_code,
-//                         clinic_phone: req.user.clinicData.mobile_number,
-//                         clinic_email: req.user.clinicData.email,
-//                         email,
-//                         password,
-//                         image_logo,
-//                         invitation_id: get_doctor_clinic_map_id
-//                     });
+//             const [existingMap] = await clinicModels.get_doctor_clinic_map_by_both(doctor_id, req.user.clinicData.clinic_id);
+//             if (existingMap) return handleError(res, 400, 'en', "DOCTOR_ALREADY_EXISTS");
 
-
-//                     const emailOptions = {
-//                         to: email,
-//                         subject: "Doctor Invitation",
-//                         html: emailHtml
-//                     };
-
-//                     await sendEmail(emailOptions);
-//                     return handleSuccess(res, 200, 'en', "INVITATION_SENT_SUCCESSFULLY");
-//                 }
-//             }
 //         } else {
 //             const roles = await clinicModels.getAllRoles();
 //             const doctorRole = roles.find(role => role.role === 'DOCTOR');
-//             if (!doctorRole) {
-//                 return handleError(res, 404, 'en', "DOCTOR_ROLE_NOT_FOUND");
-//             }
+//             if (!doctorRole) return handleError(res, 404, 'en', "DOCTOR_ROLE_NOT_FOUND");
 
-//             const password = generatePassword(email);
+//             password = generatePassword(email);
 //             const hashedPassword = await bcrypt.hash(password, 10);
-
 
 //             const doctorData = {
 //                 email,
@@ -112,8 +68,7 @@ const image_logo = process.env.LOGO_URL;
 //             };
 
 //             await webModels.create_web_user(doctorData);
-
-//             const [newWebUser] = await webModels.get_web_user_by_email(email);
+//             [newWebUser] = await webModels.get_web_user_by_email(email);
 
 //             const doctorTableData = {
 //                 zynq_user_id: newWebUser.id,
@@ -121,56 +76,47 @@ const image_logo = process.env.LOGO_URL;
 //             };
 //             await clinicModels.create_doctor(doctorTableData);
 
-//             const [newDoctor] = await clinicModels.get_doctor_by_zynq_user_id(newWebUser.id);
-
-//             // Map doctor to clinic
-//             const clinicMapData = {
-//                 doctor_id: newDoctor.doctor_id,
-//                 clinic_id: req.user.clinicData.clinic_id,
-//                 assigned_at: new Date()
-//             };
-//             console.log(clinicMapData, "clinicMapData 44");
-//             await clinicModels.create_doctor_clinic_map(clinicMapData);
-//             let [get_doctor_clinic_map] = await clinicModels.get_doctor_clinic_map_by_both(newDoctor.id, req.user.clinicData.clinic_id);
-//             [get_doctor_clinic_map] = await clinicModels.get_doctor_clinic_map_by_both(newDoctor.doctor_id, req.user.clinicData.clinic_id);
-//             console.log(get_doctor_clinic_map, "get_doctor_clinic_map 44");
-//             if (!get_doctor_clinic_map) {
-//                 const clinicMapData = {
-//                     doctor_id: newDoctor.doctor_id,
-//                     clinic_id: req.user.clinicData.clinic_id,
-//                     assigned_at: new Date()
-//                 };
-//                 await clinicModels.create_doctor_clinic_map(clinicMapData);
-//                 [get_doctor_clinic_map] = await clinicModels.get_doctor_clinic_map_by_both(newDoctor.id, req.user.clinicData.clinic_id);
-//             }
-
-//             const get_doctor_clinic_map_id = get_doctor_clinic_map.map_id;
-//             console.log(get_doctor_clinic_map_id, "get_doctor_clinic_map_id");
-
-//             console.log(req.user.clinicData.clinic_name, "req.user.clinicData.clinic_name");
-//             const emailHtml = await ejs.renderFile(emailTemplatePath, {
-//                 clinic_name: req.user.clinicData.clinic_name,
-//                 clinic_city: get_location.city,
-//                 clinic_street_address: get_location.street_address,
-//                 clinic_state: get_location.state,
-//                 clinic_zip: get_location.zip_code,
-//                 clinic_phone: req.user.clinicData.mobile_number,
-//                 clinic_email: req.user.clinicData.email,
-//                 email,
-//                 password,
-//                 image_logo,
-//                 invitation_id: get_doctor_clinic_map_id
-//             });
-
-//             const emailOptions = {
-//                 to: email,
-//                 subject: "Doctor Invitation",
-//                 html: emailHtml
-//             };
-
-//             await sendEmail(emailOptions);
-//             return handleSuccess(res, 200, 'en', "INVITATION_SENT_SUCCESSFULLY");
+//             const [createdDoctor] = await clinicModels.get_doctor_by_zynq_user_id(newWebUser.id);
+//             doctor = createdDoctor;
+//             doctor_id = doctor.doctor_id;
 //         }
+
+//         // Map doctor to clinic
+//         const clinicMapData = {
+//             doctor_id,
+//             clinic_id: req.user.clinicData.clinic_id,
+//             assigned_at: new Date(),
+//         };
+//         await clinicModels.create_doctor_clinic_map(clinicMapData);
+
+//         const [doctorClinicMap] = await clinicModels.get_doctor_clinic_map_by_both(doctor_id, req.user.clinicData.clinic_id);
+//         const invitation_id = doctorClinicMap?.map_id;
+
+
+//         const emailHtml = await ejs.renderFile(emailTemplatePath, {
+//             clinic_name: req.user.clinicData.clinic_name,
+//             clinic_org_number: req.user.clinicData.org_number,
+//             clinic_city: get_location.city,
+//             clinic_street_address: get_location.street_address,
+//             clinic_state: get_location.state,
+//             clinic_zip: get_location.zip_code,
+//             clinic_phone: req.user.clinicData.mobile_number,
+//             clinic_email: req.user.clinicData.email,
+//             email,
+//             password: password || '******', 
+//             image_logo,
+//             invitation_id,
+//         });
+
+//         const emailOptions = {
+//             to: email,
+//             subject: "Doctor Invitation",
+//             html: emailHtml,
+//         };
+
+//         await sendEmail(emailOptions);
+//         return handleSuccess(res, 200, 'en', "INVITATION_SENT_SUCCESSFULLY");
+
 //     } catch (error) {
 //         console.error("Error sending doctor invitation:", error);
 //         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR");
@@ -180,96 +126,130 @@ const image_logo = process.env.LOGO_URL;
 
 export const sendDoctorInvitation = async (req, res) => {
     try {
+
         const schema = Joi.object({
-            email: Joi.string().email().required(),
+            emails: Joi.array().items(Joi.string().email()).required(),
         });
 
-        const { error, value } = schema.validate(req.body);
-        if (error) return joiErrorHandle(error, res);
-
-        const { email } = value;
-        const emailTemplatePath = path.resolve(__dirname, "../../views/doctor_invite/en.ejs");
-
-        const [existingUser] = await webModels.get_web_user_by_email(email);
-        const get_location = await clinicModels.get_clinic_location_by_clinic_id(req.user.clinicData.clinic_id);
-
-        let doctor, doctor_id, password, newWebUser;
-
-        // If user exists
-        if (existingUser) {
-            const [existingDoctor] = await clinicModels.get_doctor_by_zynq_user_id(existingUser.id);
-            if (!existingDoctor) return handleError(res, 404, 'en', "DOCTOR_NOT_FOUND");
-
-            doctor = existingDoctor;
-            doctor_id = doctor.doctor_id;
-
-            const [existingMap] = await clinicModels.get_doctor_clinic_map_by_both(doctor_id, req.user.clinicData.clinic_id);
-            if (existingMap) return handleError(res, 400, 'en', "DOCTOR_ALREADY_EXISTS");
-
-        } else {
-            const roles = await clinicModels.getAllRoles();
-            const doctorRole = roles.find(role => role.role === 'DOCTOR');
-            if (!doctorRole) return handleError(res, 404, 'en', "DOCTOR_ROLE_NOT_FOUND");
-
-            password = generatePassword(email);
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            const doctorData = {
-                email,
-                password: hashedPassword,
-                show_password: password,
-                role_id: doctorRole.id,
-                created_at: new Date(),
-            };
-
-            await webModels.create_web_user(doctorData);
-            [newWebUser] = await webModels.get_web_user_by_email(email);
-
-            const doctorTableData = {
-                zynq_user_id: newWebUser.id,
-                created_at: new Date(),
-            };
-            await clinicModels.create_doctor(doctorTableData);
-
-            const [createdDoctor] = await clinicModels.get_doctor_by_zynq_user_id(newWebUser.id);
-            doctor = createdDoctor;
-            doctor_id = doctor.doctor_id;
+        if (typeof req.body.emails === 'string') {
+            try {
+                req.body.emails = JSON.parse(req.body.emails);
+            } catch (err) {
+                return handleError(res, 400, "en", "INVALID_JSON_FOR_EMAILS");
+            }
         }
 
-        // Map doctor to clinic
-        const clinicMapData = {
-            doctor_id,
-            clinic_id: req.user.clinicData.clinic_id,
-            assigned_at: new Date(),
-        };
-        await clinicModels.create_doctor_clinic_map(clinicMapData);
+        const { error, value } = schema.validate(req.body);
+        if (error) return joiErrorHandle(res, error);
 
-        const [doctorClinicMap] = await clinicModels.get_doctor_clinic_map_by_both(doctor_id, req.user.clinicData.clinic_id);
-        const invitation_id = doctorClinicMap?.map_id;
+        const { emails } = value;
+        const emailTemplatePath = path.resolve(__dirname, "../../views/doctor_invite/en.ejs");
+
+        for (const email of emails) {
+            const [existingUser] = await webModels.get_web_user_by_email(email);
+            const [get_location] = await clinicModels.get_clinic_location_by_clinic_id(req.user.clinicData.clinic_id);
+
+            console.log(get_location, "get_location");
+            let doctor, doctor_id, password, newWebUser;
+
+            if (existingUser) {
+                const [existingDoctor] = await clinicModels.get_doctor_by_zynq_user_id(existingUser.id);
+                if (!existingDoctor) {
+                    doctor_id = uuidv4();
+                    const doctorData = {
+                        doctor_id,
+                        zynq_user_id: existingUser.id,
+                        created_at: new Date(),
+                    };
+                    await clinicModels.create_doctor(doctorData);
+                } else {
+                    doctor_id = existingDoctor.doctor_id;
+                }
+                const [existingMap] = await clinicModels.get_doctor_clinic_map_by_both(doctor_id, req.user.clinicData.clinic_id);
+                if (existingMap) {
+                    console.log("DOCTOR_ALREADY_EXISTS");
+                    continue;
+                } else {
+                    const clinicMapData = {
+                        doctor_id,
+                        clinic_id: req.user.clinicData.clinic_id,
+                        assigned_at: new Date(),
+                    };
+                    await clinicModels.create_doctor_clinic_map(clinicMapData);
+                }
+            } else {
+                const roles = await clinicModels.getAllRoles();
+                const doctorRole = roles.find(role => role.role === 'DOCTOR');
+                if (!doctorRole) {
+                    continue;
+                }
+
+                password = generatePassword(email);
+                const hashedPassword = await bcrypt.hash(password, 10);
+
+                const doctorData = {
+                    email,
+                    password: hashedPassword,
+                    show_password: password,
+                    role_id: doctorRole.id,
+                    created_at: new Date(),
+                };
+
+                await webModels.create_web_user(doctorData);
+                [newWebUser] = await webModels.get_web_user_by_email(email);
+
+                const doctorTableData = {
+                    zynq_user_id: newWebUser.id,
+                    created_at: new Date(),
+                };
+                await clinicModels.create_doctor(doctorTableData);
+
+                const [createdDoctor] = await clinicModels.get_doctor_by_zynq_user_id(newWebUser.id);
+                doctor = createdDoctor;
+                doctor_id = doctor.doctor_id;
+            }
+
+            // Map doctor to clinic
+            const clinicMapData = {
+                doctor_id,
+                clinic_id: req.user.clinicData.clinic_id,
+                assigned_at: new Date(),
+            };
+            await clinicModels.create_doctor_clinic_map(clinicMapData);
+
+            const [doctorClinicMap] = await clinicModels.get_doctor_clinic_map_by_both(doctor_id, req.user.clinicData.clinic_id);
+            const invitation_id = doctorClinicMap?.map_id;
+
+            let sendPassword = password;
+            if (!password && existingUser) {
+                sendPassword = existingUser.show_password;
+            }
+            
 
 
-        const emailHtml = await ejs.renderFile(emailTemplatePath, {
-            clinic_name: req.user.clinicData.clinic_name,
-            clinic_org_number: req.user.clinicData.org_number,
-            clinic_city: get_location.city,
-            clinic_street_address: get_location.street_address,
-            clinic_state: get_location.state,
-            clinic_zip: get_location.zip_code,
-            clinic_phone: req.user.clinicData.mobile_number,
-            clinic_email: req.user.clinicData.email,
-            email,
-            password: password || '******', 
-            image_logo,
-            invitation_id,
-        });
+            const emailHtml = await ejs.renderFile(emailTemplatePath, {
+                clinic_name: req.user.clinicData.clinic_name,
+                clinic_org_number: req.user.clinicData.org_number,
+                clinic_city: get_location.city,
+                clinic_street_address: get_location.street_address,
+                clinic_state: get_location.state,
+                clinic_zip: get_location.zip_code,
+                clinic_phone: req.user.clinicData.mobile_number,
+                clinic_email: req.user.clinicData.email,
+                email,
+                password: sendPassword,
+                image_logo,
+                invitation_id,
+            });
 
-        const emailOptions = {
-            to: email,
-            subject: "Doctor Invitation",
-            html: emailHtml,
-        };
+            const emailOptions = {
+                to: email,
+                subject: "Doctor Invitation",
+                html: emailHtml,
+            };
 
-        await sendEmail(emailOptions);
+            await sendEmail(emailOptions);
+        }
         return handleSuccess(res, 200, 'en', "INVITATION_SENT_SUCCESSFULLY");
 
     } catch (error) {
