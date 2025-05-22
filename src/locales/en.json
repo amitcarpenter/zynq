@@ -160,6 +160,7 @@
     "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_DOCTOR": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Doctor",
     "DOCTOR_INVITATION_ACCEPTED_FAILED_DOCTOR_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Doctor Already Exists Clinic",
     "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Clinic",
+    "PROFILE_IMAGE_DELETED":"Profile Image Deleted",
     "PRODUCT_IMAGE_DELETED_SUCCESSFULLY": "Product Image Deleted Successfully",
     "PRODUCT_IMAGE_NOT_FOUND": "Product Image Not Found",
     "PRODUCT_IMAGE_DELETED_FAILED": "Product Image Deletion Failed",
