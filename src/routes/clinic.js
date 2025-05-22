@@ -32,7 +32,7 @@ const getFieldsFn = async (req) => {
 };
 
 const getProductFields = () => [
-    { name: 'product_image', maxCount: 1 }
+    { name: 'product_image', maxCount: 10 }
 ];
 
 const uploadProductImage = uploadDynamicClinicFiles(getProductFields);
@@ -69,5 +69,7 @@ router.post("/add-product", authenticate(['CLINIC']), uploadProductImage, produc
 router.get("/get-all-products", authenticate(['CLINIC']), productControllers.getAllProducts);
 router.post("/update-product", authenticate(['CLINIC']), uploadProductImage, productControllers.updateProduct);
 router.delete("/delete-product", authenticate(['CLINIC']), productControllers.deleteProduct);
+router.delete("/delete-product-image", authenticate(['CLINIC']), productControllers.deleteProductImage);
+
 
 export default router;

@@ -807,6 +807,28 @@ export const get_product_by_id = async (product_id) => {
     }
 };
 
+export const get_product_by_product_id = async (product_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_products WHERE product_id = ?', [product_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch product by product id.");
+    }
+};
+
+export const deleteProductImageByProductId = async (product_id) => {
+    try {
+        const result = await db.query('DELETE FROM tbl_product_images WHERE product_id = ?', [product_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete product image by product id.");
+    }
+};
+
 export const updateProduct = async (productData, product_id) => {
     try {
         const result = await db.query('UPDATE tbl_products SET ? WHERE product_id = ?', [productData, product_id]);
@@ -828,3 +850,53 @@ export const deleteProduct = async (product_id) => {
         throw new Error("Failed to delete product.");
     }
 };
+
+export const insertProductImage = async (image_url) => {
+    try {
+        const result = await db.query('INSERT INTO tbl_product_images SET ?', [image_url]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to insert product image.");
+    }
+};
+
+export const get_product_images = async (product_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_product_images WHERE product_id = ?', [product_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch product images.");
+    }
+};
+
+
+export const get_product_image_by_id = async (product_image_id) => {
+    try {
+        const result = await db.query('SELECT * FROM tbl_product_images WHERE product_image_id = ?', [product_image_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to fetch product image by id.");
+    }
+};
+
+
+export const deleteProductImage = async (product_image_id) => {
+    try {
+        const result = await db.query('DELETE FROM tbl_product_images WHERE product_image_id = ?', [product_image_id]);
+        return result;
+    }
+    catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to delete product image.");
+    }
+};
+
+
+
+

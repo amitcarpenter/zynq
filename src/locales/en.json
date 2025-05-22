@@ -159,6 +159,10 @@
     "DOCTOR_INVITATION_ACCEPTED_FAILED_DOCTOR_ALREADY_EXISTS_CLINIC_DOCTOR_MAP": "Doctor Invitation Accept Failed Doctor Already Exists Clinic Doctor Map",
     "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_DOCTOR": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Doctor",
     "DOCTOR_INVITATION_ACCEPTED_FAILED_DOCTOR_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Doctor Already Exists Clinic",
-    "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Clinic"
-    
+    "DOCTOR_INVITATION_ACCEPTED_FAILED_CLINIC_DOCTOR_MAP_ALREADY_EXISTS_CLINIC": "Doctor Invitation Accept Failed Clinic Doctor Map Already Exists Clinic",
+    "PRODUCT_IMAGE_DELETED_SUCCESSFULLY": "Product Image Deleted Successfully",
+    "PRODUCT_IMAGE_NOT_FOUND": "Product Image Not Found",
+    "PRODUCT_IMAGE_DELETED_FAILED": "Product Image Deletion Failed",
+    "PRODUCT_IMAGE_DELETED_FAILED_PRODUCT_NOT_FOUND": "Product Image Deletion Failed Product Not Found",
+    "PRODUCT_IMAGE_DELETED_FAILED_PRODUCT_IMAGE_ID_REQUIRED": "Product Image Deletion Failed Product Image ID Required"
 }

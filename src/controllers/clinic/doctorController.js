@@ -278,7 +278,6 @@ export const sendDoctorInvitation = async (req, res) => {
     }
 };
 
-
 export const getAllDoctors = async (req, res) => {
     try {
         const clinic_id = req.user.clinicData.clinic_id;
