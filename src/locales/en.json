@@ -164,5 +164,7 @@
     "PRODUCT_IMAGE_NOT_FOUND": "Product Image Not Found",
     "PRODUCT_IMAGE_DELETED_FAILED": "Product Image Deletion Failed",
     "PRODUCT_IMAGE_DELETED_FAILED_PRODUCT_NOT_FOUND": "Product Image Deletion Failed Product Not Found",
-    "PRODUCT_IMAGE_DELETED_FAILED_PRODUCT_IMAGE_ID_REQUIRED": "Product Image Deletion Failed Product Image ID Required"
+    "PRODUCT_IMAGE_DELETED_FAILED_PRODUCT_IMAGE_ID_REQUIRED": "Product Image Deletion Failed Product Image ID Required",
+    "PRODUCT_FETCHED_SUCCESSFULLY": "Product Fetched Successfully",
+    "PRODUCT_FETCHED_FAILED": "Product Fetch Failed"
 }

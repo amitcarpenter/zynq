@@ -23,7 +23,7 @@ const image_logo = process.env.LOGO_URL;
 export const getAllProducts = async (req, res) => {
     try {
 
-        const products = await apiModels.get_all_products_for_user();
+        let products = await apiModels.get_all_products_for_user();
 
         if (products.length === 0) {
             return handleError(res, 404, "en", "NO_PRODUCTS_FOUND");

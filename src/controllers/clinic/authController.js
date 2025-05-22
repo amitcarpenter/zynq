@@ -247,7 +247,7 @@ export const onboardClinic = async (req, res) => {
         }
 
         if (street_address && city && state && zip_code && latitude && longitude) {
-            const clinicLocation = await clinicModels.getClinicLocation(clinic_id); 
+            const [clinicLocation] = await clinicModels.getClinicLocation(clinic_id); 
             if (clinicLocation) {
                 await clinicModels.updateClinicLocation({
                     clinic_id, street_address, city, state,
