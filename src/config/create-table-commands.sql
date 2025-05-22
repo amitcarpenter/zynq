@@ -48,6 +48,18 @@ CREATE TABLE tbl_clinic_documents (
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE tbl_support_tickets (
+  support_ticket_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  clinic_id VARCHAR(36) DEFAULT NULL,
+  doctor_id VARCHAR(36) DEFAULT NULL,
+  issue_category_id VARCHAR(36) NOT NULL,
+  issue_title VARCHAR(255) NOT NULL,
+  issue_description TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
 CREATE TABLE tbl_clinic_equipments (
   clinic_equipment_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   clinic_id varchar(36) NOT NULL,
@@ -273,6 +285,12 @@ CREATE TABLE tbl_skin_types (
   skin_type_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   name varchar(100) NOT NULL UNIQUE
 );
+
+CREATE TABLE tbl_issue_categories (
+  issue_category_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  name VARCHAR(255) NOT NULL
+);
+
 
 CREATE TABLE tbl_support_tickets (
   ticket_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),

@@ -9,7 +9,7 @@ import * as authControllers from "../controllers/clinic/authController.js";
 import * as doctorControllers from "../controllers/clinic/doctorController.js";
 import * as productControllers from "../controllers/clinic/productController.js";
 import * as authControllerWeb from "../controllers/web_users/authController.js";
-
+import * as supportControllers from "../controllers/clinic/supportController.js";
 
 
 const router = express.Router();
@@ -71,6 +71,11 @@ router.post("/update-product", authenticate(['CLINIC']), uploadProductImage, pro
 router.delete("/delete-product/:product_id", authenticate(['CLINIC']), productControllers.deleteProduct);
 router.delete("/delete-product-image/:product_image_id", authenticate(['CLINIC']), productControllers.deleteProductImage);
 router.post("/get-product-by-id", authenticate(['CLINIC']), productControllers.getProductById);
+
+//==================================== Support ==============================
+router.get("/get-issue-categories", supportControllers.get_issue_categories);
+router.post("/create-support-ticket", authenticate(['CLINIC']), supportControllers.create_support_ticket);
+router.get("/get-support-tickets-by-clinic-id", authenticate(['CLINIC']), supportControllers.get_support_tickets_by_clinic_id);
 
 
 export default router;
