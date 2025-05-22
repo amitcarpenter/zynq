@@ -249,15 +249,32 @@ export const onboardClinic = async (req, res) => {
 
         const [clinicLocation] = await clinicModels.getClinicLocation(clinic_id);
         if (clinicLocation) {
-            await clinicModels.updateClinicLocation({
-                clinic_id, street_address, city, state,
-                zip_code, latitude, longitude
-            });
+
+            const update_data = {
+                clinic_id: clinic_id,
+                street_address: street_address || clinicLocation.street_address,
+                city: city || clinicLocation.city,
+                state: state || clinicLocation.state,
+                zip_code: zip_code || clinicLocation.zip_code,
+                latitude: latitude || clinicLocation.latitude,
+                longitude: longitude || clinicLocation.longitude
+            }
+
+            console.log(update_data, "update_data");
+
+            await clinicModels.updateClinicLocation(update_data, clinic_id);
         } else {
-            await clinicModels.insertClinicLocation({
-                clinic_id, street_address, city, state,
-                zip_code, latitude, longitude
-            });
+            const insert_data = {
+                clinic_id: clinic_id,
+                street_address: street_address,
+                city: city,
+                state: state,
+                zip_code: zip_code,
+                latitude: latitude,
+                longitude: longitude
+            }
+            console.log(insert_data, "insert_data");
+            await clinicModels.insertClinicLocation(insert_data);
         }
 
         if (treatments) {
