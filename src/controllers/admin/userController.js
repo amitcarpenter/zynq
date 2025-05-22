@@ -4,33 +4,20 @@ import { handleError, handleSuccess, joiErrorHandle } from "../../utils/response
 
 export const get_users_managment = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const search = req.query.search || "";
+        const users = await adminModels.get_users_managment();
 
-        const offset = (page - 1) * limit;
+        if (users && users.length > 0) {
+            const formattedUsers = users.map(user => ({
+                ...user,
+                profile_image: user.profile_image ? `${process.env.APP_URL}${user.profile_image}` : null
+            }));
 
-        const { users, total } = await adminModels.get_users_managment(limit, offset, search);
-
-        if (users) {
-            users.forEach(element => {
-                element.profile_image = element.profile_image == null ? null : process.env.LOGO_URL + `${element.profile_image}`;
-            });
+            return handleSuccess(res, 200, 'en', "Fetch user management successfully", { users: formattedUsers });
+        } else {
+            return handleSuccess(res, 200, 'en', "No users found", { users: [] });
         }
-
-        const data = {
-            users,
-            pagination: {
-                totalUsers: total,
-                totalPages: Math.ceil(total / limit),
-                currentPage: page,
-                usersPerPage: limit,
-            }
-        };
-
-        return handleSuccess(res, 200, 'en', "Fetch user management successfully", data);
     } catch (error) {
-        console.error("internal E", error);
+        console.error("Internal Server Error:", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
     }
 };
@@ -39,7 +26,7 @@ export const update_user_status = async (req, res) => {
     try {
         const schema = Joi.object({
             user_id: Joi.string().required(),
-            is_active: Joi.number().required().allow(1, 2)
+            is_active: Joi.number().valid(1, 2).required()
         });
 
         const { error, value } = schema.validate(req.body);
@@ -49,7 +36,12 @@ export const update_user_status = async (req, res) => {
 
         const updateResponse = await adminModels.update_user_status(user_id, is_active);
 
-        return handleSuccess(res, 200, 'en', "Update status successfully", updateResponse);
+        if (updateResponse && updateResponse.affectedRows > 0) {
+            return handleSuccess(res, 200, 'en', "User status updated successfully", updateResponse);
+        } else {
+            return handleSuccess(res, 200, 'en', "User not found or status unchanged", {});
+        }
+
     } catch (error) {
         console.error("internal E", error);
         return handleError(res, 500, 'en', "INTERNAL_SERVER_ERROR " + error.message);
