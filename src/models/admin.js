@@ -237,11 +237,29 @@ export const findClinicById = async (clinic_id) => {
     }
 };
 
+export const updatePasseordByClinicId = async (hashedPassword, password, zynq_user_id) => {
+    try {
+        return await db.query('UPDATE `tbl_zqnq_users` SET `password`= ?,`show_password`= ? WHERE id = ?', [hashedPassword, password, zynq_user_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update password clinic data.");
+    }
+};
+
+export const updateClinicCountAndEmailSent = async (clinic_id, email_sent_count, date) => {
+    try {
+        return await db.query('UPDATE `tbl_clinics` SET `email_sent_at`= ?,`email_sent_count`= ? WHERE clinic_id = ?', [date, email_sent_count, clinic_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to update clinic count and email sent data.");
+    }
+};
+
 //======================================= Doctor Managment =========================================
 
 export const get_doctors_management = async () => {
     try {
-        return await db.query('SELECT tbl_doctors.doctor_id, tbl_doctors.name, tbl_doctors.specialization, tbl_doctors.fee_per_session, tbl_doctors.phone, tbl_doctors.profile_image, tbl_doctors.rating, tbl_doctors.age, tbl_doctors.address, tbl_doctors.gender, tbl_doctors.experience_years, tbl_doctors.biography, tbl_doctors.profile_completion_percentage AS onboarding_progress tbl_zqnq_users.email FROM `tbl_doctors` LEFT JOIN tbl_zqnq_users ON tbl_zqnq_users.id = tbl_doctors.zynq_user_id ORDER BY tbl_doctors.created_at DESC;');
+        return await db.query('SELECT tbl_doctors.doctor_id, tbl_doctors.name, tbl_doctors.specialization, tbl_doctors.fee_per_session, tbl_doctors.phone, tbl_doctors.profile_image, tbl_doctors.rating, tbl_doctors.age, tbl_doctors.address, tbl_doctors.gender, tbl_doctors.experience_years, tbl_doctors.biography, tbl_doctors.profile_completion_percentage AS onboarding_progress, tbl_zqnq_users.email FROM `tbl_doctors` LEFT JOIN tbl_zqnq_users ON tbl_zqnq_users.id = tbl_doctors.zynq_user_id ORDER BY tbl_doctors.created_at DESC;');
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get doctor latest data.");
@@ -270,10 +288,19 @@ export const get_doctor_education = async (doctor_id) => {
 
 export const get_products_management = async () => {
     try {
-        return await db.query('SELECT tbl_products.product_id, tbl_products.image_url AS profile_image, tbl_products.name AS product_name, tbl_clinics.clinic_name, tbl_products.price, tbl_products.stock, tbl_products.rating, tbl_products.image_url AS product_image, tbl_products.short_description, tbl_products.full_description FROM `tbl_products` LEFT JOIN tbl_clinics ON tbl_clinics.clinic_id = tbl_products.clinic_id WHERE tbl_products.is_deleted = 0 ORDER BY tbl_products.created_at DESC;')
+        return await db.query('SELECT tbl_products.product_id, tbl_products.name AS product_name, tbl_clinics.clinic_name, tbl_products.price, tbl_products.stock, tbl_products.rating, tbl_products.short_description, tbl_products.full_description FROM `tbl_products` LEFT JOIN tbl_clinics ON tbl_clinics.clinic_id = tbl_products.clinic_id WHERE tbl_products.is_deleted = 0 ORDER BY tbl_products.created_at DESC;')
     } catch (error) {
         console.error("Database Error:", error.message);
         throw new Error("Failed to get product latest data.");
+    }
+};
+
+export const get_product_images_by_product_id = async (product_id, image_url) => {
+    try {
+        return await db.query(`SELECT tbl_product_images.*, CONCAT(?, image) AS image_url FROM tbl_product_images  WHERE product_id = ?`, [image_url, product_id]);
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        throw new Error("Failed to get product image latest data.");
     }
 };
 

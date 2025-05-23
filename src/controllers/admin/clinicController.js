@@ -1,12 +1,19 @@
 import fs from 'fs';
 import Joi from "joi";
 import path from 'path';
-import csv from 'csv-parser';
+import ejs from "ejs";
 import xlsx from 'xlsx';
-import { generateToken } from '../../utils/user_helper.js';
+import bcrypt from "bcrypt";
+import { generatePassword, generateToken } from '../../utils/user_helper.js';
 import { handleError, handleSuccess, joiErrorHandle } from '../../utils/responseHandler.js';
 import { insert_clinic } from '../../models/admin.js';
 import * as adminModels from "../../models/admin.js";
+import { fileURLToPath } from 'url';
+import { sendEmail } from '../../services/send_email.js';
+import moment from 'moment/moment.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // export const import_clinics_from_CSV = async (req, res) => {
 //     const filePath = req.file?.path;
@@ -247,10 +254,14 @@ export const send_invitation = async (req, res) => {
         const findClinic = await adminModels.findClinicById(invitation_ids);
         if (findClinic) {
             await Promise.all(findClinic.map(async val => {
-                const html = await ejs.renderFile(path.join(__dirname, "../../views/invitation-mail.html"), { name: val.name, email: val.email });
+                const password = await generatePassword(val.email)
+                const hashedPassword = await bcrypt.hash(password, 10);
+                await adminModels.updatePasseordByClinicId(hashedPassword, password, val.zynq_user_id);
+                await adminModels.updateClinicCountAndEmailSent(val.clinic_id, val.email_sent_count++, moment().format('YYYY-MM-DD HH:mm:ss'));
+                const html = await ejs.renderFile(path.join(__dirname, "../../views/invitation-mail.html"), { email: val.email, password: password, logo: process.env.LOGO_URL });
 
                 await sendEmail({
-                    to: email,
+                    to: val.email,
                     subject: "Send Invaitation Request",
                     html,
                 });
