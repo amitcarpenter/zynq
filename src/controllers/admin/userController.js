@@ -26,7 +26,7 @@ export const update_user_status = async (req, res) => {
     try {
         const schema = Joi.object({
             user_id: Joi.string().required(),
-            is_active: Joi.number().valid(1, 2).required()
+            is_active: Joi.number().valid(0, 1).required()
         });
 
         const { error, value } = schema.validate(req.body);
